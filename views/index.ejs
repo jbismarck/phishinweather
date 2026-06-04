@@ -54,6 +54,7 @@
   <script type="module" src="scripts/modules/radar.mjs"></script>
   <script type="module" src="scripts/modules/settings.mjs"></script>
 	<script type="module" src="scripts/modules/media.mjs"></script>
+	<script type="module" src="scripts/modules/phish-history.mjs"></script>
 	<script type="module" src="scripts/index.mjs"></script>
   <!-- data -->
   <script type="text/javascript" src="scripts/data/travelcities.js"></script>
@@ -116,6 +117,9 @@
       </div>
       <div id="almanac-html" class="weather-display">
         <%- include('partials/almanac.ejs') %>
+      </div>
+      <div id="phish-history-html" class="weather-display">
+        <%- include('partials/phish-history.ejs') %>
       </div>
       <div id="spc-outlook-html" class="weather-display">
         <%- include('partials/spc-outlook.ejs') %>

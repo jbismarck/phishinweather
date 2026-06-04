@@ -69,6 +69,71 @@ const geoip = (req, res) => {
 	res.json({});
 };
 
+// Phish "on this day" — in-memory cache keyed by calendar date
+let phishCache = null;
+let phishCacheDate = null;
+
+const phishOnThisDay = async (req, res) => {
+	const today = new Date();
+	const mm = String(today.getMonth() + 1).padStart(2, '0');
+	const dd = String(today.getDate()).padStart(2, '0');
+	const monthDay = `${mm}-${dd}`;
+	const todayKey = `${today.getFullYear()}-${monthDay}`;
+
+	if (phishCache && phishCacheDate === todayKey) {
+		return res.json(phishCache);
+	}
+
+	try {
+		// Fetch all show pages from phish.in
+		const allShows = [];
+		let page = 1;
+		let totalPages = 1;
+		while (page <= totalPages) {
+			// eslint-disable-next-line no-await-in-loop
+			const r = await fetch(`https://phish.in/api/v2/shows?sort_attr=date&sort_dir=asc&per_page=300&page=${page}`, {
+				headers: { Accept: 'application/json' },
+			});
+			const data = await r.json();
+			totalPages = data.total_pages;
+			allShows.push(...data.shows);
+			page += 1;
+		}
+
+		// Filter to today's month/day across all years
+		const todayShows = allShows.filter((s) => s.date.slice(5) === monthDay);
+
+		// Fetch track details for each matching show
+		const shows = await Promise.all(todayShows.map(async (show) => {
+			const r = await fetch(`https://phish.in/api/v2/shows/${show.date}`, {
+				headers: { Accept: 'application/json' },
+			});
+			const detail = await r.json();
+
+			const sets = {};
+			(detail.tracks || []).forEach(({ set_name: setName, title }) => {
+				if (!sets[setName]) sets[setName] = [];
+				sets[setName].push(title);
+			});
+
+			return {
+				date: show.date,
+				year: show.date.slice(0, 4),
+				venue: show.venue_name,
+				location: show.venue?.location || '',
+				sets,
+			};
+		}));
+
+		phishCache = { shows, monthDay };
+		phishCacheDate = todayKey;
+		return res.json(phishCache);
+	} catch (err) {
+		console.error('Phish history error:', err.message);
+		return res.status(500).json({ error: 'Failed to fetch Phish history' });
+	}
+};
+
 // debugging
 if (process.env?.DIST === '1') {
 	// distribution
@@ -81,6 +146,7 @@ if (process.env?.DIST === '1') {
 	app.use('/geoip', geoip);
 	app.use('/resources', express.static('./server/scripts/modules'));
 	app.get('/', index);
+	app.get('/api/phish/on-this-day', phishOnThisDay);
 	app.get('*name', express.static('./server'));
 	// cors pass-thru to api.weather.gov
 	app.get('/playlist.json', playlist);

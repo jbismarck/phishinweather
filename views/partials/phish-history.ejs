@@ -1,0 +1,16 @@
+<%- include('header.ejs', {titleDual: {top: 'THIS DAY IN', bottom: 'PHISH HISTORY'}, hasTime: true}) %>
+<div class="main has-scroll phish-history">
+  <div class="scroll-container">
+    <div class="shows-container">
+      <div class="show template">
+        <div class="show-header">
+          <div class="year"></div>
+          <div class="venue"></div>
+          <div class="location"></div>
+        </div>
+        <div class="setlist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('scroll.ejs') %>
