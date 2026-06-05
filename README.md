@@ -1,6 +1,6 @@
-# WeatherStar 4000+
+# Phishin Weather
 
-A live version of this project is available at https://weatherstar.netbymatt.com
+A live version of this project is available at https://weatherstar.netbymatt.com (upstream)
 
 ## About
 

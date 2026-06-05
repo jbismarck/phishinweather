@@ -8,7 +8,7 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 	// add user agent header to json request at api.weather.gov
 	const headers = {};
 	if (_url.toString().match(/api\.weather\.gov/)) {
-		headers['user-agent'] = 'Weatherstar 4000+; weatherstar@netbymatt.com';
+		headers['user-agent'] = 'Phishin Weather; phishinweather@gmail.com';
 	}
 	// combine default and provided parameters
 	const params = {

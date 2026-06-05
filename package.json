@@ -1,7 +1,7 @@
 {
-	"name": "ws4kp",
-	"version": "5.25.3",
-	"description": "Welcome to the WeatherStar 4000+ project page!",
+	"name": "phishinweather",
+	"version": "1.0.0",
+	"description": "Phishin Weather — retro-style weather forecasts for Phish fans!",
 	"main": "index.mjs",
 	"type": "module",
 	"scripts": {
