@@ -1,0 +1,118 @@
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
+
+#phish-countdown-html.weather-display {
+	background-image: url('../images/backgrounds/3.png');
+}
+
+.weather-display .main.phish-countdown {
+	font-family: 'Star4000';
+	@include u.text-shadow();
+	padding: 6px 20px 0;
+	box-sizing: border-box;
+
+	.crd {
+		display: none;
+
+		&.active {
+			display: block;
+		}
+	}
+
+	.event-name {
+		font-family: 'Star4000 Large';
+		font-size: 22pt;
+		color: c.$column-header-text;
+		line-height: 1.2;
+		margin-bottom: 4px;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+	}
+
+	.divider-bar {
+		height: 3px;
+		background: c.$column-header-text;
+		margin: 8px 0;
+		border-radius: 1px;
+	}
+
+	.event-dates {
+		font-size: 15pt;
+		color: white;
+		margin-top: 8px;
+	}
+
+	.event-note {
+		font-family: 'Star4000 Small';
+		font-size: 13pt;
+		color: rgba(255, 255, 255, 0.8);
+		margin-top: 4px;
+		line-height: 1.3;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+	}
+
+	// ── Confirmed Date Card ──────────────────────────────────────────────────
+	.crd-date {
+		.count-block {
+			text-align: center;
+			margin: 6px 0 4px;
+		}
+
+		.count-num {
+			font-family: 'Star4000 Large';
+			font-size: 60pt;
+			color: c.$column-header-text;
+			line-height: 1;
+			letter-spacing: -2px;
+		}
+
+		.count-unit {
+			font-family: 'Star4000 Large';
+			font-size: 22pt;
+			color: white;
+			letter-spacing: 4px;
+			margin-top: -4px;
+		}
+
+		.count-sub {
+			font-size: 16pt;
+			color: rgba(255, 255, 255, 0.7);
+			margin-top: 4px;
+		}
+	}
+
+	// ── Tonight Card ────────────────────────────────────────────────────────
+	.crd-tonight {
+		.tonight-banner {
+			font-family: 'Star4000 Large';
+			font-size: 50pt;
+			color: c.$column-header-text;
+			text-align: center;
+			line-height: 1.1;
+			margin: 16px 0 10px;
+			@include u.text-shadow();
+		}
+	}
+
+	// ── TBA Card ─────────────────────────────────────────────────────────────
+	.crd-tba {
+		.tba-label {
+			font-family: 'Star4000 Large';
+			font-size: 18pt;
+			color: rgba(255, 255, 255, 0.55);
+			text-align: center;
+			margin: 10px 0 4px;
+		}
+
+		.tba-expected {
+			font-size: 13pt;
+			color: rgba(255, 255, 255, 0.75);
+			font-family: 'Star4000 Small';
+			line-height: 1.35;
+			margin-top: 2px;
+			word-wrap: break-word;
+			overflow-wrap: break-word;
+		}
+	}
+}

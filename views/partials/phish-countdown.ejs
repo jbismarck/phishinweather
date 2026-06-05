@@ -1,0 +1,38 @@
+<%- include('header.ejs', {titleDual: {top: 'PHISH', bottom: 'COUNTDOWN'}, hasTime: true}) %>
+<div class="main has-scroll phish-countdown">
+
+  <!-- Countdown card (confirmed date) -->
+  <div class="crd crd-date">
+    <div class="event-name"></div>
+    <div class="divider-bar"></div>
+    <div class="count-block">
+      <div class="count-num"></div>
+      <div class="count-unit">DAYS</div>
+      <div class="count-sub"><span class="count-hrs"></span> HRS &nbsp; <span class="count-min"></span> MIN</div>
+    </div>
+    <div class="divider-bar"></div>
+    <div class="event-dates"></div>
+    <div class="event-note"></div>
+  </div>
+
+  <!-- Tonight card -->
+  <div class="crd crd-tonight">
+    <div class="event-name"></div>
+    <div class="tonight-banner">TONIGHT!</div>
+    <div class="event-dates"></div>
+    <div class="event-note"></div>
+  </div>
+
+  <!-- TBA card -->
+  <div class="crd crd-tba">
+    <div class="event-name"></div>
+    <div class="divider-bar"></div>
+    <div class="tba-label">DATES NOT YET ANNOUNCED</div>
+    <div class="tba-expected"></div>
+    <div class="event-dates"></div>
+    <div class="divider-bar"></div>
+    <div class="event-note"></div>
+  </div>
+
+</div>
+<%- include('scroll.ejs') %>

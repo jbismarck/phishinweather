@@ -98,13 +98,13 @@ const updateStatus = (value) => {
 	// typically this plays out as current conditions loads, then hazards fails.
 	if (value.id === 0 && (value.status === STATUS.failed || value.status === STATUS.retrying)) {
 		value.id = firstDisplayIndex;
-		value.status = displays[firstDisplayIndex].status;
+		value.status = displays[firstDisplayIndex]?.status;
 	}
 
 	// if hazards data arrives after the firstDisplayIndex loads, then we need to hot wire this to the first display
 	if (value.id === 0 && value.status === STATUS.loaded && displays[0].timing.totalScreens === 0) {
 		value.id = firstDisplayIndex;
-		value.status = displays[firstDisplayIndex].status;
+		value.status = displays[firstDisplayIndex]?.status;
 	}
 
 	// if this is the first display and we're playing, load it up so it starts playing
@@ -160,7 +160,7 @@ const navTo = (direction) => {
 		let firstDisplay;
 		let displayCount = 0;
 		do {
-			if (displays[displayCount].status === STATUS.loaded && displays[displayCount].timing.totalScreens > 0) firstDisplay = displays[displayCount];
+			if (displays[displayCount]?.status === STATUS.loaded && displays[displayCount]?.timing?.totalScreens > 0) firstDisplay = displays[displayCount];
 			displayCount += 1;
 		} while (!firstDisplay && displayCount < displays.length);
 

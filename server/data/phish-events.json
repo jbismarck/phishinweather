@@ -1,0 +1,52 @@
+{
+  "events": [
+    {
+      "name": "Summer Tour 2026",
+      "short": "SUMMER TOUR",
+      "type": "summer",
+      "date": "2026-06-17",
+      "dateDisplay": "JUN 17 – AUG 30",
+      "note": "Bethel Woods through Dick's Labor Day Run",
+      "announced": true
+    },
+    {
+      "name": "Fall Tour 2026",
+      "short": "FALL TOUR",
+      "type": "fall",
+      "date": null,
+      "dateDisplay": "SEPT – NOV 2026",
+      "expected": "Announcement expected late summer 2026",
+      "note": "Watch phish.net for dates",
+      "announced": false
+    },
+    {
+      "name": "New Year's Run 2026",
+      "short": "YEMSG",
+      "type": "yemsg",
+      "date": "2026-12-28",
+      "dateDisplay": "DEC 28-31 2026",
+      "note": "Madison Square Garden, New York City",
+      "announced": false
+    },
+    {
+      "name": "Mexico 2027",
+      "short": "MEXICO RUN",
+      "type": "mexico",
+      "date": null,
+      "dateDisplay": "FEB 2027",
+      "expected": "Riviera Maya resort announcement expected fall 2026",
+      "note": "Watch phish.com for package details",
+      "announced": false
+    },
+    {
+      "name": "Spring Tour 2027",
+      "short": "SPRING TOUR",
+      "type": "spring",
+      "date": null,
+      "dateDisplay": "APR – MAY 2027",
+      "expected": "Announcement expected late winter 2027",
+      "note": "Watch phish.net for dates",
+      "announced": false
+    }
+  ]
+}
