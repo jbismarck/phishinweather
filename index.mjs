@@ -6,7 +6,7 @@ import OVERRIDES from './src/overrides.mjs';
 
 
 const app = express();
-const port = process.env.WS4KP_PORT ?? 8080;
+const port = process.env.PORT ?? process.env.WS4KP_PORT ?? 8080;
 
 // template engine
 app.set('view engine', 'ejs');

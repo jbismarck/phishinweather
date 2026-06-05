@@ -6,6 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node index.mjs",
 		"build:css": "sass --style=compressed ./server/styles/scss/main.scss ./server/styles/main.css",
 		"build": "gulp buildDist",
 		"lint": "eslint ./server/scripts/**/*.mjs",
