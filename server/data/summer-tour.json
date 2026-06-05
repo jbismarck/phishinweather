@@ -2,151 +2,55 @@
   "tour": "Summer 2026",
   "shows": [
     {
-      "date": "2026-06-17",
-      "venue": "Bethel Woods Center for the Arts",
-      "city": "Bethel",
-      "state": "NY",
-      "lat": 41.687,
-      "lon": -74.898,
-      "phishin_venue_slug": "bethel-woods-center-for-the-arts",
+      "date": "2026-07-07",
+      "venue": "Kohl Center",
+      "city": "Madison",
+      "state": "WI",
+      "lat": 43.0731,
+      "lon": -89.4012,
+      "phishin_venue_slug": "kohl-center",
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted"
       },
       "food": [
-        { "name": "Harvest on Main", "type": "American", "note": "5 min from venue on Main St" },
-        { "name": "The Laundrette", "type": "Bar & Grill", "note": "Cold drafts and great burgers" },
-        { "name": "Catskill Rose", "type": "Cafe", "note": "Perfect pre-show breakfast spot" },
-        { "name": "Lot Food Vendors", "type": "Various", "note": "Shakedown opens at 2pm" }
+        { "name": "Nitty Gritty", "type": "Bar & Grill", "note": "1 block from Kohl Center — classic Madison campus bar, great pre-show stop" },
+        { "name": "Ian's Pizza", "type": "Pizza", "note": "Walking distance on Frances St — famous Mac & Cheese slice, UW campus staple" },
+        { "name": "The Old Fashioned", "type": "Wisconsin Supper Club", "note": "Classic Wisconsin fare on Capitol Square, 15 min walk" },
+        { "name": "Graze", "type": "Farm to Table", "note": "Seasonal local menu on Capitol Square, 15 min walk" }
       ],
       "shakedown": {
-        "location": "West Lot near Gate 2",
-        "parking": "Rte 17B parking fields",
-        "tip": "Site of the 1969 Woodstock Festival. Arrive early to explore the museum"
+        "location": "Outside Kohl Center on Dayton St",
+        "parking": "Ramps on Frances St and Randall Ave",
+        "tip": "Indoor arena on the UW campus. Madison is a great college town — explore State Street before the show"
       }
     },
     {
-      "date": "2026-06-18",
-      "venue": "Bethel Woods Center for the Arts",
-      "city": "Bethel",
-      "state": "NY",
-      "lat": 41.687,
-      "lon": -74.898,
-      "phishin_venue_slug": "bethel-woods-center-for-the-arts",
+      "date": "2026-07-08",
+      "venue": "Kohl Center",
+      "city": "Madison",
+      "state": "WI",
+      "lat": 43.0731,
+      "lon": -89.4012,
+      "phishin_venue_slug": "kohl-center",
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted"
       },
       "food": [
-        { "name": "Harvest on Main", "type": "American", "note": "5 min from venue on Main St" },
-        { "name": "The Laundrette", "type": "Bar & Grill", "note": "Cold drafts and great burgers" },
-        { "name": "Catskill Rose", "type": "Cafe", "note": "Perfect pre-show breakfast spot" },
-        { "name": "Lot Food Vendors", "type": "Various", "note": "Shakedown opens at 2pm" }
+        { "name": "Nitty Gritty", "type": "Bar & Grill", "note": "1 block from Kohl Center — classic Madison campus bar, great pre-show stop" },
+        { "name": "Ian's Pizza", "type": "Pizza", "note": "Walking distance on Frances St — famous Mac & Cheese slice, UW campus staple" },
+        { "name": "The Old Fashioned", "type": "Wisconsin Supper Club", "note": "Classic Wisconsin fare on Capitol Square, 15 min walk" },
+        { "name": "Graze", "type": "Farm to Table", "note": "Seasonal local menu on Capitol Square, 15 min walk" }
       ],
       "shakedown": {
-        "location": "West Lot near Gate 2",
-        "parking": "Rte 17B parking fields",
-        "tip": "Night 2 at Bethel Woods. Catskill Mountain magic in full effect"
+        "location": "Outside Kohl Center on Dayton St",
+        "parking": "Ramps on Frances St and Randall Ave",
+        "tip": "Night 2 in Madison. Phish's first Kohl Center run — history in the making"
       }
     },
     {
-      "date": "2026-06-20",
-      "venue": "Saratoga Performing Arts Center",
-      "city": "Saratoga Springs",
-      "state": "NY",
-      "lat": 43.077,
-      "lon": -73.781,
-      "phishin_venue_slug": "saratoga-performing-arts-center",
-      "policy": {
-        "water_bottles": "Empty reusable or factory-sealed",
-        "poster_tubes": "Not permitted"
-      },
-      "food": [
-        { "name": "Cantina", "type": "Mexican", "note": "On Broadway, 3 min walk from main gate" },
-        { "name": "Hamlet & Ghost", "type": "Farm to Table", "note": "Craft cocktails and seasonal menu" },
-        { "name": "Hattie's", "type": "Southern Soul Food", "note": "A Saratoga institution since 1938" },
-        { "name": "The Brook Tavern", "type": "Pub Grub", "note": "Right on the strip, cold beer" }
-      ],
-      "shakedown": {
-        "location": "Lot 1 off Route 50",
-        "parking": "Lots 1-4 on Rte 50 side of venue",
-        "tip": "Arrive by 3pm for good lot spots. Saratoga Race Course is just across the way"
-      }
-    },
-    {
-      "date": "2026-06-21",
-      "venue": "Saratoga Performing Arts Center",
-      "city": "Saratoga Springs",
-      "state": "NY",
-      "lat": 43.077,
-      "lon": -73.781,
-      "phishin_venue_slug": "saratoga-performing-arts-center",
-      "policy": {
-        "water_bottles": "Empty reusable or factory-sealed",
-        "poster_tubes": "Not permitted"
-      },
-      "food": [
-        { "name": "Cantina", "type": "Mexican", "note": "On Broadway, 3 min walk from main gate" },
-        { "name": "Hamlet & Ghost", "type": "Farm to Table", "note": "Craft cocktails and seasonal menu" },
-        { "name": "Hattie's", "type": "Southern Soul Food", "note": "A Saratoga institution since 1938" },
-        { "name": "The Brook Tavern", "type": "Pub Grub", "note": "Right on the strip, cold beer" }
-      ],
-      "shakedown": {
-        "location": "Lot 1 off Route 50",
-        "parking": "Lots 1-4 on Rte 50 side of venue",
-        "tip": "SPAC Night 2! Phish has played legendary late sets here since the 90s"
-      }
-    },
-    {
-      "date": "2026-06-26",
-      "venue": "Alpine Valley Music Theatre",
-      "city": "East Troy",
-      "state": "WI",
-      "lat": 42.668,
-      "lon": -88.373,
-      "phishin_venue_slug": "alpine-valley-music-theatre",
-      "policy": {
-        "water_bottles": "Factory-sealed or empty reusable",
-        "poster_tubes": "Permitted (soft-sided only)"
-      },
-      "food": [
-        { "name": "Brat Stop", "type": "Wisconsin Brats", "note": "On I-94 at exit 333 - a rite of passage" },
-        { "name": "House of Munich", "type": "German Biergarten", "note": "Brats, schnitzels, cold steins" },
-        { "name": "Charcoal Grill", "type": "Steakhouse", "note": "Best pre-show steak in the area" },
-        { "name": "Lot Tailgate", "type": "BYOG", "note": "Bring your own grill. Wisconsin style" }
-      ],
-      "shakedown": {
-        "location": "Grass hill to the left of the main stage",
-        "parking": "Lots A-D off County Road D",
-        "tip": "Bring layers - it gets cold in the valley after dark even in June"
-      }
-    },
-    {
-      "date": "2026-06-27",
-      "venue": "Alpine Valley Music Theatre",
-      "city": "East Troy",
-      "state": "WI",
-      "lat": 42.668,
-      "lon": -88.373,
-      "phishin_venue_slug": "alpine-valley-music-theatre",
-      "policy": {
-        "water_bottles": "Factory-sealed or empty reusable",
-        "poster_tubes": "Permitted (soft-sided only)"
-      },
-      "food": [
-        { "name": "Brat Stop", "type": "Wisconsin Brats", "note": "On I-94 at exit 333 - a rite of passage" },
-        { "name": "House of Munich", "type": "German Biergarten", "note": "Brats, schnitzels, cold steins" },
-        { "name": "Charcoal Grill", "type": "Steakhouse", "note": "Best pre-show steak in the area" },
-        { "name": "Lot Tailgate", "type": "BYOG", "note": "Bring your own grill. Wisconsin style" }
-      ],
-      "shakedown": {
-        "location": "Grass hill to the left of the main stage",
-        "parking": "Lots A-D off County Road D",
-        "tip": "Night 2 in the Valley. Expect deep set 2 adventures in the hills"
-      }
-    },
-    {
-      "date": "2026-07-03",
+      "date": "2026-07-10",
       "venue": "Ruoff Music Center",
       "city": "Noblesville",
       "state": "IN",
@@ -158,19 +62,19 @@
         "poster_tubes": "Not permitted"
       },
       "food": [
-        { "name": "White Oak Butcher Shop", "type": "Craft Burgers", "note": "10 min south on SR-37" },
-        { "name": "Kona Jack's Fish Market", "type": "Seafood", "note": "Fresh catch in the Midwest" },
-        { "name": "Moody's Butcher Shop", "type": "Deli Sandwiches", "note": "Quick and loaded" },
-        { "name": "Yard House", "type": "Bar & Grill", "note": "100 beers on tap, downtown Indy" }
+        { "name": "Aspen Creek Grill", "type": "American", "note": "One of the top-rated spots closest to Ruoff" },
+        { "name": "Livery", "type": "Latin American", "note": "Bold flavors — guacamole, ceviche, skirt steak, paella near the venue" },
+        { "name": "Ford's Garage Noblesville", "type": "Burgers & Beer", "note": "Gas station-themed craft burger bar near the venue" },
+        { "name": "Sunny Day Cafe", "type": "Cafe", "note": "Right in the outdoor mall area near Ruoff — easy pre-show option" }
       ],
       "shakedown": {
         "location": "Lot along Boden Road",
         "parking": "Multiple lots off SR-32 and Boden Rd",
-        "tip": "Formerly Deer Creek - site of legendary 1995 Phish shows. History in the air"
+        "tip": "Formerly Deer Creek — site of legendary 1995 Phish shows. History in the air"
       }
     },
     {
-      "date": "2026-07-04",
+      "date": "2026-07-11",
       "venue": "Ruoff Music Center",
       "city": "Noblesville",
       "state": "IN",
@@ -182,19 +86,355 @@
         "poster_tubes": "Not permitted"
       },
       "food": [
-        { "name": "White Oak Butcher Shop", "type": "Craft Burgers", "note": "10 min south on SR-37" },
-        { "name": "Kona Jack's Fish Market", "type": "Seafood", "note": "Fresh catch in the Midwest" },
-        { "name": "Moody's Butcher Shop", "type": "Deli Sandwiches", "note": "Quick and loaded" },
-        { "name": "Yard House", "type": "Bar & Grill", "note": "100 beers on tap, downtown Indy" }
+        { "name": "Aspen Creek Grill", "type": "American", "note": "One of the top-rated spots closest to Ruoff" },
+        { "name": "Livery", "type": "Latin American", "note": "Bold flavors — guacamole, ceviche, skirt steak, paella near the venue" },
+        { "name": "Ford's Garage Noblesville", "type": "Burgers & Beer", "note": "Gas station-themed craft burger bar near the venue" },
+        { "name": "Sunny Day Cafe", "type": "Cafe", "note": "Right in the outdoor mall area near Ruoff — easy pre-show option" }
       ],
       "shakedown": {
         "location": "Lot along Boden Road",
         "parking": "Multiple lots off SR-32 and Boden Rd",
-        "tip": "July 4th show! Watch for a set break fireworks surprise. Bring the flag"
+        "tip": "Night 2 at Deer Creek. Summer is in full swing in Indiana"
       }
     },
     {
-      "date": "2026-08-28",
+      "date": "2026-07-12",
+      "venue": "Ruoff Music Center",
+      "city": "Noblesville",
+      "state": "IN",
+      "lat": 40.051,
+      "lon": -86.016,
+      "phishin_venue_slug": "deer-creek-music-center",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
+      "food": [
+        { "name": "Aspen Creek Grill", "type": "American", "note": "One of the top-rated spots closest to Ruoff" },
+        { "name": "Livery", "type": "Latin American", "note": "Bold flavors — guacamole, ceviche, skirt steak, paella near the venue" },
+        { "name": "Ford's Garage Noblesville", "type": "Burgers & Beer", "note": "Gas station-themed craft burger bar near the venue" },
+        { "name": "Sunny Day Cafe", "type": "Cafe", "note": "Right in the outdoor mall area near Ruoff — easy pre-show option" }
+      ],
+      "shakedown": {
+        "location": "Lot along Boden Road",
+        "parking": "Multiple lots off SR-32 and Boden Rd",
+        "tip": "Night 3 closes out the Deer Creek run. Expect something special on the last night"
+      }
+    },
+    {
+      "date": "2026-07-14",
+      "venue": "Enmarket Arena",
+      "city": "Savannah",
+      "state": "GA",
+      "lat": 32.0738,
+      "lon": -81.0999,
+      "phishin_venue_slug": "enmarket-arena",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
+      "food": [
+        { "name": "Treylor Park", "type": "American Comfort", "note": "Funky local favorite in downtown Savannah, walking distance from the arena" },
+        { "name": "The Collins Quarter", "type": "Australian Cafe", "note": "Brunch and coffee institution in the historic district, short walk" },
+        { "name": "Mrs. Wilkes' Dining Room", "type": "Southern", "note": "Legendary family-style Southern food on Jones St — arrive before they open" },
+        { "name": "Zunzi's", "type": "Sandwiches", "note": "South African-inspired sandwiches — a Savannah institution on York Street" }
+      ],
+      "shakedown": {
+        "location": "Outside arena on Arena Pl",
+        "parking": "Arena lots off Louisville Rd",
+        "tip": "Phish in the Deep South. Savannah's historic squares are stunning — arrive early and explore"
+      }
+    },
+    {
+      "date": "2026-07-15",
+      "venue": "Enmarket Arena",
+      "city": "Savannah",
+      "state": "GA",
+      "lat": 32.0738,
+      "lon": -81.0999,
+      "phishin_venue_slug": "enmarket-arena",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
+      "food": [
+        { "name": "Treylor Park", "type": "American Comfort", "note": "Funky local favorite in downtown Savannah, walking distance from the arena" },
+        { "name": "The Collins Quarter", "type": "Australian Cafe", "note": "Brunch and coffee institution in the historic district, short walk" },
+        { "name": "Mrs. Wilkes' Dining Room", "type": "Southern", "note": "Legendary family-style Southern food on Jones St — arrive before they open" },
+        { "name": "Zunzi's", "type": "Sandwiches", "note": "South African-inspired sandwiches — a Savannah institution on York Street" }
+      ],
+      "shakedown": {
+        "location": "Outside arena on Arena Pl",
+        "parking": "Arena lots off Louisville Rd",
+        "tip": "Night 2 in Savannah. Hot and humid — stay hydrated. The city comes alive at night"
+      }
+    },
+    {
+      "date": "2026-07-17",
+      "venue": "Coastal Credit Union Music Park at Walnut Creek",
+      "city": "Raleigh",
+      "state": "NC",
+      "lat": 35.7354,
+      "lon": -78.6218,
+      "phishin_venue_slug": "walnut-creek-amphitheatre",
+      "policy": {
+        "water_bottles": "Empty reusable or factory-sealed",
+        "poster_tubes": "Permitted"
+      },
+      "food": [
+        { "name": "Frank's", "type": "NY-Style Pizza", "note": "8 min drive — small strip mall pizzeria with excellent pies and steak subs" },
+        { "name": "Transfer Co. Food Hall", "type": "Food Hall", "note": "Vietnamese, Mexican, ramen and more — downtown Raleigh, 10 min drive" },
+        { "name": "Brewery Bhavana", "type": "Dim Sum & Beer", "note": "Dim sum, craft beer, and bookshop in one — downtown Raleigh, 10 min drive" },
+        { "name": "Bida Manda", "type": "Laotian", "note": "James Beard-celebrated Laotian cuisine — downtown Raleigh, 10 min drive" }
+      ],
+      "shakedown": {
+        "location": "Lawn entrance area off Sunstone Dr",
+        "parking": "Lots A–C off Rock Quarry Rd",
+        "tip": "Walnut Creek is a beloved outdoor amp. Lawn is huge — great sight lines anywhere"
+      }
+    },
+    {
+      "date": "2026-07-18",
+      "venue": "Merriweather Post Pavilion",
+      "city": "Columbia",
+      "state": "MD",
+      "lat": 39.2178,
+      "lon": -76.8631,
+      "phishin_venue_slug": "merriweather-post-pavilion",
+      "policy": {
+        "water_bottles": "Empty reusable or factory-sealed",
+        "poster_tubes": "Permitted"
+      },
+      "food": [
+        { "name": "Busboys and Poets", "type": "American/Vegan", "note": "In the Merriweather District — literally next door to the venue" },
+        { "name": "Peter Chang", "type": "Szechuan", "note": "Bold Szechuan flavors in the Merriweather District, steps from the lawn" },
+        { "name": "Smashing Grapes", "type": "Italian/Pizza", "note": "Wood-fired pizza and house-made pasta in the Merriweather District" },
+        { "name": "Clyde's of Columbia", "type": "American Grill", "note": "Columbia institution since 1975, short drive from Merriweather" }
+      ],
+      "shakedown": {
+        "location": "Lawn area near the main entrance",
+        "parking": "Lots 1 and 2 off Little Patuxent Pkwy",
+        "tip": "Legendary Mid-Atlantic outdoor venue. Mix of pavilion and lawn — lawn is a Phish rite of passage"
+      }
+    },
+    {
+      "date": "2026-07-19",
+      "venue": "Merriweather Post Pavilion",
+      "city": "Columbia",
+      "state": "MD",
+      "lat": 39.2178,
+      "lon": -76.8631,
+      "phishin_venue_slug": "merriweather-post-pavilion",
+      "policy": {
+        "water_bottles": "Empty reusable or factory-sealed",
+        "poster_tubes": "Permitted"
+      },
+      "food": [
+        { "name": "Busboys and Poets", "type": "American/Vegan", "note": "In the Merriweather District — literally next door to the venue" },
+        { "name": "Peter Chang", "type": "Szechuan", "note": "Bold Szechuan flavors in the Merriweather District, steps from the lawn" },
+        { "name": "Smashing Grapes", "type": "Italian/Pizza", "note": "Wood-fired pizza and house-made pasta in the Merriweather District" },
+        { "name": "Clyde's of Columbia", "type": "American Grill", "note": "Columbia institution since 1975, short drive from Merriweather" }
+      ],
+      "shakedown": {
+        "location": "Lawn area near the main entrance",
+        "parking": "Lots 1 and 2 off Little Patuxent Pkwy",
+        "tip": "Night 2 at Merriweather. Historic DC-area venue with great energy on the lawn"
+      }
+    },
+    {
+      "date": "2026-07-21",
+      "venue": "Empower FCU Amphitheater at Lakeview",
+      "city": "Syracuse",
+      "state": "NY",
+      "lat": 43.0481,
+      "lon": -76.1474,
+      "phishin_venue_slug": "amphitheater-at-lakeview",
+      "policy": {
+        "water_bottles": "Empty reusable or factory-sealed",
+        "poster_tubes": "Permitted"
+      },
+      "food": [
+        { "name": "Dinosaur Bar-B-Que", "type": "BBQ", "note": "Syracuse BBQ legend — smoked meats and ribs, 10 min from the fairgrounds" },
+        { "name": "Pastabilities", "type": "Italian", "note": "Famous downtown Syracuse pasta joint — must-try spicy tomato oil bread" },
+        { "name": "The Fish Friar", "type": "Seafood", "note": "Fresh fried seafood close to the amphitheater" },
+        { "name": "Alto Cinco", "type": "Mexican", "note": "Best burrito in Syracuse in the Westcott neighborhood, 10 min away" }
+      ],
+      "shakedown": {
+        "location": "Main entrance plaza area",
+        "parking": "NYS Fairgrounds lots off State Fair Blvd",
+        "tip": "Right on the NYS Fairgrounds. Great outdoor amphitheater with a dedicated Phish fanbase in CNY"
+      }
+    },
+    {
+      "date": "2026-07-22",
+      "venue": "Madison Square Garden",
+      "city": "New York",
+      "state": "NY",
+      "lat": 40.7505,
+      "lon": -73.9934,
+      "phishin_venue_slug": "madison-square-garden",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
+      "food": [
+        { "name": "Nick + Stef's Steakhouse", "type": "Steakhouse", "note": "Right next to MSG on 33rd St — pre-show steaks steps from Penn Station" },
+        { "name": "Keens Steakhouse", "type": "Historic Steakhouse", "note": "NYC institution since 1885 at 72 W 36th St — 1 block from the Garden" },
+        { "name": "BCD Tofu House", "type": "Korean", "note": "Koreatown on 32nd St, 1 block over — open 24/7, bubbling soon tofu stew" },
+        { "name": "Joe's Pizza", "type": "NYC Pizza", "note": "Classic cheese slice across from Penn Station — right below MSG" }
+      ],
+      "shakedown": {
+        "location": "7th Avenue and 33rd St sidewalk scene",
+        "parking": "Take the subway — Penn Station is right below the Garden",
+        "tip": "MSG Night 1 of 5. The Garden is Phish's home. Take the subway — Penn Station is right downstairs"
+      }
+    },
+    {
+      "date": "2026-07-24",
+      "venue": "Madison Square Garden",
+      "city": "New York",
+      "state": "NY",
+      "lat": 40.7505,
+      "lon": -73.9934,
+      "phishin_venue_slug": "madison-square-garden",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
+      "food": [
+        { "name": "Nick + Stef's Steakhouse", "type": "Steakhouse", "note": "Right next to MSG on 33rd St — pre-show steaks steps from Penn Station" },
+        { "name": "Keens Steakhouse", "type": "Historic Steakhouse", "note": "NYC institution since 1885 at 72 W 36th St — 1 block from the Garden" },
+        { "name": "BCD Tofu House", "type": "Korean", "note": "Koreatown on 32nd St, 1 block over — open 24/7, bubbling soon tofu stew" },
+        { "name": "Joe's Pizza", "type": "NYC Pizza", "note": "Classic cheese slice across from Penn Station — right below MSG" }
+      ],
+      "shakedown": {
+        "location": "7th Avenue and 33rd St sidewalk scene",
+        "parking": "Take the subway — Penn Station is right below the Garden",
+        "tip": "MSG Night 2 of 5. The city that never sleeps — after-show options are endless"
+      }
+    },
+    {
+      "date": "2026-07-25",
+      "venue": "Madison Square Garden",
+      "city": "New York",
+      "state": "NY",
+      "lat": 40.7505,
+      "lon": -73.9934,
+      "phishin_venue_slug": "madison-square-garden",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
+      "food": [
+        { "name": "Nick + Stef's Steakhouse", "type": "Steakhouse", "note": "Right next to MSG on 33rd St — pre-show steaks steps from Penn Station" },
+        { "name": "Keens Steakhouse", "type": "Historic Steakhouse", "note": "NYC institution since 1885 at 72 W 36th St — 1 block from the Garden" },
+        { "name": "BCD Tofu House", "type": "Korean", "note": "Koreatown on 32nd St, 1 block over — open 24/7, bubbling soon tofu stew" },
+        { "name": "Joe's Pizza", "type": "NYC Pizza", "note": "Classic cheese slice across from Penn Station — right below MSG" }
+      ],
+      "shakedown": {
+        "location": "7th Avenue and 33rd St sidewalk scene",
+        "parking": "Take the subway — Penn Station is right below the Garden",
+        "tip": "MSG Night 3 of 5. Mid-run energy peaks here — expect the band to stretch out"
+      }
+    },
+    {
+      "date": "2026-07-27",
+      "venue": "Madison Square Garden",
+      "city": "New York",
+      "state": "NY",
+      "lat": 40.7505,
+      "lon": -73.9934,
+      "phishin_venue_slug": "madison-square-garden",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
+      "food": [
+        { "name": "Nick + Stef's Steakhouse", "type": "Steakhouse", "note": "Right next to MSG on 33rd St — pre-show steaks steps from Penn Station" },
+        { "name": "Keens Steakhouse", "type": "Historic Steakhouse", "note": "NYC institution since 1885 at 72 W 36th St — 1 block from the Garden" },
+        { "name": "BCD Tofu House", "type": "Korean", "note": "Koreatown on 32nd St, 1 block over — open 24/7, bubbling soon tofu stew" },
+        { "name": "Joe's Pizza", "type": "NYC Pizza", "note": "Classic cheese slice across from Penn Station — right below MSG" }
+      ],
+      "shakedown": {
+        "location": "7th Avenue and 33rd St sidewalk scene",
+        "parking": "Take the subway — Penn Station is right below the Garden",
+        "tip": "MSG Night 4 of 5. Sunday at the Garden — the crowd knows something special is brewing"
+      }
+    },
+    {
+      "date": "2026-07-29",
+      "venue": "Madison Square Garden",
+      "city": "New York",
+      "state": "NY",
+      "lat": 40.7505,
+      "lon": -73.9934,
+      "phishin_venue_slug": "madison-square-garden",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
+      "food": [
+        { "name": "Nick + Stef's Steakhouse", "type": "Steakhouse", "note": "Right next to MSG on 33rd St — pre-show steaks steps from Penn Station" },
+        { "name": "Keens Steakhouse", "type": "Historic Steakhouse", "note": "NYC institution since 1885 at 72 W 36th St — 1 block from the Garden" },
+        { "name": "BCD Tofu House", "type": "Korean", "note": "Koreatown on 32nd St, 1 block over — open 24/7, bubbling soon tofu stew" },
+        { "name": "Joe's Pizza", "type": "NYC Pizza", "note": "Classic cheese slice across from Penn Station — right below MSG" }
+      ],
+      "shakedown": {
+        "location": "7th Avenue and 33rd St sidewalk scene",
+        "parking": "Take the subway — Penn Station is right below the Garden",
+        "tip": "MSG Night 5 — the finale. Madison Square Garden closers are legendary. Bring it all"
+      }
+    },
+    {
+      "date": "2026-07-31",
+      "venue": "Fenway Park",
+      "city": "Boston",
+      "state": "MA",
+      "lat": 42.3467,
+      "lon": -71.0972,
+      "phishin_venue_slug": "fenway-park",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
+      "food": [
+        { "name": "Cask 'n Flagon", "type": "Sports Bar", "note": "Literally across the street from Fenway — classic pre-show stop since 1969" },
+        { "name": "Sweet Cheeks Q", "type": "Southern BBQ", "note": "Top Chef's Tiffani Faison's acclaimed BBQ spot in the Fenway neighborhood" },
+        { "name": "Hojoko", "type": "Japanese Izakaya", "note": "Funky izakaya in the Verb Hotel, 5 min from the park" },
+        { "name": "Tasty Burger", "type": "Burgers", "note": "Fast and solid burgers right in the Fenway neighborhood" }
+      ],
+      "shakedown": {
+        "location": "Lansdowne St behind the Green Monster",
+        "parking": "Take the Green Line to Kenmore — easiest option",
+        "tip": "Phish at Fenway! Green Monster in view. One of the most iconic stages in rock history"
+      }
+    },
+    {
+      "date": "2026-08-01",
+      "venue": "Fenway Park",
+      "city": "Boston",
+      "state": "MA",
+      "lat": 42.3467,
+      "lon": -71.0972,
+      "phishin_venue_slug": "fenway-park",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
+      "food": [
+        { "name": "Cask 'n Flagon", "type": "Sports Bar", "note": "Literally across the street from Fenway — classic pre-show stop since 1969" },
+        { "name": "Sweet Cheeks Q", "type": "Southern BBQ", "note": "Top Chef's Tiffani Faison's acclaimed BBQ spot in the Fenway neighborhood" },
+        { "name": "Hojoko", "type": "Japanese Izakaya", "note": "Funky izakaya in the Verb Hotel, 5 min from the park" },
+        { "name": "Tasty Burger", "type": "Burgers", "note": "Fast and solid burgers right in the Fenway neighborhood" }
+      ],
+      "shakedown": {
+        "location": "Lansdowne St behind the Green Monster",
+        "parking": "Take the Green Line to Kenmore — easiest option",
+        "tip": "Fenway Night 2. The last night before the long break to Dick's — go out swinging"
+      }
+    },
+    {
+      "date": "2026-09-04",
       "venue": "Dick's Sporting Goods Park",
       "city": "Commerce City",
       "state": "CO",
@@ -206,10 +446,10 @@
         "poster_tubes": "Permitted"
       },
       "food": [
-        { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Elk and boar sausages - legendary" },
-        { "name": "Illegal Pete's", "type": "Mission Burritos", "note": "Closest real burrito to the lot" },
-        { "name": "Denver Central Market", "type": "Food Hall", "note": "20 min south on I-70 in RiNo" },
-        { "name": "Dick's Lot BBQ Trucks", "type": "BBQ", "note": "Right outside the venue gates" }
+        { "name": "Cattivella", "type": "Wood-Fired Italian", "note": "Award-winning Italian in Stapleton, ~10 min from Dick's" },
+        { "name": "ChoLon Central Park", "type": "Modern Asian", "note": "Excellent Asian fusion in Stapleton's Central Park neighborhood, ~10 min" },
+        { "name": "Annette", "type": "American", "note": "James Beard Award-winning chef at Stanley Marketplace in Aurora, ~15 min" },
+        { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Legendary elk and bison sausages in downtown Denver — worth the 20 min drive" }
       ],
       "shakedown": {
         "location": "South Lot near Gate 4",
@@ -218,7 +458,7 @@
       }
     },
     {
-      "date": "2026-08-29",
+      "date": "2026-09-05",
       "venue": "Dick's Sporting Goods Park",
       "city": "Commerce City",
       "state": "CO",
@@ -230,19 +470,19 @@
         "poster_tubes": "Permitted"
       },
       "food": [
-        { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Elk and boar sausages - legendary" },
-        { "name": "Illegal Pete's", "type": "Mission Burritos", "note": "Closest real burrito to the lot" },
-        { "name": "Denver Central Market", "type": "Food Hall", "note": "20 min south on I-70 in RiNo" },
-        { "name": "Dick's Lot BBQ Trucks", "type": "BBQ", "note": "Right outside the venue gates" }
+        { "name": "Cattivella", "type": "Wood-Fired Italian", "note": "Award-winning Italian in Stapleton, ~10 min from Dick's" },
+        { "name": "ChoLon Central Park", "type": "Modern Asian", "note": "Excellent Asian fusion in Stapleton's Central Park neighborhood, ~10 min" },
+        { "name": "Annette", "type": "American", "note": "James Beard Award-winning chef at Stanley Marketplace in Aurora, ~15 min" },
+        { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Legendary elk and bison sausages in downtown Denver — worth the 20 min drive" }
       ],
       "shakedown": {
         "location": "South Lot near Gate 4",
         "parking": "Lot F closest to the action",
-        "tip": "Night 2 at Dick's! Watch for Tweezerpalooza or secret language signals"
+        "tip": "Dick's Night 2. Watch for Tweezerpalooza or secret language signals"
       }
     },
     {
-      "date": "2026-08-30",
+      "date": "2026-09-06",
       "venue": "Dick's Sporting Goods Park",
       "city": "Commerce City",
       "state": "CO",
@@ -254,15 +494,15 @@
         "poster_tubes": "Permitted"
       },
       "food": [
-        { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Elk and boar sausages - legendary" },
-        { "name": "Illegal Pete's", "type": "Mission Burritos", "note": "Closest real burrito to the lot" },
-        { "name": "Denver Central Market", "type": "Food Hall", "note": "20 min south on I-70 in RiNo" },
-        { "name": "Dick's Lot BBQ Trucks", "type": "BBQ", "note": "Right outside the venue gates" }
+        { "name": "Cattivella", "type": "Wood-Fired Italian", "note": "Award-winning Italian in Stapleton, ~10 min from Dick's" },
+        { "name": "ChoLon Central Park", "type": "Modern Asian", "note": "Excellent Asian fusion in Stapleton's Central Park neighborhood, ~10 min" },
+        { "name": "Annette", "type": "American", "note": "James Beard Award-winning chef at Stanley Marketplace in Aurora, ~15 min" },
+        { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Legendary elk and bison sausages in downtown Denver — worth the 20 min drive" }
       ],
       "shakedown": {
         "location": "South Lot near Gate 4",
         "parking": "Lot F closest to the action",
-        "tip": "Labor Day Night 3! Bring warm layers - Colorado nights drop fast after dark"
+        "tip": "Labor Day Night 3! Tour closer at Dick's — bring warm layers, Colorado nights drop fast after dark"
       }
     }
   ]
