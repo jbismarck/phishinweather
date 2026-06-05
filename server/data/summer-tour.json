@@ -1,0 +1,225 @@
+{
+  "tour": "Summer 2026",
+  "shows": [
+    {
+      "date": "2026-06-17",
+      "venue": "Bethel Woods Center for the Arts",
+      "city": "Bethel",
+      "state": "NY",
+      "lat": 41.687,
+      "lon": -74.898,
+      "phishin_venue_slug": "bethel-woods-center-for-the-arts",
+      "food": [
+        { "name": "Harvest on Main", "type": "American", "note": "5 min from venue on Main St" },
+        { "name": "The Laundrette", "type": "Bar & Grill", "note": "Cold drafts and great burgers" },
+        { "name": "Catskill Rose", "type": "Cafe", "note": "Perfect pre-show breakfast spot" },
+        { "name": "Lot Food Vendors", "type": "Various", "note": "Shakedown opens at 2pm" }
+      ],
+      "shakedown": {
+        "location": "West Lot near Gate 2",
+        "parking": "Rte 17B parking fields",
+        "tip": "Site of the 1969 Woodstock Festival. Arrive early to explore the museum"
+      }
+    },
+    {
+      "date": "2026-06-18",
+      "venue": "Bethel Woods Center for the Arts",
+      "city": "Bethel",
+      "state": "NY",
+      "lat": 41.687,
+      "lon": -74.898,
+      "phishin_venue_slug": "bethel-woods-center-for-the-arts",
+      "food": [
+        { "name": "Harvest on Main", "type": "American", "note": "5 min from venue on Main St" },
+        { "name": "The Laundrette", "type": "Bar & Grill", "note": "Cold drafts and great burgers" },
+        { "name": "Catskill Rose", "type": "Cafe", "note": "Perfect pre-show breakfast spot" },
+        { "name": "Lot Food Vendors", "type": "Various", "note": "Shakedown opens at 2pm" }
+      ],
+      "shakedown": {
+        "location": "West Lot near Gate 2",
+        "parking": "Rte 17B parking fields",
+        "tip": "Night 2 at Bethel Woods. Catskill Mountain magic in full effect"
+      }
+    },
+    {
+      "date": "2026-06-20",
+      "venue": "Saratoga Performing Arts Center",
+      "city": "Saratoga Springs",
+      "state": "NY",
+      "lat": 43.077,
+      "lon": -73.781,
+      "phishin_venue_slug": "saratoga-performing-arts-center",
+      "food": [
+        { "name": "Cantina", "type": "Mexican", "note": "On Broadway, 3 min walk from main gate" },
+        { "name": "Hamlet & Ghost", "type": "Farm to Table", "note": "Craft cocktails and seasonal menu" },
+        { "name": "Hattie's", "type": "Southern Soul Food", "note": "A Saratoga institution since 1938" },
+        { "name": "The Brook Tavern", "type": "Pub Grub", "note": "Right on the strip, cold beer" }
+      ],
+      "shakedown": {
+        "location": "Lot 1 off Route 50",
+        "parking": "Lots 1-4 on Rte 50 side of venue",
+        "tip": "Arrive by 3pm for good lot spots. Saratoga Race Course is just across the way"
+      }
+    },
+    {
+      "date": "2026-06-21",
+      "venue": "Saratoga Performing Arts Center",
+      "city": "Saratoga Springs",
+      "state": "NY",
+      "lat": 43.077,
+      "lon": -73.781,
+      "phishin_venue_slug": "saratoga-performing-arts-center",
+      "food": [
+        { "name": "Cantina", "type": "Mexican", "note": "On Broadway, 3 min walk from main gate" },
+        { "name": "Hamlet & Ghost", "type": "Farm to Table", "note": "Craft cocktails and seasonal menu" },
+        { "name": "Hattie's", "type": "Southern Soul Food", "note": "A Saratoga institution since 1938" },
+        { "name": "The Brook Tavern", "type": "Pub Grub", "note": "Right on the strip, cold beer" }
+      ],
+      "shakedown": {
+        "location": "Lot 1 off Route 50",
+        "parking": "Lots 1-4 on Rte 50 side of venue",
+        "tip": "SPAC Night 2! Phish has played legendary late sets here since the 90s"
+      }
+    },
+    {
+      "date": "2026-06-26",
+      "venue": "Alpine Valley Music Theatre",
+      "city": "East Troy",
+      "state": "WI",
+      "lat": 42.668,
+      "lon": -88.373,
+      "phishin_venue_slug": "alpine-valley-music-theatre",
+      "food": [
+        { "name": "Brat Stop", "type": "Wisconsin Brats", "note": "On I-94 at exit 333 - a rite of passage" },
+        { "name": "House of Munich", "type": "German Biergarten", "note": "Brats, schnitzels, cold steins" },
+        { "name": "Charcoal Grill", "type": "Steakhouse", "note": "Best pre-show steak in the area" },
+        { "name": "Lot Tailgate", "type": "BYOG", "note": "Bring your own grill. Wisconsin style" }
+      ],
+      "shakedown": {
+        "location": "Grass hill to the left of the main stage",
+        "parking": "Lots A-D off County Road D",
+        "tip": "Bring layers - it gets cold in the valley after dark even in June"
+      }
+    },
+    {
+      "date": "2026-06-27",
+      "venue": "Alpine Valley Music Theatre",
+      "city": "East Troy",
+      "state": "WI",
+      "lat": 42.668,
+      "lon": -88.373,
+      "phishin_venue_slug": "alpine-valley-music-theatre",
+      "food": [
+        { "name": "Brat Stop", "type": "Wisconsin Brats", "note": "On I-94 at exit 333 - a rite of passage" },
+        { "name": "House of Munich", "type": "German Biergarten", "note": "Brats, schnitzels, cold steins" },
+        { "name": "Charcoal Grill", "type": "Steakhouse", "note": "Best pre-show steak in the area" },
+        { "name": "Lot Tailgate", "type": "BYOG", "note": "Bring your own grill. Wisconsin style" }
+      ],
+      "shakedown": {
+        "location": "Grass hill to the left of the main stage",
+        "parking": "Lots A-D off County Road D",
+        "tip": "Night 2 in the Valley. Expect deep set 2 adventures in the hills"
+      }
+    },
+    {
+      "date": "2026-07-03",
+      "venue": "Ruoff Music Center",
+      "city": "Noblesville",
+      "state": "IN",
+      "lat": 40.051,
+      "lon": -86.016,
+      "phishin_venue_slug": "deer-creek-music-center",
+      "food": [
+        { "name": "White Oak Butcher Shop", "type": "Craft Burgers", "note": "10 min south on SR-37" },
+        { "name": "Kona Jack's Fish Market", "type": "Seafood", "note": "Fresh catch in the Midwest" },
+        { "name": "Moody's Butcher Shop", "type": "Deli Sandwiches", "note": "Quick and loaded" },
+        { "name": "Yard House", "type": "Bar & Grill", "note": "100 beers on tap, downtown Indy" }
+      ],
+      "shakedown": {
+        "location": "Lot along Boden Road",
+        "parking": "Multiple lots off SR-32 and Boden Rd",
+        "tip": "Formerly Deer Creek - site of legendary 1995 Phish shows. History in the air"
+      }
+    },
+    {
+      "date": "2026-07-04",
+      "venue": "Ruoff Music Center",
+      "city": "Noblesville",
+      "state": "IN",
+      "lat": 40.051,
+      "lon": -86.016,
+      "phishin_venue_slug": "deer-creek-music-center",
+      "food": [
+        { "name": "White Oak Butcher Shop", "type": "Craft Burgers", "note": "10 min south on SR-37" },
+        { "name": "Kona Jack's Fish Market", "type": "Seafood", "note": "Fresh catch in the Midwest" },
+        { "name": "Moody's Butcher Shop", "type": "Deli Sandwiches", "note": "Quick and loaded" },
+        { "name": "Yard House", "type": "Bar & Grill", "note": "100 beers on tap, downtown Indy" }
+      ],
+      "shakedown": {
+        "location": "Lot along Boden Road",
+        "parking": "Multiple lots off SR-32 and Boden Rd",
+        "tip": "July 4th show! Watch for a set break fireworks surprise. Bring the flag"
+      }
+    },
+    {
+      "date": "2026-08-28",
+      "venue": "Dick's Sporting Goods Park",
+      "city": "Commerce City",
+      "state": "CO",
+      "lat": 39.822,
+      "lon": -104.892,
+      "phishin_venue_slug": "dicks-sporting-goods-park",
+      "food": [
+        { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Elk and boar sausages - legendary" },
+        { "name": "Illegal Pete's", "type": "Mission Burritos", "note": "Closest real burrito to the lot" },
+        { "name": "Denver Central Market", "type": "Food Hall", "note": "20 min south on I-70 in RiNo" },
+        { "name": "Dick's Lot BBQ Trucks", "type": "BBQ", "note": "Right outside the venue gates" }
+      ],
+      "shakedown": {
+        "location": "South Lot near Gate 4",
+        "parking": "Lot F closest to the action",
+        "tip": "Dick's Night 1 of 3. Elevation 5,280 ft. Drink water and pace yourself"
+      }
+    },
+    {
+      "date": "2026-08-29",
+      "venue": "Dick's Sporting Goods Park",
+      "city": "Commerce City",
+      "state": "CO",
+      "lat": 39.822,
+      "lon": -104.892,
+      "phishin_venue_slug": "dicks-sporting-goods-park",
+      "food": [
+        { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Elk and boar sausages - legendary" },
+        { "name": "Illegal Pete's", "type": "Mission Burritos", "note": "Closest real burrito to the lot" },
+        { "name": "Denver Central Market", "type": "Food Hall", "note": "20 min south on I-70 in RiNo" },
+        { "name": "Dick's Lot BBQ Trucks", "type": "BBQ", "note": "Right outside the venue gates" }
+      ],
+      "shakedown": {
+        "location": "South Lot near Gate 4",
+        "parking": "Lot F closest to the action",
+        "tip": "Night 2 at Dick's! Watch for Tweezerpalooza or secret language signals"
+      }
+    },
+    {
+      "date": "2026-08-30",
+      "venue": "Dick's Sporting Goods Park",
+      "city": "Commerce City",
+      "state": "CO",
+      "lat": 39.822,
+      "lon": -104.892,
+      "phishin_venue_slug": "dicks-sporting-goods-park",
+      "food": [
+        { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Elk and boar sausages - legendary" },
+        { "name": "Illegal Pete's", "type": "Mission Burritos", "note": "Closest real burrito to the lot" },
+        { "name": "Denver Central Market", "type": "Food Hall", "note": "20 min south on I-70 in RiNo" },
+        { "name": "Dick's Lot BBQ Trucks", "type": "BBQ", "note": "Right outside the venue gates" }
+      ],
+      "shakedown": {
+        "location": "South Lot near Gate 4",
+        "parking": "Lot F closest to the action",
+        "tip": "Labor Day Night 3! Bring warm layers - Colorado nights drop fast after dark"
+      }
+    }
+  ]
+}

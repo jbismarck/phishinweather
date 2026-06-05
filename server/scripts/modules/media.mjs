@@ -173,6 +173,8 @@ const mediaVolume = new Setting('mediaVolume', {
 	changeAction: setVolume,
 });
 
+const getTrackUrl = (track) => (track.startsWith('http') ? track : `music/${track}`);
+
 const initializePlayer = () => {
 	// basic sanity checks
 	if (!playlist.availableFiles || playlist?.availableFiles.length === 0) {
@@ -192,7 +194,7 @@ const initializePlayer = () => {
 	player.addEventListener('ended', playerEnded);
 
 	// get the first file
-	player.src = `music/${playlist.availableFiles[currentTrack]}`;
+	player.src = getTrackUrl(playlist.availableFiles[currentTrack]);
 	setTrackName(playlist.availableFiles[currentTrack]);
 	player.type = 'audio/mpeg';
 	setVolume(mediaVolume.value);
@@ -214,8 +216,9 @@ const playerEnded = () => {
 		currentTrack = 0;
 	}
 	// update the player source
-	player.src = `music/${playlist.availableFiles[currentTrack]}`;
-	setTrackName(playlist.availableFiles[currentTrack]);
+	const track = playlist.availableFiles[currentTrack];
+	player.src = getTrackUrl(track);
+	setTrackName(track);
 };
 
 const setTrackName = (fileName) => {
@@ -226,7 +229,19 @@ const setTrackName = (fileName) => {
         document.getElementById('musicTrack').innerHTML = trackName;
 };
 
+const injectTracks = (tracks) => {
+	if (!tracks?.length) return;
+	playlist = { availableFiles: [...tracks] };
+	randomizePlaylist();
+	currentTrack = 0;
+	if (!player) return;
+	const track = playlist.availableFiles[0];
+	player.src = getTrackUrl(track);
+	setTrackName(track);
+	if (mediaPlaying.value) player.play().catch(() => {});
+};
+
 export {
-	// eslint-disable-next-line import/prefer-default-export
 	toggleMedia,
+	injectTracks,
 };

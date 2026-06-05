@@ -1,0 +1,66 @@
+<%- include('header.ejs', {titleDual: {top: 'PHISH SUMMER', bottom: 'TOUR'}, hasTime: true}) %>
+<div class="main has-scroll phish-tour">
+
+  <!-- Show Info Card -->
+  <div class="card card-info">
+    <div class="info-date-row">
+      <div class="show-date"></div>
+      <div class="show-countdown"></div>
+    </div>
+    <div class="show-venue"></div>
+    <div class="show-city"></div>
+    <div class="show-counter">SHOW <span class="show-num"></span> OF <span class="show-total"></span></div>
+  </div>
+
+  <!-- Forecast Card -->
+  <div class="card card-forecast">
+    <div class="forecast-header">
+      <span class="forecast-city"></span>
+      <span class="forecast-label">3-DAY FORECAST</span>
+    </div>
+    <div class="forecast-days">
+      <div class="forecast-day template">
+        <div class="f-date"></div>
+        <div class="f-condition"></div>
+        <div class="f-temps">
+          <span class="f-hi"></span>
+          <span class="f-lo"></span>
+        </div>
+      </div>
+    </div>
+    <div class="no-forecast" style="display:none">FORECAST UNAVAILABLE</div>
+  </div>
+
+  <!-- Eats Card -->
+  <div class="card card-eats">
+    <div class="eats-header">WHERE TO EAT  <span class="eats-venue"></span></div>
+    <div class="eats-list">
+      <div class="eat-item template">
+        <div class="eat-name-row">
+          <span class="eat-name"></span>
+          <span class="eat-type"></span>
+        </div>
+        <div class="eat-note"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shakedown Card -->
+  <div class="card card-shakedown">
+    <div class="shakedown-title">SHAKEDOWN ST.</div>
+    <div class="sd-venue"></div>
+    <div class="sd-row">
+      <span class="sd-label">LOCATION</span>
+      <span class="sd-location"></span>
+    </div>
+    <div class="sd-row">
+      <span class="sd-label">PARKING</span>
+      <span class="sd-parking"></span>
+    </div>
+    <div class="sd-tip-wrap">
+      <div class="sd-tip"></div>
+    </div>
+  </div>
+
+</div>
+<%- include('scroll.ejs') %>
