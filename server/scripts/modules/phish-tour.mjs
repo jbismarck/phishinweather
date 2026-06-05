@@ -113,6 +113,10 @@ class PhishTour extends WeatherDisplay {
 		card.querySelector('.show-venue').textContent = show.venue;
 		card.querySelector('.show-city').textContent = `${show.city}, ${show.state}`;
 
+		const policy = show.policy ?? {};
+		card.querySelector('.policy-bottles').textContent = policy.water_bottles ?? 'Check venue website';
+		card.querySelector('.policy-tubes').textContent = policy.poster_tubes ?? 'Check venue website';
+
 		const days = daysUntil(show.date);
 		const countdownElem = card.querySelector('.show-countdown');
 		if (days === 0) {

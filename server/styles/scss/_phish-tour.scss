@@ -58,10 +58,34 @@
 			margin-top: 3px;
 		}
 
+		.policy-row {
+			display: flex;
+			align-items: baseline;
+			gap: 8px;
+			margin-top: 6px;
+
+			.policy-label {
+				font-size: 12pt;
+				color: c.$column-header-text;
+				width: 72px;
+				flex-shrink: 0;
+				font-family: 'Star4000 Small';
+			}
+
+			.policy-bottles,
+			.policy-tubes {
+				font-size: 13pt;
+				color: white;
+				font-family: 'Star4000 Small';
+				word-wrap: break-word;
+				overflow-wrap: break-word;
+			}
+		}
+
 		.show-counter {
 			font-size: 13pt;
 			color: rgba(255, 255, 255, 0.65);
-			margin-top: 12px;
+			margin-top: 8px;
 			text-align: right;
 		}
 	}

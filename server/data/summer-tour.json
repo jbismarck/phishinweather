@@ -9,6 +9,10 @@
       "lat": 41.687,
       "lon": -74.898,
       "phishin_venue_slug": "bethel-woods-center-for-the-arts",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
       "food": [
         { "name": "Harvest on Main", "type": "American", "note": "5 min from venue on Main St" },
         { "name": "The Laundrette", "type": "Bar & Grill", "note": "Cold drafts and great burgers" },
@@ -29,6 +33,10 @@
       "lat": 41.687,
       "lon": -74.898,
       "phishin_venue_slug": "bethel-woods-center-for-the-arts",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
       "food": [
         { "name": "Harvest on Main", "type": "American", "note": "5 min from venue on Main St" },
         { "name": "The Laundrette", "type": "Bar & Grill", "note": "Cold drafts and great burgers" },
@@ -49,6 +57,10 @@
       "lat": 43.077,
       "lon": -73.781,
       "phishin_venue_slug": "saratoga-performing-arts-center",
+      "policy": {
+        "water_bottles": "Empty reusable or factory-sealed",
+        "poster_tubes": "Not permitted"
+      },
       "food": [
         { "name": "Cantina", "type": "Mexican", "note": "On Broadway, 3 min walk from main gate" },
         { "name": "Hamlet & Ghost", "type": "Farm to Table", "note": "Craft cocktails and seasonal menu" },
@@ -69,6 +81,10 @@
       "lat": 43.077,
       "lon": -73.781,
       "phishin_venue_slug": "saratoga-performing-arts-center",
+      "policy": {
+        "water_bottles": "Empty reusable or factory-sealed",
+        "poster_tubes": "Not permitted"
+      },
       "food": [
         { "name": "Cantina", "type": "Mexican", "note": "On Broadway, 3 min walk from main gate" },
         { "name": "Hamlet & Ghost", "type": "Farm to Table", "note": "Craft cocktails and seasonal menu" },
@@ -89,6 +105,10 @@
       "lat": 42.668,
       "lon": -88.373,
       "phishin_venue_slug": "alpine-valley-music-theatre",
+      "policy": {
+        "water_bottles": "Factory-sealed or empty reusable",
+        "poster_tubes": "Permitted (soft-sided only)"
+      },
       "food": [
         { "name": "Brat Stop", "type": "Wisconsin Brats", "note": "On I-94 at exit 333 - a rite of passage" },
         { "name": "House of Munich", "type": "German Biergarten", "note": "Brats, schnitzels, cold steins" },
@@ -109,6 +129,10 @@
       "lat": 42.668,
       "lon": -88.373,
       "phishin_venue_slug": "alpine-valley-music-theatre",
+      "policy": {
+        "water_bottles": "Factory-sealed or empty reusable",
+        "poster_tubes": "Permitted (soft-sided only)"
+      },
       "food": [
         { "name": "Brat Stop", "type": "Wisconsin Brats", "note": "On I-94 at exit 333 - a rite of passage" },
         { "name": "House of Munich", "type": "German Biergarten", "note": "Brats, schnitzels, cold steins" },
@@ -129,6 +153,10 @@
       "lat": 40.051,
       "lon": -86.016,
       "phishin_venue_slug": "deer-creek-music-center",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
       "food": [
         { "name": "White Oak Butcher Shop", "type": "Craft Burgers", "note": "10 min south on SR-37" },
         { "name": "Kona Jack's Fish Market", "type": "Seafood", "note": "Fresh catch in the Midwest" },
@@ -149,6 +177,10 @@
       "lat": 40.051,
       "lon": -86.016,
       "phishin_venue_slug": "deer-creek-music-center",
+      "policy": {
+        "water_bottles": "Factory-sealed only",
+        "poster_tubes": "Not permitted"
+      },
       "food": [
         { "name": "White Oak Butcher Shop", "type": "Craft Burgers", "note": "10 min south on SR-37" },
         { "name": "Kona Jack's Fish Market", "type": "Seafood", "note": "Fresh catch in the Midwest" },
@@ -169,6 +201,10 @@
       "lat": 39.822,
       "lon": -104.892,
       "phishin_venue_slug": "dicks-sporting-goods-park",
+      "policy": {
+        "water_bottles": "Factory-sealed or empty reusable (1 liter max)",
+        "poster_tubes": "Permitted"
+      },
       "food": [
         { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Elk and boar sausages - legendary" },
         { "name": "Illegal Pete's", "type": "Mission Burritos", "note": "Closest real burrito to the lot" },
@@ -189,6 +225,10 @@
       "lat": 39.822,
       "lon": -104.892,
       "phishin_venue_slug": "dicks-sporting-goods-park",
+      "policy": {
+        "water_bottles": "Factory-sealed or empty reusable (1 liter max)",
+        "poster_tubes": "Permitted"
+      },
       "food": [
         { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Elk and boar sausages - legendary" },
         { "name": "Illegal Pete's", "type": "Mission Burritos", "note": "Closest real burrito to the lot" },
@@ -209,6 +249,10 @@
       "lat": 39.822,
       "lon": -104.892,
       "phishin_venue_slug": "dicks-sporting-goods-park",
+      "policy": {
+        "water_bottles": "Factory-sealed or empty reusable (1 liter max)",
+        "poster_tubes": "Permitted"
+      },
       "food": [
         { "name": "Biker Jim's Gourmet Dogs", "type": "Hot Dogs", "note": "Elk and boar sausages - legendary" },
         { "name": "Illegal Pete's", "type": "Mission Burritos", "note": "Closest real burrito to the lot" },

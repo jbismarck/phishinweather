@@ -182,7 +182,7 @@ const loadDisplay = (direction) => {
 	for (let i = 0; i < totalDisplays; i += 1) {
 		// convert form simple 0-10 to start at current display index +/-1 and wrap
 		idx = wrap(curIdx + (i + 1) * direction, totalDisplays);
-		if (displays[idx].status === STATUS.loaded && displays[idx].timing.totalScreens > 0) break;
+		if (displays[idx]?.status === STATUS.loaded && displays[idx]?.timing?.totalScreens > 0) break;
 	}
 	const newDisplay = displays[idx];
 	// hide all displays
@@ -193,7 +193,7 @@ const loadDisplay = (direction) => {
 };
 
 // get the current display index or value
-const currentDisplayIndex = () => displays.findIndex((display) => display.active);
+const currentDisplayIndex = () => displays.findIndex((display) => display?.active);
 const currentDisplay = () => displays[currentDisplayIndex()];
 
 const setPlaying = (newValue) => {
