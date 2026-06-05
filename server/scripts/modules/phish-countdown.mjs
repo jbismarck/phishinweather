@@ -142,4 +142,6 @@ class PhishCountdown extends WeatherDisplay {
 	}
 }
 
-registerDisplay(new PhishCountdown(22, 'phish-countdown'));
+const phishCountdown = new PhishCountdown(22, 'phish-countdown');
+registerDisplay(phishCountdown);
+phishCountdown.getData();

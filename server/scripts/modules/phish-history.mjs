@@ -60,8 +60,9 @@ class PhishHistory extends WeatherDisplay {
 			container.append(block);
 		});
 
-		// measure visible area from container's parent
-		this.pageHeight = this.elem.querySelector('.scroll-container').offsetHeight;
+		// scroll-container is 310px (from CSS .has-scroll height) — measure at runtime but
+		// fall back to the fixed value when the element is hidden (offsetHeight=0)
+		this.pageHeight = this.elem.querySelector('.scroll-container').offsetHeight || 310;
 
 		// round each show block up to a multiple of pageHeight so screens align cleanly
 		container.querySelectorAll('.show').forEach((showBlock) => {
@@ -69,7 +70,7 @@ class PhishHistory extends WeatherDisplay {
 			showBlock.style.minHeight = `${rounded}px`;
 		});
 
-		this.timing.totalScreens = Math.round(container.scrollHeight / this.pageHeight);
+		this.timing.totalScreens = Math.max(1, Math.round(container.scrollHeight / this.pageHeight));
 		this.calcNavTiming();
 	}
 
@@ -81,4 +82,6 @@ class PhishHistory extends WeatherDisplay {
 	}
 }
 
-registerDisplay(new PhishHistory(20, 'phish-history'));
+const phishHistory = new PhishHistory(20, 'phish-history');
+registerDisplay(phishHistory);
+phishHistory.getData();

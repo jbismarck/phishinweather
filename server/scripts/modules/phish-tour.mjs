@@ -185,4 +185,6 @@ class PhishTour extends WeatherDisplay {
 	}
 }
 
-registerDisplay(new PhishTour(21, 'phish-tour'));
+const phishTour = new PhishTour(21, 'phish-tour');
+registerDisplay(phishTour);
+phishTour.getData();
