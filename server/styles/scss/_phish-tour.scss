@@ -1,9 +1,10 @@
 @use 'shared/_colors' as c;
 @use 'shared/_utils' as u;
 
-#phish-tour-html.weather-display {
-	background-image: url('../images/backgrounds/2.png');
-}
+#phish-tour-html.weather-display.bg-info      { background-image: url('../images/backgrounds/2.png'); }
+#phish-tour-html.weather-display.bg-forecast  { background-image: url('../images/backgrounds/2.png'); }
+#phish-tour-html.weather-display.bg-eats      { background-image: url('../images/backgrounds/3.png'); }
+#phish-tour-html.weather-display.bg-shakedown { background-image: url('../images/backgrounds/3.png'); }
 
 .weather-display .main.phish-tour {
 	font-family: 'Star4000';
@@ -47,8 +48,10 @@
 			color: c.$column-header-text;
 			line-height: 1.25;
 			margin-top: 10px;
-			word-wrap: break-word;
-			overflow-wrap: break-word;
+			overflow: hidden;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
 		}
 
 		.show-city {

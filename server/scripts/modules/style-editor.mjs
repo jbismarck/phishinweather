@@ -172,14 +172,59 @@ const GROUPS = [
 	},
 ];
 
+// ── Scale Groups (compound proportional controls) ─────────────────────────────
+const SCALE_GROUPS = [
+	{
+		id: 'sg-countdown',
+		label: 'Countdown Numbers',
+		targets: [
+			{ id: 'cd-num-fs',  base: 60 },
+			{ id: 'cd-unit-fs', base: 22 },
+			{ id: 'cd-sub-fs',  base: 16 },
+		],
+	},
+	{
+		id: 'sg-history',
+		label: 'History Text',
+		targets: [
+			{ id: 'h-year-fs',  base: 16 },
+			{ id: 'h-venue-fs', base: 16 },
+			{ id: 'h-loc-fs',   base: 14 },
+			{ id: 'h-seth-fs',  base: 16 },
+			{ id: 'h-song-fs',  base: 16 },
+		],
+	},
+	{
+		id: 'sg-tour-info',
+		label: 'Tour Info Text',
+		targets: [
+			{ id: 'pt-date-fs',  base: 20 },
+			{ id: 'pt-venue-fs', base: 19 },
+			{ id: 'pt-city-fs',  base: 17 },
+		],
+	},
+];
+
+// ── Selector → control map (for inspect mode) ─────────────────────────────────
+const selectorMap = [];
+for (const g of GROUPS) {
+	for (const c of g.controls) {
+		c.sel.split(',').map((s) => s.trim()).forEach((s) => {
+			selectorMap.push({ sel: s, ctrl: c, groupLabel: g.label });
+		});
+	}
+}
+
 // ── Engine ──────────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'phish-style-editor';
 const STYLE_ID    = 'phish-style-editor-overrides';
 
-let panel   = null;
-let visible = false;
-let values  = {};
+let panel      = null;
+let overlay    = null;
+let visible    = false;
+let inspecting = false;
+let values     = {};
 
 const load = () => {
 	try { values = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}'); } catch { values = {}; }
@@ -206,10 +251,45 @@ const syncInputs = (el, c, v) => {
 	el.querySelector(`#se-${c.id}-n`).value = v;
 };
 
+// Shared update logic; call applyStyles() after all batch updates
+const updateCtrlValue = (el, c, v) => {
+	const s = step(c);
+	const clamped = Math.round(Math.min(c.max, Math.max(c.min, parseFloat(v) || c.def)) / s) * s;
+	const rounded = Math.round(clamped * 1000) / 1000;
+	el.querySelector(`#se-${c.id}-r`).value = rounded;
+	el.querySelector(`#se-${c.id}-n`).value = rounded;
+	if (rounded !== c.def) values[c.id] = rounded;
+	else delete values[c.id];
+	return rounded;
+};
+
+// ── Inspect mode helpers ─────────────────────────────────────────────────────
+
+const findInspectMatch = (target) => {
+	let el = target;
+	while (el && el !== document.body) {
+		for (const entry of selectorMap) {
+			try {
+				if (el.matches(entry.sel)) return { el, ...entry };
+			} catch { /* ignore invalid selectors */ }
+		}
+		el = el.parentElement;
+	}
+	return null;
+};
+
+const hideOverlay = () => { if (overlay) overlay.style.display = 'none'; };
+
+const showOverlayAt = (matchEl, label) => {
+	const r = matchEl.getBoundingClientRect();
+	overlay.style.cssText = `display:block;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;`;
+	overlay.querySelector('.se-overlay-label').textContent = label;
+};
+
 // ── Build HTML ───────────────────────────────────────────────────────────────
 
 const rowHTML = (c) => `
-<div class="se-row" data-id="${c.id}">
+<div class="se-row" id="se-${c.id}-row">
 	<label title="${c.prop}: ${c.def}${c.unit}">${c.label}</label>
 	<input type="range"  id="se-${c.id}-r" min="${c.min}" max="${c.max}" step="${step(c)}" value="${val(c)}" />
 	<input type="number" id="se-${c.id}-n" min="${c.min}" max="${c.max}" step="${step(c)}" value="${val(c)}" />
@@ -222,6 +302,23 @@ const groupHTML = (g) => `
 	<summary>${g.label} <span class="se-gcnt">(${g.controls.length})</span></summary>
 	<div class="se-group">${g.controls.map(rowHTML).join('')}</div>
 </details>`;
+
+const scaleGroupsHTML = () => {
+	const scaleVal = (sg) => values[sg.id] ?? 1.0;
+	const rows = SCALE_GROUPS.map((sg) => `
+<div class="se-row" data-sg="${sg.id}">
+	<label title="Scales ${sg.targets.map((t) => t.id).join(', ')}">${sg.label}</label>
+	<input type="range"  id="${sg.id}-r" min="0.5" max="2.0" step="0.05" value="${scaleVal(sg)}" />
+	<input type="number" id="${sg.id}-n" min="0.5" max="2.0" step="0.05" value="${scaleVal(sg)}" />
+	<span class="se-unit">×</span>
+	<button class="se-1r" data-sg="${sg.id}" title="Reset scale">↩</button>
+</div>`).join('');
+	return `
+<details>
+	<summary>SCALE GROUPS <span class="se-gcnt">(${SCALE_GROUPS.length})</span></summary>
+	<div class="se-group">${rows}</div>
+</details>`;
+};
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 
@@ -241,6 +338,14 @@ const PANEL_CSS = `
 	user-select:none;
 }
 #phish-style-editor .se-header:active { cursor:grabbing; }
+#phish-style-editor .se-header-right { display:flex; gap:4px; align-items:center; }
+#phish-style-editor .se-inspect {
+	background:none; border:1px solid #444; color:#777; cursor:pointer;
+	font-size:10px; padding:2px 5px; border-radius:2px; line-height:1;
+	font-family:monospace; letter-spacing:0.5px;
+}
+#phish-style-editor .se-inspect:hover { color:#f0c040; border-color:#f0c040; }
+#phish-style-editor .se-inspect.active { color:#f0c040; border-color:#f0c040; background:rgba(240,192,64,.12); }
 #phish-style-editor .se-close {
 	background:none; border:none; color:#777; cursor:pointer; font-size:14px; padding:0 2px; line-height:1;
 }
@@ -290,6 +395,26 @@ const PANEL_CSS = `
 #phish-style-editor .se-hint {
 	padding:3px 10px 5px; font-size:10px; color:#444; text-align:center;
 }
+@keyframes se-flash {
+	0%, 100% { background: transparent; }
+	50% { background: rgba(240,192,64,.22); }
+}
+#phish-style-editor .se-row.se-flash { animation: se-flash .65s ease 2; border-radius:2px; }
+
+#se-overlay {
+	display:none; position:fixed; pointer-events:none; z-index:99998;
+	border:2px solid #f0c040; background:rgba(240,192,64,.08);
+	box-sizing:border-box;
+}
+#se-overlay .se-overlay-label {
+	position:absolute; bottom:3px; left:4px;
+	background:rgba(0,0,0,.8); color:#f0c040;
+	font-size:10px; font-family:monospace; padding:1px 5px;
+	border-radius:2px; pointer-events:none;
+	max-width:calc(100% - 8px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+body.se-inspecting .weather-display { cursor:crosshair !important; }
+body.se-inspecting .weather-display * { cursor:crosshair !important; }
 `;
 
 // ── Build & wire panel ────────────────────────────────────────────────────────
@@ -299,14 +424,23 @@ const buildPanel = () => {
 	styleTag.textContent = PANEL_CSS;
 	document.head.append(styleTag);
 
+	// create overlay (appended to body, outside panel)
+	overlay = document.createElement('div');
+	overlay.id = 'se-overlay';
+	overlay.innerHTML = '<div class="se-overlay-label"></div>';
+	document.body.append(overlay);
+
 	const el = document.createElement('div');
 	el.id = 'phish-style-editor';
 	el.innerHTML = `
 		<div class="se-header">
 			<span>✦ STYLE EDITOR</span>
-			<button class="se-close" title="Close (Shift+E)">✕</button>
+			<div class="se-header-right">
+				<button class="se-inspect" title="Inspect mode — hover elements to find controls">INSPECT</button>
+				<button class="se-close" title="Close (Shift+E)">✕</button>
+			</div>
 		</div>
-		<div class="se-body">${GROUPS.map(groupHTML).join('')}</div>
+		<div class="se-body">${scaleGroupsHTML()}${GROUPS.map(groupHTML).join('')}</div>
 		<div class="se-footer">
 			<button class="se-reset-all">Reset All</button>
 			<button class="se-copy">Copy SCSS</button>
@@ -319,13 +453,75 @@ const buildPanel = () => {
 const wirePanel = (el) => {
 	el.querySelector('.se-close').addEventListener('click', toggle);
 
+	// ── Inspect mode ────────────────────────────────────────────────────────
+	const inspectBtn = el.querySelector('.se-inspect');
+	inspectBtn.addEventListener('click', () => {
+		inspecting = !inspecting;
+		inspectBtn.classList.toggle('active', inspecting);
+		document.body.classList.toggle('se-inspecting', inspecting);
+		if (!inspecting) hideOverlay();
+	});
+
+	document.addEventListener('mousemove', (e) => {
+		if (!inspecting) return;
+		if (e.target.closest('#phish-style-editor') || e.target.closest('#se-overlay')) {
+			hideOverlay();
+			return;
+		}
+		const match = findInspectMatch(e.target);
+		if (match) {
+			showOverlayAt(match.el, `${match.ctrl.label} · ${match.groupLabel}`);
+		} else {
+			hideOverlay();
+		}
+	});
+
+	document.addEventListener('click', (e) => {
+		if (!inspecting) return;
+		if (e.target.closest('#phish-style-editor')) return;
+		e.preventDefault();
+		e.stopPropagation();
+
+		const match = findInspectMatch(e.target);
+		if (!match) return;
+
+		// Open the matching group details
+		const details = [...el.querySelectorAll('details')].find((d) =>
+			d.querySelector('summary')?.textContent.trim().startsWith(match.groupLabel),
+		);
+		if (details) {
+			details.open = true;
+			const row = el.querySelector(`#se-${match.ctrl.id}-row`);
+			if (row) {
+				row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+				row.classList.add('se-flash');
+				setTimeout(() => row.classList.remove('se-flash'), 1500);
+			}
+		}
+	}, true); // capture phase so we get it before nav handlers
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && inspecting) {
+			inspecting = false;
+			inspectBtn.classList.remove('active');
+			document.body.classList.remove('se-inspecting');
+			hideOverlay();
+		}
+	});
+
+	// ── Reset All ───────────────────────────────────────────────────────────
 	el.querySelector('.se-reset-all').addEventListener('click', () => {
 		values = {};
 		save();
 		applyStyles();
 		for (const g of GROUPS) for (const c of g.controls) syncInputs(el, c, c.def);
+		for (const sg of SCALE_GROUPS) {
+			el.querySelector(`#${sg.id}-r`).value = 1.0;
+			el.querySelector(`#${sg.id}-n`).value = 1.0;
+		}
 	});
 
+	// ── Copy SCSS ───────────────────────────────────────────────────────────
 	el.querySelector('.se-copy').addEventListener('click', () => {
 		const lines = [];
 		for (const g of GROUPS) {
@@ -342,6 +538,7 @@ const wirePanel = (el) => {
 		setTimeout(() => { btn.textContent = 'Copy SCSS'; btn.classList.remove('copied'); }, 1600);
 	});
 
+	// ── Individual controls ─────────────────────────────────────────────────
 	for (const g of GROUPS) {
 		for (const c of g.controls) {
 			const range = el.querySelector(`#se-${c.id}-r`);
@@ -349,13 +546,7 @@ const wirePanel = (el) => {
 			const resetBtn = el.querySelector(`.se-1r[data-id="${c.id}"]`);
 
 			const update = (v) => {
-				const s = step(c);
-				const clamped = Math.round(Math.min(c.max, Math.max(c.min, parseFloat(v) || c.def)) / s) * s;
-				const rounded = Math.round(clamped * 1000) / 1000;
-				range.value = rounded;
-				num.value   = rounded;
-				if (rounded !== c.def) values[c.id] = rounded;
-				else delete values[c.id];
+				updateCtrlValue(el, c, v);
 				save();
 				applyStyles();
 			};
@@ -371,13 +562,52 @@ const wirePanel = (el) => {
 			});
 		}
 	}
+
+	// ── Scale group controls ────────────────────────────────────────────────
+	const allControls = GROUPS.flatMap((g) => g.controls);
+
+	const applyScale = (sg, multiplier) => {
+		values[sg.id] = multiplier;
+		for (const t of sg.targets) {
+			const ctrl = allControls.find((c) => c.id === t.id);
+			if (!ctrl) continue;
+			const newVal = Math.round(t.base * multiplier * 10) / 10;
+			updateCtrlValue(el, ctrl, newVal);
+		}
+		save();
+		applyStyles();
+	};
+
+	for (const sg of SCALE_GROUPS) {
+		const range = el.querySelector(`#${sg.id}-r`);
+		const num   = el.querySelector(`#${sg.id}-n`);
+		const resetBtn = el.querySelector(`.se-1r[data-sg="${sg.id}"]`);
+
+		const updateScale = (v) => {
+			const m = Math.round(Math.min(2.0, Math.max(0.5, parseFloat(v) || 1.0)) * 20) / 20;
+			range.value = m;
+			num.value   = m;
+			applyScale(sg, m);
+		};
+
+		range.addEventListener('input', () => updateScale(range.value));
+		num.addEventListener('change', () => updateScale(num.value));
+		num.addEventListener('keydown', (e) => { if (e.key === 'Enter') updateScale(num.value); });
+		resetBtn.addEventListener('click', () => {
+			delete values[sg.id];
+			range.value = 1.0;
+			num.value   = 1.0;
+			// Individual controls retain their values; scale just resets to neutral
+			save();
+		});
+	}
 };
 
 const makeDraggable = (el) => {
 	const header = el.querySelector('.se-header');
 	let ox = 0; let oy = 0; let dragging = false;
 	header.addEventListener('mousedown', (e) => {
-		if (e.target.classList.contains('se-close')) return;
+		if (e.target.closest('.se-header-right')) return;
 		dragging = true;
 		const r = el.getBoundingClientRect();
 		ox = e.clientX - r.left;
@@ -404,8 +634,13 @@ const toggle = () => {
 		} else {
 			panel.style.display = 'flex';
 		}
-	} else if (panel) {
-		panel.style.display = 'none';
+	} else {
+		if (panel) panel.style.display = 'none';
+		if (inspecting) {
+			inspecting = false;
+			document.body.classList.remove('se-inspecting');
+			hideOverlay();
+		}
 	}
 };
 

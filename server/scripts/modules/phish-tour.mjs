@@ -86,6 +86,11 @@ class PhishTour extends WeatherDisplay {
 		const cardClasses = ['card-info', 'card-forecast', 'card-eats', 'card-shakedown'];
 		this.elem.querySelector(`.${cardClasses[cardIndex]}`).classList.add('active');
 
+		// swap background per card type
+		const BG_CLASSES = ['bg-info', 'bg-forecast', 'bg-eats', 'bg-shakedown'];
+		this.elem.classList.remove(...BG_CLASSES);
+		this.elem.classList.add(BG_CLASSES[cardIndex]);
+
 		// show/counter
 		this.elem.querySelector('.show-num').textContent = showIndex + 1;
 		this.elem.querySelector('.show-total').textContent = this.data.shows.length;
@@ -142,6 +147,11 @@ class PhishTour extends WeatherDisplay {
 		const fcst = show.forecast;
 
 		if (!fcst?.length) {
+			const daysOut = daysUntil(show.date);
+			const daysUntilForecast = Math.max(0, daysOut - 14);
+			noForecast.textContent = daysUntilForecast > 0
+				? `FORECAST AVAILABLE IN ~${daysUntilForecast} DAYS`
+				: 'FORECAST UNAVAILABLE';
 			noForecast.style.display = '';
 			return;
 		}
