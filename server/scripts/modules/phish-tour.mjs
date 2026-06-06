@@ -14,6 +14,18 @@ const WMO_DESC = {
 	95: 'TSTORMS', 96: 'TSTORMS W/ HAIL', 99: 'TSTORMS W/ HAIL',
 };
 
+const WMO_ICON = {
+	0: 'Sunny.gif', 1: 'Sunny.gif', 2: 'Partly-Cloudy.gif', 3: 'Cloudy.gif',
+	45: 'Fog.gif', 48: 'Fog.gif',
+	51: 'Rain.gif', 53: 'Rain.gif', 55: 'Rain.gif',
+	61: 'Rain.gif', 63: 'Rain.gif', 65: 'Rain.gif',
+	71: 'Light-Snow.gif', 73: 'Light-Snow.gif', 75: 'Heavy-Snow.gif', 77: 'Light-Snow.gif',
+	80: 'Shower.gif', 81: 'Shower.gif', 82: 'Shower.gif',
+	85: 'Light-Snow.gif', 86: 'Heavy-Snow.gif',
+	95: 'Scattered-Thunderstorms-Day.gif', 96: 'Scattered-Thunderstorms-Day.gif',
+	99: 'Thunderstorm.gif',
+};
+
 const DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const CARDS_PER_SHOW = 4;
@@ -29,6 +41,11 @@ const formatForecastDate = (dateStr) => {
 	// "2026-06-17" → "WED JUN 17"
 	const d = new Date(`${dateStr}T12:00:00`);
 	return `${DAY_NAMES[d.getDay()]} ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
+};
+
+const formatDayName = (dateStr) => {
+	const d = new Date(`${dateStr}T12:00:00`);
+	return DAY_NAMES[d.getDay()];
 };
 
 const daysUntil = (dateStr) => {
@@ -140,8 +157,8 @@ class PhishTour extends WeatherDisplay {
 		const card = this.elem.querySelector('.card-forecast');
 		card.querySelector('.forecast-city').textContent = `${show.city.toUpperCase()}, ${show.state}`;
 
-		const daysContainer = card.querySelector('.forecast-days');
-		daysContainer.innerHTML = '';
+		const panelsContainer = card.querySelector('.forecast-panels');
+		panelsContainer.innerHTML = '';
 
 		const noForecast = card.querySelector('.no-forecast');
 		const fcst = show.forecast;
@@ -158,13 +175,15 @@ class PhishTour extends WeatherDisplay {
 		noForecast.style.display = 'none';
 
 		fcst.forEach((day) => {
-			const block = this.fillTemplate('forecast-day', {
-				'f-date': formatForecastDate(day.date),
-				'f-condition': WMO_DESC[day.wmo] ?? 'UNKNOWN',
-				'f-hi': `HI ${Math.round(day.tempMax)}°`,
-				'f-lo': `LO ${Math.round(day.tempMin)}°`,
+			const iconFile = WMO_ICON[day.wmo] ?? 'Sunny.gif';
+			const block = this.fillTemplate('forecast-panel', {
+				'fp-date': formatDayName(day.date),
+				'fp-icon': { type: 'img', src: `images/icons/current-conditions/${iconFile}` },
+				'fp-condition': WMO_DESC[day.wmo] ?? 'UNKNOWN',
+				'fp-hi': Math.round(day.tempMax),
+				'fp-lo': Math.round(day.tempMin),
 			});
-			daysContainer.append(block);
+			panelsContainer.append(block);
 		});
 	}
 

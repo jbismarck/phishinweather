@@ -122,13 +122,13 @@ const GROUPS = [
 	{
 		label: 'TOUR — FORECAST CARD',
 		controls: [
-			fs('pt-fc-city-fs', 'City header fs',  `${PT} .forecast-city`,  17),
-			fs('pt-fc-lbl-fs',  'Label fs',        `${PT} .forecast-label`, 13),
-			pt('pt-fc-day-pt',  'Row pad top',     `${PT} .forecast-day`,   7),
-			fs('pt-fc-date-fs', 'Date fs',         `${PT} .f-date`,         15),
-			wd('pt-fc-date-w',  'Date col width',  `${PT} .f-date`,         158),
-			fs('pt-fc-cond-fs', 'Condition fs',    `${PT} .f-condition`,    15),
-			fs('pt-fc-temp-fs', 'Temps fs',        `${PT} .f-temps`,        14),
+			fs('pt-fc-city-fs',  'City header fs',  `${PT} .forecast-city`,   17),
+			fs('pt-fc-lbl-fs',   'Label fs',        `${PT} .forecast-label`,  13),
+			fs('pt-fc-date-fs',  'Day name fs',     `${PT} .fp-date`,         24),
+			fs('pt-fc-cond-fs',  'Condition fs',    `${PT} .fp-condition`,    24),
+			fs('pt-fc-lbl2-fs',  'Hi/Lo labels fs', `${PT} .fp-label`,        24),
+			fs('pt-fc-val-fs',   'Hi/Lo values fs', `${PT} .fp-value`,        24),
+			wd('pt-fc-pan-w',    'Panel width',     `${PT} .forecast-panel`,  155, 100, 220),
 		],
 	},
 
