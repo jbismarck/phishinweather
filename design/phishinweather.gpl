@@ -1,0 +1,16 @@
+GIMP Palette
+Name: Phishin Weather
+Columns: 4
+#
+ 16  32 128	gradient-top
+  0  16  64	gradient-bottom
+ 38  35  90	blue-box
+ 32   0  87	column-header
+255 255   0	title-yellow
+128 128 255	extended-low
+  9  36 111	loading-1
+ 54  74 192	loading-2
+ 79 153 249	loading-3
+143 253 250	loading-4
+255 255 255	text-white
+  0   0   0	text-shadow

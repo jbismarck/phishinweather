@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Phishin Weather — Color Reference</title>
+<style>
+  @import url('../server/styles/fonts.css');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #001040;
+    color: white;
+    font-family: 'Star4000', 'Courier New', monospace;
+    padding: 32px;
+  }
+
+  h1 {
+    color: yellow;
+    font-size: 28pt;
+    letter-spacing: 2px;
+    text-shadow: 0 1px 0 black, 0 0 8px rgba(0,0,0,0.8);
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    color: rgba(255,255,255,0.6);
+    font-size: 11pt;
+    font-family: 'Star4000 Small', monospace;
+    margin-bottom: 32px;
+    letter-spacing: 1px;
+  }
+
+  .section-title {
+    color: yellow;
+    font-size: 14pt;
+    letter-spacing: 2px;
+    border-bottom: 2px solid yellow;
+    padding-bottom: 6px;
+    margin: 28px 0 16px;
+    text-transform: uppercase;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .swatch {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .swatch-block {
+    width: 72px;
+    min-height: 80px;
+    flex-shrink: 0;
+  }
+
+  .swatch-info {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    background: rgba(255,255,255,0.04);
+    flex: 1;
+  }
+
+  .swatch-name {
+    color: yellow;
+    font-size: 13pt;
+    letter-spacing: 1px;
+  }
+
+  .swatch-values {
+    font-family: 'Courier New', monospace;
+    font-size: 10pt;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.5px;
+  }
+
+  .swatch-usage {
+    font-family: 'Star4000 Small', 'Courier New', monospace;
+    font-size: 9pt;
+    color: rgba(255,255,255,0.45);
+    margin-top: 2px;
+  }
+
+  .divider {
+    height: 2px;
+    background: linear-gradient(90deg, rgba(32,0,87,0.8), yellow, rgba(32,0,87,0.8));
+    margin: 36px 0 0;
+  }
+
+  .notes {
+    margin-top: 28px;
+    padding: 18px 22px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(38,35,90,0.5);
+    border-radius: 3px;
+  }
+
+  .notes h2 {
+    color: yellow;
+    font-size: 13pt;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .notes ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .notes li {
+    font-family: 'Star4000 Small', 'Courier New', monospace;
+    font-size: 10pt;
+    color: rgba(255,255,255,0.75);
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .notes li::before {
+    content: '▶';
+    position: absolute;
+    left: 0;
+    color: yellow;
+    font-size: 8pt;
+    top: 1px;
+  }
+
+  @media print {
+    body { background: #001040 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<h1>PHISHIN WEATHER</h1>
+<div class="subtitle">COLOR REFERENCE &nbsp;·&nbsp; GIMP PALETTE: phishinweather.gpl</div>
+
+<div class="section-title">Core Backgrounds</div>
+<div class="grid">
+  <div class="swatch">
+    <div class="swatch-block" style="background:#102080"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">GRADIENT TOP</div>
+      <div class="swatch-values">#102080 &nbsp;·&nbsp; rgb(16, 32, 128)</div>
+      <div class="swatch-usage">Background gradient — top edge</div>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-block" style="background:#001040"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">GRADIENT BOTTOM</div>
+      <div class="swatch-values">#001040 &nbsp;·&nbsp; rgb(0, 16, 64)</div>
+      <div class="swatch-usage">Background gradient — bottom edge</div>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-block" style="background:#26235a"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">BLUE BOX</div>
+      <div class="swatch-values">#26235a &nbsp;·&nbsp; rgb(38, 35, 90)</div>
+      <div class="swatch-usage">Card / panel fill color</div>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-block" style="background:rgb(32,0,87)"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">COLUMN HEADER</div>
+      <div class="swatch-values">#200057 &nbsp;·&nbsp; rgb(32, 0, 87)</div>
+      <div class="swatch-usage">Column / section header bar fill</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">Text &amp; Labels</div>
+<div class="grid">
+  <div class="swatch">
+    <div class="swatch-block" style="background:yellow"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">TITLE YELLOW</div>
+      <div class="swatch-values">#FFFF00 &nbsp;·&nbsp; rgb(255, 255, 0)</div>
+      <div class="swatch-usage">Titles, column headers, labels</div>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-block" style="background:white"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">TEXT WHITE</div>
+      <div class="swatch-values">#FFFFFF &nbsp;·&nbsp; rgb(255, 255, 255)</div>
+      <div class="swatch-usage">Body text, values</div>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-block" style="background:black; border: 1px solid rgba(255,255,255,0.2)"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">TEXT SHADOW</div>
+      <div class="swatch-values">#000000 &nbsp;·&nbsp; rgb(0, 0, 0)</div>
+      <div class="swatch-usage">Drop shadow on all text</div>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-block" style="background:#8080FF"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">EXTENDED LOW</div>
+      <div class="swatch-values">#8080FF &nbsp;·&nbsp; rgb(128, 128, 255)</div>
+      <div class="swatch-usage">Low temperature / cool accent</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">Loading / Accent Gradient</div>
+<div class="grid">
+  <div class="swatch">
+    <div class="swatch-block" style="background:#09246f"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">LOADING 1</div>
+      <div class="swatch-values">#09246f &nbsp;·&nbsp; rgb(9, 36, 111)</div>
+      <div class="swatch-usage">Progress bar — start</div>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-block" style="background:#364ac0"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">LOADING 2</div>
+      <div class="swatch-values">#364ac0 &nbsp;·&nbsp; rgb(54, 74, 192)</div>
+      <div class="swatch-usage">Progress bar — mid-low</div>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-block" style="background:#4f99f9"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">LOADING 3</div>
+      <div class="swatch-values">#4f99f9 &nbsp;·&nbsp; rgb(79, 153, 249)</div>
+      <div class="swatch-usage">Progress bar — mid-high</div>
+    </div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-block" style="background:#8ffdfa"></div>
+    <div class="swatch-info">
+      <div class="swatch-name">LOADING 4</div>
+      <div class="swatch-values">#8ffdfa &nbsp;·&nbsp; rgb(143, 253, 250)</div>
+      <div class="swatch-usage">Progress bar — end / highlight</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="notes">
+  <h2>BACKGROUND RECIPE</h2>
+  <ul>
+    <li>Canvas size: 640 × 480 px</li>
+    <li>Base fill: linear gradient #102080 (top) → #001040 (bottom)</li>
+    <li>Panel/card areas: #26235a at varying opacity (30–60%)</li>
+    <li>Venue silhouettes: paint in #001040 at 30–50% opacity — shadow detail only</li>
+    <li>Text-safe zone: inner ~560 × 320 px — keep outer edges for background detail</li>
+    <li>Do NOT bake scanlines into PNGs — CSS applies them as an overlay</li>
+    <li>Font family: Star4000, Star4000 Large, Star4000 Small, Star4000 Extended</li>
+  </ul>
+</div>
+
+</body>
+</html>
