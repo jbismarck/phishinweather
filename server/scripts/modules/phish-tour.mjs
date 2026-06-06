@@ -3,6 +3,7 @@ import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import { injectTracks } from './media.mjs';
+import { setHFBScroll } from './phish-easter-eggs.mjs';
 
 const WMO_DESC = {
 	0: 'CLEAR', 1: 'MAINLY CLEAR', 2: 'PARTLY CLOUDY', 3: 'OVERCAST',
@@ -62,6 +63,7 @@ class PhishTour extends WeatherDisplay {
 		this.timing.baseDelay = 8000;
 		this.lastShowIndex = -1;
 		this.mockWeather = false;
+		this.okToDrawCurrentConditions = false;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -95,12 +97,19 @@ class PhishTour extends WeatherDisplay {
 		const cardIndex = this.screenIndex % CARDS_PER_SHOW;
 		const show = this.data.shows[showIndex];
 
-		// update header subtitle — forecast card shows city name, others use static labels
+		const isMSG = show.venue === 'Madison Square Garden';
+
+		// update header subtitle
 		const headerBottom = this.elem.querySelector('.title .bottom');
 		if (headerBottom) {
-			const subtitle = cardIndex === 1
-				? `${show.city.toUpperCase()}, ${show.state}`
-				: CARD_SUBTITLES[cardIndex];
+			let subtitle;
+			if (cardIndex === 1) {
+				subtitle = `${show.city.toUpperCase()}, ${show.state}`;
+			} else if (cardIndex === 0 && isMSG) {
+				subtitle = 'YEMSG';
+			} else {
+				subtitle = CARD_SUBTITLES[cardIndex];
+			}
 			headerBottom.textContent = subtitle;
 		}
 
@@ -115,8 +124,17 @@ class PhishTour extends WeatherDisplay {
 		this.elem.classList.add(BG_CLASSES[cardIndex]);
 
 		// show/counter
-		this.elem.querySelector('.show-num').textContent = showIndex + 1;
-		this.elem.querySelector('.show-total').textContent = this.data.shows.length;
+		const DICKS_NIGHTS = ['2026-09-04', '2026-09-05', '2026-09-06'];
+		const isDicks = show.venue.includes("Dick's");
+		const dicksNight = DICKS_NIGHTS.indexOf(show.date) + 1;
+		const counter = this.elem.querySelector('.show-counter');
+		if (isDicks) {
+			counter.innerHTML = `LABOR DAY RUN &nbsp;&middot;&nbsp; NIGHT ${dicksNight} OF 3`;
+			counter.classList.add('dicks');
+		} else {
+			counter.innerHTML = `SHOW <span class="show-num">${showIndex + 1}</span> OF <span class="show-total">${this.data.shows.length}</span>`;
+			counter.classList.remove('dicks');
+		}
 
 		// swap music when entering a new show's info card
 		if (cardIndex === 0 && showIndex !== this.lastShowIndex) {
@@ -125,7 +143,7 @@ class PhishTour extends WeatherDisplay {
 		}
 
 		switch (cardIndex) {
-			case 0: this.renderInfo(show); break;
+			case 0: this.renderInfo(show, isMSG); break;
 			case 1: this.renderForecast(show); break;
 			case 2: this.renderEats(show); break;
 			case 3: this.renderShakedown(show); break;
@@ -133,12 +151,15 @@ class PhishTour extends WeatherDisplay {
 		}
 
 		this.finishDraw();
+		setHFBScroll(this.elem);
 	}
 
-	renderInfo(show) {
+	renderInfo(show, isMSG = false) {
 		const card = this.elem.querySelector('.card-info');
 		card.querySelector('.show-date').textContent = formatShowDate(show.date);
-		card.querySelector('.show-venue').textContent = show.venue;
+		const venueElem = card.querySelector('.show-venue');
+		venueElem.textContent = show.venue;
+		venueElem.classList.toggle('msg-glow', isMSG);
 		card.querySelector('.show-city').textContent = `${show.city}, ${show.state}`;
 
 		const policy = show.policy ?? {};

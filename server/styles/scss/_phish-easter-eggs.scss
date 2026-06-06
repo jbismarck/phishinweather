@@ -1,0 +1,166 @@
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
+
+// ── 5:55 Overlay ──────────────────────────────────────────────────────────────
+
+@keyframes overlay-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+@keyframes five-pulse {
+	0%, 100% { color: c.$title-color; }
+	50%  { color: #ff9944; text-shadow: 0 0 30px #ff9944, 0 0 8px #000; }
+}
+
+#phish-555-overlay {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	background: #000822 url('../images/backgrounds/3.png') center/cover no-repeat;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	cursor: pointer;
+
+	&.active {
+		display: flex;
+		animation: overlay-in 0.4s ease;
+	}
+
+	.o-num {
+		font-family: 'Star4000 Large';
+		font-size: 110pt;
+		color: c.$title-color;
+		text-align: center;
+		animation: five-pulse 1s ease-in-out infinite;
+		@include u.text-shadow();
+	}
+
+	.o-sub {
+		font-family: 'Star4000';
+		font-size: 22pt;
+		color: white;
+		margin-top: 10px;
+		@include u.text-shadow();
+	}
+}
+
+// ── Gamehendge Weather ────────────────────────────────────────────────────────
+
+#gamehendge-weather-html.weather-display {
+	background-image: url('../images/backgrounds/3.png');
+}
+
+.weather-display .main.gamehendge-weather {
+	font-family: 'Star4000';
+	@include u.text-shadow();
+	padding: 4px 16px 0;
+	box-sizing: border-box;
+
+	.gw-panels {
+		margin-left: 11px;
+		margin-top: 16px;
+	}
+
+	.gw-panel {
+		display: inline-block;
+		width: 155px;
+		height: 285px;
+		padding: 5px;
+		margin: 0 15px;
+		font-size: 24pt;
+		vertical-align: top;
+
+		.gw-location {
+			text-align: center;
+			color: c.$column-header-text;
+			font-size: 14pt;
+			text-transform: uppercase;
+			line-height: 1.2;
+			margin-bottom: 4px;
+		}
+
+		.gw-icon {
+			text-align: center;
+			height: 75px;
+
+			img {
+				max-height: 75px;
+			}
+		}
+
+		.gw-condition {
+			text-align: center;
+			height: 74px;
+			margin-top: 5px;
+		}
+
+		.gw-temps {
+			width: 100%;
+
+			.gw-block {
+				display: inline-block;
+				width: 44%;
+				vertical-align: top;
+
+				> div {
+					text-align: center;
+				}
+
+				.gw-value {
+					font-family: 'Star4000 Large';
+					margin-top: 4px;
+				}
+
+				&.lo .gw-label {
+					color: c.$extended-low;
+				}
+
+				&.hi .gw-label {
+					color: c.$title-color;
+				}
+			}
+		}
+	}
+}
+
+// ── MSG Glow ──────────────────────────────────────────────────────────────────
+
+@keyframes msg-glow {
+	0%, 100% { text-shadow: 0 0 6px #f0c040, 0 1px 0 #000; }
+	50%  { text-shadow: 0 0 20px #f0c040, 0 0 35px #f0c040, 0 1px 0 #000; }
+}
+
+.weather-display .main.phish-tour .show-venue.msg-glow {
+	animation: msg-glow 2s ease-in-out infinite;
+	color: c.$title-color !important;
+}
+
+// ── Dick's Labor Day Counter ──────────────────────────────────────────────────
+
+.weather-display .main.phish-tour .show-counter.dicks {
+	font-size: 13pt;
+	color: c.$title-color;
+	letter-spacing: 0.5px;
+}
+
+// ── 46-Day Countdown Special ──────────────────────────────────────────────────
+
+@keyframes forty-six-pulse {
+	0%, 100% { color: c.$column-header-text; }
+	50%  { color: #ff9944; text-shadow: 0 0 20px #ff9944, 0 1px 0 #000; }
+}
+
+.weather-display .main.phish-countdown .crd-date.forty-six {
+	.count-num {
+		animation: forty-six-pulse 1.5s ease-in-out infinite;
+	}
+
+	.count-unit {
+		font-size: 14pt;
+		letter-spacing: 2px;
+		color: #ff9944;
+	}
+}

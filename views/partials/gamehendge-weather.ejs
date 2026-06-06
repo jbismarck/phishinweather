@@ -1,0 +1,57 @@
+<%- include('header.ejs', {titleDual: {top: 'GAMEHENDGE', bottom: 'WEATHER REPORT'}, hasTime: true}) %>
+<div class="main has-scroll gamehendge-weather">
+
+  <div class="gw-panels">
+
+    <div class="gw-panel">
+      <div class="gw-location">TELA'S ISLAND</div>
+      <div class="gw-icon"><img src="images/icons/current-conditions/Fog.gif" /></div>
+      <div class="gw-condition">HAZY</div>
+      <div class="gw-temps">
+        <div class="gw-block lo">
+          <div class="gw-label">Lo</div>
+          <div class="gw-value">12</div>
+        </div>
+        <div class="gw-block hi">
+          <div class="gw-label">Hi</div>
+          <div class="gw-value">46</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gw-panel">
+      <div class="gw-location">THE LIZARDS</div>
+      <div class="gw-icon"><img src="images/icons/current-conditions/Partly-Cloudy.gif" /></div>
+      <div class="gw-condition">PARTLY GNARLY</div>
+      <div class="gw-temps">
+        <div class="gw-block lo">
+          <div class="gw-label">Lo</div>
+          <div class="gw-value">46</div>
+        </div>
+        <div class="gw-block hi">
+          <div class="gw-label">Hi</div>
+          <div class="gw-value">72</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gw-panel">
+      <div class="gw-location">WILSON'S KEEP</div>
+      <div class="gw-icon"><img src="images/icons/current-conditions/Scattered-Thunderstorms-Day.gif" /></div>
+      <div class="gw-condition">SEVERE EVIL</div>
+      <div class="gw-temps">
+        <div class="gw-block lo">
+          <div class="gw-label">Lo</div>
+          <div class="gw-value">66</div>
+        </div>
+        <div class="gw-block hi">
+          <div class="gw-label">Hi</div>
+          <div class="gw-value">99</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+<%- include('scroll.ejs') %>

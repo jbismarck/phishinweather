@@ -2,6 +2,7 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import { setHFBScroll } from './phish-easter-eggs.mjs';
 
 const msUntil = (dateStr) => {
 	const target = new Date(`${dateStr}T00:00:00`);
@@ -25,6 +26,7 @@ class PhishCountdown extends WeatherDisplay {
 		this.timing.baseDelay = 12000;
 		this.countdownInterval = null;
 		this.events = [];
+		this.okToDrawCurrentConditions = false;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -71,6 +73,7 @@ class PhishCountdown extends WeatherDisplay {
 
 		this.renderEvent(event);
 		this.finishDraw();
+		setHFBScroll(this.elem);
 	}
 
 	renderEvent(event) {
@@ -96,6 +99,8 @@ class PhishCountdown extends WeatherDisplay {
 		card.querySelector('.event-name').textContent = event.name.toUpperCase();
 		card.querySelector('.event-dates').textContent = event.dateDisplay ?? '';
 		card.querySelector('.event-note').textContent = event.note ?? '';
+		const days = daysUntilDate(event.date);
+		card.classList.toggle('forty-six', days === 46);
 		this.updateCountdownNums(event.date);
 	}
 
@@ -121,6 +126,8 @@ class PhishCountdown extends WeatherDisplay {
 		if (!card?.classList.contains('active')) return;
 		const { days, hrs, min } = parseCountdown(dateStr);
 		card.querySelector('.count-num').textContent = days;
+		card.querySelector('.count-unit').textContent = days === 46 ? 'FORTY SIX DAYS' : 'DAYS';
+		card.classList.toggle('forty-six', days === 46);
 		card.querySelector('.count-hrs').textContent = String(hrs).padStart(2, '0');
 		card.querySelector('.count-min').textContent = String(min).padStart(2, '0');
 	}

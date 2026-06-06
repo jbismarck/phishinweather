@@ -2,11 +2,13 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import { setHFBScroll } from './phish-easter-eggs.mjs';
 
 class PhishHistory extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Phish History', true);
 		this.timing.baseDelay = 8000;
+		this.okToDrawCurrentConditions = false;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -79,6 +81,7 @@ class PhishHistory extends WeatherDisplay {
 		const top = -this.screenIndex * this.pageHeight;
 		this.elem.querySelector('.shows-container').style.top = `${top}px`;
 		this.finishDraw();
+		setHFBScroll(this.elem);
 	}
 }
 
