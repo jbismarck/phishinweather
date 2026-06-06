@@ -95,35 +95,16 @@
 
 	// ── Forecast Card ────────────────────────────────────────────────────────
 	.card-forecast {
-		.forecast-header {
-			display: flex;
-			justify-content: space-between;
-			align-items: baseline;
-			margin-top: 8px;
-			margin-bottom: 8px;
-			border-bottom: 2px solid c.$column-header-text;
-			padding-bottom: 4px;
-
-			.forecast-city {
-				font-size: 17pt;
-				color: c.$column-header-text;
-			}
-
-			.forecast-label {
-				font-size: 13pt;
-				color: rgba(255, 255, 255, 0.7);
-			}
-		}
-
 		.forecast-panels {
-			margin-left: 10px;
+			margin-left: 27px;
+			margin-top: 8px;
 		}
 
 		.forecast-panel {
 			@include u.text-shadow();
 			display: inline-block;
 			width: 155px;
-			height: 250px;
+			height: 280px;
 			padding: 5px;
 			margin: 0 10px;
 			font-family: 'Star4000';

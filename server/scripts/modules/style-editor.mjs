@@ -122,8 +122,6 @@ const GROUPS = [
 	{
 		label: 'TOUR — FORECAST CARD',
 		controls: [
-			fs('pt-fc-city-fs',  'City header fs',  `${PT} .forecast-city`,   17),
-			fs('pt-fc-lbl-fs',   'Label fs',        `${PT} .forecast-label`,  13),
 			fs('pt-fc-date-fs',  'Day name fs',     `${PT} .fp-date`,         24),
 			fs('pt-fc-cond-fs',  'Condition fs',    `${PT} .fp-condition`,    24),
 			fs('pt-fc-lbl2-fs',  'Hi/Lo labels fs', `${PT} .fp-label`,        24),

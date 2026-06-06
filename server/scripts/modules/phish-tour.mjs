@@ -95,9 +95,14 @@ class PhishTour extends WeatherDisplay {
 		const cardIndex = this.screenIndex % CARDS_PER_SHOW;
 		const show = this.data.shows[showIndex];
 
-		// update header subtitle to reflect current card type
+		// update header subtitle — forecast card shows city name, others use static labels
 		const headerBottom = this.elem.querySelector('.title .bottom');
-		if (headerBottom) headerBottom.textContent = CARD_SUBTITLES[cardIndex];
+		if (headerBottom) {
+			const subtitle = cardIndex === 1
+				? `${show.city.toUpperCase()}, ${show.state}`
+				: CARD_SUBTITLES[cardIndex];
+			headerBottom.textContent = subtitle;
+		}
 
 		// show only the active card
 		this.elem.querySelectorAll('.card').forEach((c) => c.classList.remove('active'));
@@ -156,8 +161,6 @@ class PhishTour extends WeatherDisplay {
 
 	renderForecast(show) {
 		const card = this.elem.querySelector('.card-forecast');
-		card.querySelector('.forecast-city').textContent = `${show.city.toUpperCase()}, ${show.state}`;
-
 		const panelsContainer = card.querySelector('.forecast-panels');
 		panelsContainer.innerHTML = '';
 
