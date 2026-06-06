@@ -96,17 +96,17 @@
 	// ── Forecast Card ────────────────────────────────────────────────────────
 	.card-forecast {
 		.forecast-panels {
-			margin-left: 27px;
-			margin-top: 8px;
+			margin-left: 11px;
+			margin-top: 16px;
 		}
 
 		.forecast-panel {
 			@include u.text-shadow();
 			display: inline-block;
 			width: 155px;
-			height: 280px;
+			height: 285px;
 			padding: 5px;
-			margin: 0 10px;
+			margin: 0 15px;
 			font-family: 'Star4000';
 			font-size: 24pt;
 			vertical-align: top;
@@ -128,7 +128,7 @@
 
 			.fp-condition {
 				text-align: center;
-				height: 60px;
+				height: 74px;
 				margin-top: 5px;
 			}
 
