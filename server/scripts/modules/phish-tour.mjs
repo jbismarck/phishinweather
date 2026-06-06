@@ -61,6 +61,7 @@ class PhishTour extends WeatherDisplay {
 		super(navId, elemId, 'Phish Summer Tour', true);
 		this.timing.baseDelay = 8000;
 		this.lastShowIndex = -1;
+		this.mockWeather = false;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -68,7 +69,7 @@ class PhishTour extends WeatherDisplay {
 
 		let data;
 		try {
-			data = await json('/api/phish/summer-tour');
+			data = await json(`/api/phish/summer-tour${this.mockWeather ? '?mock=1' : ''}`);
 		} catch (e) {
 			console.error('PhishTour fetch failed:', e);
 			this.setStatus(STATUS.failed);
@@ -217,3 +218,12 @@ class PhishTour extends WeatherDisplay {
 const phishTour = new PhishTour(21, 'phish-tour');
 registerDisplay(phishTour);
 phishTour.getData();
+
+// Dev: Shift+W toggles mock weather data for testing the forecast card layout
+document.addEventListener('keydown', (e) => {
+	if (e.shiftKey && e.key === 'W') {
+		phishTour.mockWeather = !phishTour.mockWeather;
+		console.log(`[PhishTour] Mock weather: ${phishTour.mockWeather ? 'ON' : 'OFF'}`);
+		phishTour.getData(phishTour.weatherParameters, true);
+	}
+});

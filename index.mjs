@@ -209,23 +209,34 @@ const phishSummerTour = async (req, res) => {
 		}));
 
 		// Enrich each show with forecast + music tracks
-		shows.forEach((show) => {
-			const weatherKey = `${show.lat},${show.lon}`;
-			const daily = weatherByKey[weatherKey];
-			if (daily) {
-				const idx = daily.time?.findIndex((t) => t === show.date);
-				if (idx !== undefined && idx >= 0) {
-					show.forecast = Array.from({ length: Math.min(3, daily.time.length - idx) }, (_, i) => ({
-						date: daily.time[idx + i],
-						wmo: daily.weathercode[idx + i],
-						tempMax: daily.temperature_2m_max[idx + i],
-						tempMin: daily.temperature_2m_min[idx + i],
-					}));
+		const MOCK_WMO = [0, 2, 63, 3, 80, 95, 1, 71, 45, 61];
+		shows.forEach((show, i) => {
+			if (req.query.mock === '1') {
+				// synthetic forecast cycling through varied WMO codes for UI testing
+				show.forecast = [0, 1, 2].map((offset) => ({
+					date: show.date,
+					wmo: MOCK_WMO[(i + offset) % MOCK_WMO.length],
+					tempMax: 72 + Math.round(Math.sin(i + offset) * 14),
+					tempMin: 52 + Math.round(Math.cos(i + offset) * 10),
+				}));
+			} else {
+				const weatherKey = `${show.lat},${show.lon}`;
+				const daily = weatherByKey[weatherKey];
+				if (daily) {
+					const idx = daily.time?.findIndex((t) => t === show.date);
+					if (idx !== undefined && idx >= 0) {
+						show.forecast = Array.from({ length: Math.min(3, daily.time.length - idx) }, (_, i2) => ({
+							date: daily.time[idx + i2],
+							wmo: daily.weathercode[idx + i2],
+							tempMax: daily.temperature_2m_max[idx + i2],
+							tempMin: daily.temperature_2m_min[idx + i2],
+						}));
+					} else {
+						show.forecast = [];
+					}
 				} else {
 					show.forecast = [];
 				}
-			} else {
-				show.forecast = [];
 			}
 			show.musicTracks = tracksBySlug[show.phishin_venue_slug] ?? [];
 		});
