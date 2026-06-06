@@ -220,10 +220,21 @@ registerDisplay(phishTour);
 phishTour.getData();
 
 // Dev: Shift+W toggles mock weather data for testing the forecast card layout
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', async (e) => {
 	if (e.shiftKey && e.key === 'W') {
 		phishTour.mockWeather = !phishTour.mockWeather;
-		console.log(`[PhishTour] Mock weather: ${phishTour.mockWeather ? 'ON' : 'OFF'}`);
-		phishTour.getData(phishTour.weatherParameters, true);
+		console.log(`[PhishTour] Mock weather: ${phishTour.mockWeather ? 'ON ✓' : 'OFF'}`);
+		try {
+			const data = await json(`/api/phish/summer-tour${phishTour.mockWeather ? '?mock=1' : ''}`);
+			if (data?.shows?.length) {
+				phishTour.data = data;
+				// stay on current show's forecast card (cardIndex=1) to see the result immediately
+				const showIndex = Math.floor(phishTour.screenIndex / CARDS_PER_SHOW);
+				phishTour.screenIndex = showIndex * CARDS_PER_SHOW + 1;
+				phishTour.drawCanvas();
+			}
+		} catch (err) {
+			console.error('[PhishTour] Mock toggle fetch failed:', err);
+		}
 	}
 });

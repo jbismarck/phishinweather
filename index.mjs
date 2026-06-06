@@ -141,7 +141,8 @@ let tourCacheHour = null;
 
 const phishSummerTour = async (req, res) => {
 	const now = new Date();
-	const hourKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${now.getHours()}`;
+	const mock = req.query.mock === '1';
+	const hourKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${now.getHours()}-${mock ? 'mock' : 'live'}`;
 
 	if (tourCache && tourCacheHour === hourKey) {
 		return res.json(tourCache);
@@ -211,7 +212,7 @@ const phishSummerTour = async (req, res) => {
 		// Enrich each show with forecast + music tracks
 		const MOCK_WMO = [0, 2, 63, 3, 80, 95, 1, 71, 45, 61];
 		shows.forEach((show, i) => {
-			if (req.query.mock === '1') {
+			if (mock) {
 				// synthetic forecast cycling through varied WMO codes for UI testing
 				show.forecast = [0, 1, 2].map((offset) => ({
 					date: show.date,
