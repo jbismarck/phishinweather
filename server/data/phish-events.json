@@ -29,14 +29,13 @@
       "announced": false
     },
     {
-      "name": "Mexico 2027",
-      "short": "MEXICO RUN",
+      "name": "Riviera Maya 2027",
+      "short": "RIVIERA MAYA",
       "type": "mexico",
-      "date": null,
-      "dateDisplay": "FEB 2027",
-      "expected": "Riviera Maya resort announcement expected fall 2026",
-      "note": "Watch phish.com for package details",
-      "announced": false
+      "date": "2027-01-27",
+      "dateDisplay": "JAN 27-30 2027",
+      "note": "Moon Palace Cancun, Quintana Roo, Mexico",
+      "announced": true
     },
     {
       "name": "Spring Tour 2027",
