@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishinweather — Shop</title>
+  <link rel="stylesheet" href="styles/main.css?v=<%= Date.now() %>" />
+</head>
+<body>
+
+<div id="shop-page">
+
+  <a class="shop-back" href="/">← back to phishinweather</a>
+
+  <div class="shop-header">
+    <div class="shop-eyebrow">OFFICIAL MERCH</div>
+    <div class="shop-title">PHISHINWEATHER</div>
+    <div class="shop-subtitle">SHOP</div>
+  </div>
+
+  <div class="shop-product">
+    <div class="shop-product-image">
+      <div class="shop-product-placeholder">
+        <span>POSTER</span>
+        <span class="shop-product-size">18 × 24"</span>
+      </div>
+    </div>
+
+    <div class="shop-product-info">
+      <div class="shop-product-name">TOUR POSTER</div>
+      <div class="shop-product-desc">
+        18×24" archival print on heavyweight paper.<br />
+        Ships in a protective tube. US shipping only.
+      </div>
+      <div class="shop-product-price">$30.00</div>
+
+      <% if (locals.stripeEnabled) { %>
+      <form action="/shop/checkout" method="POST">
+        <button class="shop-buy-btn" type="submit">BUY NOW — $30</button>
+      </form>
+      <% } else { %>
+      <div class="shop-unavailable">Store is temporarily unavailable.</div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="shop-footer">
+    Questions? <a href="mailto:hello@phishinweather.com">hello@phishinweather.com</a>
+  </div>
+
+</div>
+
+</body>
+</html>

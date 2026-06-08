@@ -1,12 +1,17 @@
 import 'dotenv/config';
 import express from 'express';
 import fs from 'fs';
+import Stripe from 'stripe';
 import playlist from './src/playlist.mjs';
 import OVERRIDES from './src/overrides.mjs';
 
 
 const app = express();
+app.use(express.urlencoded({ extended: false }));
 const port = process.env.PORT ?? process.env.WS4KP_PORT ?? 8080;
+
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+const POSTER_PRICE_CENTS = 3000; // $30.00
 
 // template engine
 app.set('view engine', 'ejs');
@@ -555,6 +560,46 @@ ${serviceHTML}
 
 app.get('/admin', adminDashboard);
 app.get('/poster', (req, res) => res.render('poster', { version }));
+
+// shop
+app.get('/shop', (_req, res) => {
+	res.render('shop', { version, stripeEnabled: !!stripe });
+});
+
+app.post('/shop/checkout', async (req, res) => {
+	if (!stripe) return res.status(503).send('Store is not configured.');
+	const origin = `${req.protocol}://${req.get('host')}`;
+	const session = await stripe.checkout.sessions.create({
+		payment_method_types: ['card'],
+		line_items: [{
+			price_data: {
+				currency: 'usd',
+				product_data: {
+					name: 'Phishinweather Tour Poster',
+					description: '18×24" archival print — ships in a protective tube',
+				},
+				unit_amount: POSTER_PRICE_CENTS,
+			},
+			quantity: 1,
+		}],
+		mode: 'payment',
+		shipping_address_collection: { allowed_countries: ['US'] },
+		success_url: `${origin}/shop/success?session_id={CHECKOUT_SESSION_ID}`,
+		cancel_url: `${origin}/shop`,
+	});
+	res.redirect(303, session.url);
+});
+
+app.get('/shop/success', async (req, res) => {
+	let email = null;
+	if (stripe && req.query.session_id) {
+		try {
+			const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+			email = session.customer_details?.email ?? null;
+		} catch (_) { /* session lookup is best-effort */ }
+	}
+	res.render('shop-success', { version, email });
+});
 
 // debugging
 if (process.env?.DIST === '1') {

@@ -1,0 +1,172 @@
+@use 'shared/_colors' as c;
+
+#shop-page {
+	min-height: 100vh;
+	background: linear-gradient(180deg, #102080 0%, #001040 100%);
+	color: white;
+	font-family: 'Star4000';
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 40px 24px 60px;
+	box-sizing: border-box;
+
+	.shop-back {
+		align-self: flex-start;
+		color: rgba(255,255,255,0.5);
+		font-family: 'Star4000 Small';
+		font-size: 10pt;
+		text-decoration: none;
+		margin-bottom: 32px;
+		letter-spacing: 0.05em;
+		&:hover { color: #ffff00; }
+	}
+
+	.shop-header {
+		text-align: center;
+		margin-bottom: 48px;
+
+		.shop-eyebrow {
+			font-family: 'Star4000 Small';
+			font-size: 10pt;
+			color: rgba(255,255,255,0.5);
+			letter-spacing: 0.3em;
+			margin-bottom: 8px;
+		}
+		.shop-title {
+			font-family: 'Star4000 Large';
+			font-size: clamp(32pt, 7vw, 64pt);
+			color: #ffff00;
+			line-height: 1;
+			text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+		}
+		.shop-subtitle {
+			font-family: 'Star4000 Large';
+			font-size: clamp(18pt, 4vw, 36pt);
+			color: rgba(255,255,0,0.6);
+		}
+	}
+
+	.shop-product {
+		display: flex;
+		gap: 48px;
+		align-items: flex-start;
+		max-width: 760px;
+		width: 100%;
+		margin-bottom: 48px;
+
+		@media (max-width: 600px) {
+			flex-direction: column;
+			align-items: center;
+		}
+	}
+
+	.shop-product-image {
+		flex-shrink: 0;
+	}
+
+	.shop-product-placeholder {
+		width: 200px;
+		height: 267px;
+		border: 2px dashed rgba(255,255,255,0.25);
+		background: rgba(0,0,0,0.3);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		font-family: 'Star4000 Small';
+		font-size: 11pt;
+		color: rgba(255,255,255,0.4);
+		letter-spacing: 0.15em;
+
+		.shop-product-size {
+			font-size: 9pt;
+			color: rgba(255,255,255,0.25);
+		}
+	}
+
+	.shop-product-info {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+
+		.shop-product-name {
+			font-family: 'Star4000 Large';
+			font-size: 28pt;
+			color: #ffff00;
+		}
+		.shop-product-desc {
+			font-family: 'Star4000 Small';
+			font-size: 10pt;
+			color: rgba(255,255,255,0.7);
+			line-height: 1.8;
+			letter-spacing: 0.05em;
+		}
+		.shop-product-price {
+			font-size: 22pt;
+			color: white;
+		}
+	}
+
+	.shop-buy-btn {
+		display: inline-block;
+		background: #ffff00;
+		color: #001040;
+		font-family: 'Star4000';
+		font-size: 14pt;
+		padding: 12px 32px;
+		border: none;
+		cursor: pointer;
+		letter-spacing: 0.05em;
+		text-decoration: none;
+		text-align: center;
+		transition: background 0.15s;
+
+		&:hover { background: #ffffaa; }
+	}
+
+	.shop-unavailable {
+		font-family: 'Star4000 Small';
+		font-size: 10pt;
+		color: rgba(255,255,255,0.4);
+	}
+
+	.shop-success-body {
+		text-align: center;
+		max-width: 500px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 24px;
+
+		.shop-success-icon {
+			font-size: 48pt;
+			color: #ffff00;
+			line-height: 1;
+		}
+		p {
+			font-family: 'Star4000 Small';
+			font-size: 11pt;
+			color: rgba(255,255,255,0.8);
+			line-height: 1.8;
+			margin: 0;
+			letter-spacing: 0.05em;
+			a { color: #ffff00; }
+			strong { color: white; }
+		}
+		.shop-success-note {
+			color: rgba(255,255,255,0.5);
+			font-size: 9pt;
+		}
+	}
+
+	.shop-footer {
+		font-family: 'Star4000 Small';
+		font-size: 9pt;
+		color: rgba(255,255,255,0.35);
+		letter-spacing: 0.05em;
+		a { color: rgba(255,255,0,0.5); }
+	}
+}

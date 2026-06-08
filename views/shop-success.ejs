@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishinweather — Order Confirmed</title>
+  <link rel="stylesheet" href="styles/main.css?v=<%= Date.now() %>" />
+</head>
+<body>
+
+<div id="shop-page">
+
+  <a class="shop-back" href="/">← back to phishinweather</a>
+
+  <div class="shop-header">
+    <div class="shop-eyebrow">ORDER CONFIRMED</div>
+    <div class="shop-title">YOU'RE ALL SET</div>
+  </div>
+
+  <div class="shop-success-body">
+    <div class="shop-success-icon">✓</div>
+    <p>
+      Your poster is on its way.<br />
+      <% if (locals.email) { %>
+      A confirmation was sent to <strong><%= locals.email %></strong>.
+      <% } else { %>
+      Check your email for a confirmation from Stripe.
+      <% } %>
+    </p>
+    <p class="shop-success-note">
+      Orders ship within 3–5 business days in a protective tube.<br />
+      Questions? <a href="mailto:hello@phishinweather.com">hello@phishinweather.com</a>
+    </p>
+    <a class="shop-buy-btn" href="/">Back to Phishinweather</a>
+  </div>
+
+</div>
+
+</body>
+</html>
