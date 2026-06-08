@@ -138,6 +138,7 @@ const otherFiles = [
 	'server/robots.txt',
 	'server/manifest.json',
 	'server/music/**/*.mp3',
+	'server/data/phish-events.json',
 ];
 const copyOtherFiles = () => src(otherFiles, { base: 'server/', encoding: false })
 	.pipe(dest('./dist'));
