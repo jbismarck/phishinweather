@@ -89,6 +89,15 @@ const mjsSources = [
 	'server/scripts/modules/travelforecast.mjs',
 	'server/scripts/modules/progress.mjs',
 	'server/scripts/modules/media.mjs',
+	'server/scripts/modules/phish-history.mjs',
+	'server/scripts/modules/phish-tour.mjs',
+	'server/scripts/modules/phish-countdown.mjs',
+	'server/scripts/modules/phish-easter-eggs.mjs',
+	'server/scripts/modules/support.mjs',
+	'server/scripts/modules/social-instagram.mjs',
+	'server/scripts/modules/social-youtube.mjs',
+	'server/scripts/modules/social-reddit.mjs',
+	'server/scripts/modules/social-onlyfans.mjs',
 	'server/scripts/index.mjs',
 ];
 
