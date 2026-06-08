@@ -5,6 +5,7 @@ import { registerDisplay } from './navigation.mjs';
 class SocialReddit extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Reddit', true);
+		this.alwaysEnabled = true;
 		this.timing.baseDelay = 12000;
 	}
 

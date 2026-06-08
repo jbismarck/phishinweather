@@ -5,6 +5,7 @@ import { registerDisplay } from './navigation.mjs';
 class SocialInstagram extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Instagram', true);
+		this.alwaysEnabled = true;
 		this.timing.baseDelay = 12000;
 	}
 

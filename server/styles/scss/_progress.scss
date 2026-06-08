@@ -4,24 +4,29 @@
 .weather-display .progress {
 	@include u.text-shadow();
 	font-family: 'Star4000 Extended';
-	font-size: 15pt;
+	font-size: 12pt;
 
 	.container {
 		position: relative;
 		top: 15px;
 		margin: 0px 10px;
 		box-sizing: border-box;
-		height: 310px;
+		height: 330px;
 		overflow: hidden;
+		column-count: 2;
+		column-gap: 20px;
+		column-rule: 1px solid rgba(255, 255, 255, 0.15);
 
 		.item {
 			position: relative;
+			break-inside: avoid;
+			margin-bottom: 4px;
 
 			.name {
 				white-space: nowrap;
 
 				&::after {
-					content: '........................................................................';
+					content: '......................';
 				}
 			}
 

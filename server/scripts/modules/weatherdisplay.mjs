@@ -54,6 +54,12 @@ class WeatherDisplay {
 		// no checkbox if progress
 		if (this.elemId === 'progress') return false;
 
+		// always-enabled displays skip the checkbox entirely
+		if (this.alwaysEnabled) {
+			this.isEnabled = true;
+			return false;
+		}
+
 		// get url provided state
 		const urlValue = parseQueryString()?.[`${this.elemId}-checkbox`];
 		let urlState;
