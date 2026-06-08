@@ -181,10 +181,10 @@
 	// ── Eats Card ────────────────────────────────────────────────────────────
 	.card-eats {
 		.eats-header {
-			font-size: 18pt;
+			font-size: 26pt;
 			color: c.$column-header-text;
-			margin-top: 8px;
-			margin-bottom: 8px;
+			margin-top: 24px;
+			margin-bottom: 35px;
 			border-bottom: 2px solid c.$column-header-text;
 			padding-bottom: 4px;
 			white-space: nowrap;
@@ -219,7 +219,7 @@
 				}
 
 				.eat-type {
-					font-size: 12pt;
+					font-size: 15pt;
 					color: rgba(255, 255, 255, 0.7);
 					font-family: 'Star4000 Small';
 					flex-shrink: 0;
@@ -243,16 +243,16 @@
 	.card-shakedown {
 		.shakedown-title {
 			font-family: 'Star4000 Large';
-			font-size: 22pt;
+			font-size: 16pt;
 			color: c.$column-header-text;
-			line-height: 1.15;
-			margin-top: 8px;
+			line-height: 1.35;
+			margin-top: 25px;
 		}
 
 		.sd-venue {
-			font-size: 14pt;
+			font-size: 18.5pt;
 			color: white;
-			margin-bottom: 12px;
+			margin-bottom: 28px;
 			line-height: 1.25;
 			word-wrap: break-word;
 			overflow-wrap: break-word;
