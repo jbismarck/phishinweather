@@ -605,6 +605,7 @@ app.get('/shop/success', async (req, res) => {
 if (process.env?.DIST === '1') {
 	// distribution
 	app.use('/scripts', express.static('./server/scripts'));
+	app.use('/styles', express.static('./server/styles'));
 	app.use('/geoip', geoip);
 	app.use('/', express.static('./dist'));
 } else {
