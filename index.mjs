@@ -352,30 +352,204 @@ const MONTHLY_BURN = [
 	{ name: 'Porkbun domain (phishinweather.com)', monthly: 10.00 / 12 },
 ];
 
+const SERVICES = [
+	{
+		category: 'Infrastructure',
+		items: [
+			{
+				name: 'Railway',
+				url: 'https://railway.com/project/f58ae63c-29c0-49e4-8cc0-fb90b0e73ef3',
+				login: 'GitHub OAuth (rstownsend81@gmail.com)',
+				does: 'Hosts the Node server. Auto-deploys on every push to main.',
+				breaks: 'Entire site offline. Nothing works.',
+				cost: '$5/mo',
+				critical: true,
+			},
+			{
+				name: 'GitHub — jbismarck/phishinweather',
+				url: 'https://github.com/jbismarck/phishinweather',
+				login: 'github.com — rstownsend81@gmail.com',
+				does: 'Source code. Pushing to main triggers Railway deploy.',
+				breaks: 'Can\'t deploy new code. Site keeps running on last deploy.',
+				cost: 'Free',
+				critical: false,
+			},
+			{
+				name: 'Porkbun — phishinweather.com',
+				url: 'https://porkbun.com',
+				login: 'porkbun.com — rstownsend81@gmail.com',
+				does: 'Domain registrar. DNS points phishinweather.com → Railway.',
+				breaks: 'Site unreachable at phishinweather.com. Railway URL still works.',
+				cost: '~$0.83/mo',
+				critical: true,
+			},
+		],
+	},
+	{
+		category: 'Monitoring',
+		items: [
+			{
+				name: 'UptimeRobot',
+				url: 'https://uptimerobot.com',
+				login: 'uptimerobot.com — rstownsend81@gmail.com',
+				does: 'Pings phishinweather.com every 5 min. Emails on downtime.',
+				breaks: 'No downtime alerts. Site unaffected.',
+				cost: 'Free',
+				critical: false,
+			},
+		],
+	},
+	{
+		category: 'Revenue',
+		items: [
+			{
+				name: 'Ko-fi — phishinweather',
+				url: 'https://ko-fi.com/phishinweather',
+				login: 'ko-fi.com — rstownsend81@gmail.com',
+				does: 'Donation page. QR code on the support display card.',
+				breaks: 'No donations. Site unaffected.',
+				cost: 'Free (Ko-fi takes 0% on donations)',
+				critical: false,
+			},
+			{
+				name: 'Stripe',
+				url: 'https://dashboard.stripe.com',
+				login: 'stripe.com — rstownsend81@gmail.com',
+				does: 'Payment processing. Currently used by Ko-fi for payouts. Will power /shop directly.',
+				breaks: 'Ko-fi payouts pause. Future /shop revenue stops.',
+				cost: '2.9% + 30¢ per transaction',
+				critical: false,
+			},
+		],
+	},
+	{
+		category: 'Data APIs (free, no auth required)',
+		items: [
+			{
+				name: 'NWS — api.weather.gov',
+				url: 'https://www.weather.gov/documentation/services-web-api',
+				login: 'No account needed',
+				does: 'Current conditions, hourly/extended forecasts, alerts, radar stations.',
+				breaks: 'All weather displays show Failed. Phish tour forecast card fails. Core site is broken.',
+				cost: 'Free',
+				critical: true,
+			},
+			{
+				name: 'SPC — spc.noaa.gov',
+				url: 'https://www.spc.noaa.gov',
+				login: 'No account needed',
+				does: 'Storm Prediction Center outlook (SPC display).',
+				breaks: 'SPC Outlook display fails only.',
+				cost: 'Free',
+				critical: false,
+			},
+			{
+				name: 'phish.in API',
+				url: 'https://phish.in',
+				login: 'No account needed',
+				does: 'Show history, setlists, tour dates, venue data, audio tracks.',
+				breaks: 'Phish History/Tour/Countdown displays fail. Music stops. On-this-day feature breaks.',
+				cost: 'Free',
+				critical: true,
+			},
+			{
+				name: 'Open-Meteo',
+				url: 'https://open-meteo.com',
+				login: 'No account needed',
+				does: 'Venue weather forecasts for Phish Tour card.',
+				breaks: 'Tour forecast card shows no weather. Other displays unaffected.',
+				cost: 'Free',
+				critical: false,
+			},
+			{
+				name: 'Iowa State Mesonet (radar)',
+				url: 'https://mesonet.agron.iastate.edu',
+				login: 'No account needed',
+				does: 'Doppler radar tile images.',
+				breaks: 'Radar display fails only.',
+				cost: 'Free',
+				critical: false,
+			},
+		],
+	},
+	{
+		category: 'Social (accounts to create)',
+		items: [
+			{
+				name: 'Instagram — @phishinweather',
+				url: 'https://instagram.com',
+				login: 'NOT CREATED YET',
+				does: 'Social presence. Placeholder card in display rotation.',
+				breaks: 'N/A until created.',
+				cost: 'Free',
+				critical: false,
+			},
+			{
+				name: 'YouTube — @phishinweather',
+				url: 'https://youtube.com',
+				login: 'NOT CREATED YET — use rstownsend81@gmail.com Google account',
+				does: 'Ambient tour stream. Placeholder card in display rotation.',
+				breaks: 'N/A until created.',
+				cost: 'Free',
+				critical: false,
+			},
+			{
+				name: 'Reddit — r/phishinweather',
+				url: 'https://reddit.com',
+				login: 'NOT CREATED YET — requires 30-day-old account to mod',
+				does: 'Community hub. Placeholder card in display rotation.',
+				breaks: 'N/A until created.',
+				cost: 'Free',
+				critical: false,
+			},
+		],
+	},
+];
+
 const adminDashboard = (_req, res) => {
 	const totalMonthly = MONTHLY_BURN.reduce((sum, e) => sum + e.monthly, 0);
 	const totalAnnual = totalMonthly * 12;
-	const rows = MONTHLY_BURN.map((e) => `<tr><td>${e.name}</td><td>$${e.monthly.toFixed(2)}/mo</td></tr>`).join('');
+
+	const serviceHTML = SERVICES.map(({ category, items }) => `
+		<h2>${category}</h2>
+		${items.map(({ name, url, login, does, breaks, cost, critical }) => `
+		<div class="svc ${critical ? 'critical' : ''}">
+			<div class="svc-name"><a href="${url}" target="_blank">${name}</a> <span class="cost">${cost}</span>${critical ? ' <span class="tag">CRITICAL</span>' : ''}</div>
+			<div class="svc-row"><span class="label">Login</span><span>${login}</span></div>
+			<div class="svc-row"><span class="label">Does</span><span>${does}</span></div>
+			<div class="svc-row ${critical ? 'break-critical' : 'break-minor'}"><span class="label">If down</span><span>${breaks}</span></div>
+		</div>`).join('')}
+	`).join('');
+
+	const burnRows = MONTHLY_BURN.map((e) => `<tr><td>${e.name}</td><td>$${e.monthly.toFixed(2)}/mo</td></tr>`).join('');
+
 	res.send(`<!DOCTYPE html><html><head><title>phishinweather admin</title>
-<style>body{font-family:monospace;max-width:600px;margin:40px auto;padding:0 20px}
-table{border-collapse:collapse;width:100%}td{padding:6px 12px;border:1px solid #ccc}
-h2{margin-top:2em}.green{color:green}.red{color:#c00}</style></head><body>
-<h1>phishinweather admin</h1>
+<style>
+  body { font-family: monospace; max-width: 800px; margin: 40px auto; padding: 0 20px; background: #0a0a0a; color: #ccc; }
+  h1 { color: #ff0; } h2 { color: #ff0; margin-top: 2em; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  a { color: #6af; }
+  .svc { border: 1px solid #333; padding: 12px 16px; margin-bottom: 10px; border-radius: 4px; }
+  .svc.critical { border-color: #a33; }
+  .svc-name { font-weight: bold; font-size: 1.05em; margin-bottom: 8px; }
+  .svc-row { display: flex; gap: 12px; margin: 3px 0; font-size: 0.9em; }
+  .label { color: #888; min-width: 60px; flex-shrink: 0; }
+  .cost { color: #888; font-size: 0.85em; }
+  .tag { background: #a33; color: #fff; font-size: 0.7em; padding: 1px 5px; border-radius: 2px; vertical-align: middle; }
+  .break-critical span:last-child { color: #f88; }
+  .break-minor span:last-child { color: #888; }
+  table { border-collapse: collapse; width: 100%; }
+  td { padding: 6px 12px; border: 1px solid #333; }
+  .total { color: #ff0; }
+</style></head><body>
+<h1>phishinweather /admin</h1>
+
 <h2>Monthly Burn</h2>
-<table>${rows}
-<tr><td><strong>Total</strong></td><td><strong>$${totalMonthly.toFixed(2)}/mo ($${totalAnnual.toFixed(0)}/yr)</strong></td></tr>
+<table>${burnRows}
+<tr class="total"><td><strong>Total</strong></td><td><strong>$${totalMonthly.toFixed(2)}/mo ($${totalAnnual.toFixed(0)}/yr)</strong></td></tr>
 </table>
-<h2>Break-even</h2>
-<p>Need <strong>$${totalMonthly.toFixed(2)}/month</strong> to cover costs.</p>
-<h2>Links</h2>
-<ul>
-<li><a href="https://railway.com/project/f58ae63c-29c0-49e4-8cc0-fb90b0e73ef3" target="_blank">Railway dashboard</a></li>
-<li><a href="https://porkbun.com" target="_blank">Porkbun (domain)</a></li>
-<li><a href="https://ko-fi.com/phishinweather" target="_blank">Ko-fi dashboard</a></li>
-<li><a href="https://uptimerobot.com" target="_blank">UptimeRobot</a></li>
-</ul>
-<h2>Revenue tracking</h2>
-<p>Check Ko-fi and Shopify dashboards directly for current revenue.</p>
+<p style="color:#888">Break-even: $${totalMonthly.toFixed(2)}/month. Check <a href="https://ko-fi.com/phishinweather" target="_blank">Ko-fi</a> and <a href="https://dashboard.stripe.com" target="_blank">Stripe</a> for revenue.</p>
+
+${serviceHTML}
 </body></html>`);
 };
 
