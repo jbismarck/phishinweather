@@ -58,8 +58,9 @@ class Progress extends WeatherDisplay {
 
 		this.finishDraw();
 
-		// calculate loaded percent
-		const loadedPercent = (loadedCount / displays.length);
+		// filter(Boolean) skips sparse-array holes from non-contiguous navIds (e.g. 0–11, 20–22)
+		const totalDisplays = displays.filter(Boolean).length;
+		const loadedPercent = (loadedCount / totalDisplays);
 
 		this.progressCover.style.width = `${(1.0 - loadedPercent) * 100}%`;
 		if (loadedPercent < 1.0) {
