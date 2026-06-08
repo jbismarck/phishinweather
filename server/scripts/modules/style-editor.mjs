@@ -213,7 +213,7 @@ for (const g of GROUPS) {
 
 // ── Engine ──────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'phish-style-editor';
+const STORAGE_KEY = 'phish-style-editor-v2';
 const STYLE_ID    = 'phish-style-editor-overrides';
 
 let panel      = null;
