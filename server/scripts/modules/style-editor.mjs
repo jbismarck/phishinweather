@@ -60,12 +60,10 @@ const GROUPS = [
 		label: 'COUNTDOWN — DATE CARD',
 		controls: [
 			mt('cd-blk-mt',   'Count block top',   `${CD} .count-block`,  6, 0),
-			fs('cd-num-fs',   'Big Number fs',      `${CD} .count-num`,   60, 20, 100),
-			lh('cd-num-lh',   'Big Number lh',      `${CD} .count-num`,   1.0),
-			fs('cd-unit-fs',  'DAYS/HRS/MIN fs',    `${CD} .count-unit`,  22, 10, 48),
-			mt('cd-unit-mt',  'DAYS gap ↑',         `${CD} .count-unit`,  -4),
-			fs('cd-sub-fs',   'HRS MIN row fs',     `${CD} .count-sub`,   16),
-			mt('cd-sub-mt',   'HRS MIN gap ↑',      `${CD} .count-sub`,   4, 0),
+			fs('cd-val-fs',   'Numbers fs',         `${CD} .count-val`,   48, 20, 100),
+			lh('cd-val-lh',   'Numbers lh',         `${CD} .count-val`,   1.0),
+			fs('cd-lbl-fs',   'Labels fs',          `${CD} .count-lbl`,   12, 6, 24),
+			mt('cd-lbl-mt',   'Labels gap ↑',       `${CD} .count-lbl`,   2, 0),
 		],
 	},
 
@@ -224,8 +222,17 @@ let visible    = false;
 let inspecting = false;
 let values     = {};
 
+const STALE_KEYS = [
+	'cd-num-fs', 'cd-num-lh',
+	'cd-unit-fs', 'cd-unit-mt',
+	'cd-sub-fs', 'cd-sub-mt',
+];
+
 const load = () => {
 	try { values = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}'); } catch { values = {}; }
+	let dirty = false;
+	STALE_KEYS.forEach((k) => { if (k in values) { delete values[k]; dirty = true; } });
+	if (dirty) localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
 };
 const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
 const val  = (c) => values[c.id] ?? c.def;

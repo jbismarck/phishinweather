@@ -37,9 +37,9 @@
 	}
 
 	.event-dates {
-		font-size: 15pt;
+		font-size: 18pt;
 		color: white;
-		margin-top: 8px;
+		margin-top: 18px;
 	}
 
 	.event-note {
@@ -55,32 +55,40 @@
 	// ── Confirmed Date Card ──────────────────────────────────────────────────
 	.crd-date {
 		.count-block {
+			display: flex;
+			justify-content: space-around;
+			align-items: flex-start;
+			margin: 10px 0 4px;
 			text-align: center;
-			margin: 6px 0 4px;
 		}
 
-		.count-num {
-			font-family: 'Star4000 Large';
-			font-size: 60pt;
-			color: c.$column-header-text;
-			line-height: 1;
-			letter-spacing: -2px;
-		}
-
-		.count-unit {
-			font-family: 'Star4000 Large';
-			font-size: 22pt;
-			color: white;
-			letter-spacing: 4px;
-			margin-top: -4px;
-		}
-
-		.count-sub {
-			font-size: 16pt;
-			color: rgba(255, 255, 255, 0.7);
-			margin-top: 4px;
+		.count-col {
+			flex: 1;
 		}
 	}
+}
+
+// Scoped outside parent to avoid cascade interference — single class, highest clarity
+.weather-display .main.phish-countdown .count-val {
+	font-family: 'Star4000 Large';
+	font-size: 48pt;
+	color: #ff0;
+	line-height: 1;
+	letter-spacing: -2px;
+	display: block;
+}
+
+.weather-display .main.phish-countdown .count-lbl {
+	font-family: 'Star4000 Large';
+	font-size: 12pt;
+	color: #fff;
+	letter-spacing: 2px;
+	margin-top: 2px;
+	display: block;
+}
+
+// re-open for remaining cards
+.weather-display .main.phish-countdown {
 
 	// ── Tonight Card ────────────────────────────────────────────────────────
 	.crd-tonight {
