@@ -21,12 +21,18 @@ Phishinweather is a heavily customized fork of the WeatherStar 4000+ project, re
 
 ```bash
 # Make changes to SCSS or JS source
-npm run build:css    # Recompile SCSS → server/styles/main.css  (REQUIRED if SCSS changed)
-npm run build        # Bundle JS + copy CSS → dist/              (REQUIRED before testing)
+npm run build        # Recompile SCSS + bundle JS + copy CSS → dist/
 npm start            # Serve on localhost:8080
 ```
 
-**Critical:** `npm run build` does NOT recompile SCSS. It only copies the existing `server/styles/main.css` into the bundle. Always run `build:css` first whenever SCSS changes, otherwise styles are stale.
+`npm run build` now runs `build:css` automatically first, so SCSS is always compiled fresh.
+
+For rapid style iteration only (skips the slow webpack step):
+
+```bash
+npm run build:css    # Recompile SCSS → server/styles/main.css only
+# Refresh browser — dev mode reads main.css directly, no full build needed
+```
 
 ### Feature branch workflow
 
@@ -45,6 +51,27 @@ Push to `main` = immediate deploy to phishinweather.com. Work on a branch to avo
 - Open `http://localhost:8080` in a real browser — NWS blocks headless Chrome, so automated browser tests will stall on the progress bar
 - Use real browser devtools for debugging navigation/display issues
 - The `/poster` route (`localhost:8080/poster`) can be screenshot by headless tools since it makes no NWS calls
+
+---
+
+## Session Workflow
+
+### Opening a bug session efficiently
+
+Before asking Claude to debug, get a concrete symptom first:
+- Open `localhost:8080` in real browser devtools
+- Get an error message, a console stack trace, or a specific visual description
+- "navigation.mjs:92 throws on second prev press" costs half the tokens of "nav seems broken"
+
+### Opening a feature session efficiently
+
+Batch related items — "add venue stats card + fix the nav bug" in one session amortizes setup cost. One small change per session wastes the orientation overhead.
+
+### Checklist mindset
+
+Ship → iterate. You can push a fix to phishinweather.com in 90 seconds. Polish-first is for teams that can't hotfix.
+
+---
 
 ### CSS cache-busting
 
@@ -110,7 +137,9 @@ Use 29+ for new cards.
 3. **Create `server/styles/scss/_my-card.scss`** — add background and layout rules.
 4. **`server/styles/scss/main.scss`** — add `@use 'my-card';`
 5. **`views/index.ejs`** — add `<script type="module" src="scripts/modules/my-card.mjs">` and `<div id="my-card-html" class="weather-display"><%- include('partials/my-card.ejs') %></div>`
-6. Run `npm run build:css && npm run build` and test.
+6. Run `npm run build && npm start` and test.
+
+The build auto-discovers all `.mjs` files in `server/scripts/modules/` — no `mjsSources` edit needed.
 
 For static/placeholder cards (no API), the `support.mjs` pattern is the simplest template. For multi-card data-driven displays, see `phish-tour.mjs` (CARDS_PER_SHOW × shows = totalScreens).
 

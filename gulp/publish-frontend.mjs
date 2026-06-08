@@ -13,6 +13,7 @@ import s3Upload from 'gulp-s3-uploader';
 import webpack from 'webpack-stream';
 import TerserPlugin from 'terser-webpack-plugin';
 import { readFile } from 'fs/promises';
+import { readdirSync } from 'fs';
 import file from 'gulp-file';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import OVERRIDES from '../src/overrides.mjs';
@@ -72,33 +73,12 @@ const compressJsVendor = () => src(jsVendorSources)
 	.pipe(terser())
 	.pipe(dest(RESOURCES_PATH));
 
+const modulesDir = 'server/scripts/modules';
 const mjsSources = [
-	'server/scripts/modules/currentweatherscroll.mjs',
-	'server/scripts/modules/hazards.mjs',
-	'server/scripts/modules/currentweather.mjs',
-	'server/scripts/modules/almanac.mjs',
-	'server/scripts/modules/spc-outlook.mjs',
-	'server/scripts/modules/icons.mjs',
-	'server/scripts/modules/extendedforecast.mjs',
-	'server/scripts/modules/hourly.mjs',
-	'server/scripts/modules/hourly-graph.mjs',
-	'server/scripts/modules/latestobservations.mjs',
-	'server/scripts/modules/localforecast.mjs',
-	'server/scripts/modules/radar.mjs',
-	'server/scripts/modules/regionalforecast.mjs',
-	'server/scripts/modules/travelforecast.mjs',
-	'server/scripts/modules/progress.mjs',
-	'server/scripts/modules/media.mjs',
-	'server/scripts/modules/phish-history.mjs',
-	'server/scripts/modules/phish-tour.mjs',
-	'server/scripts/modules/phish-countdown.mjs',
-	'server/scripts/modules/phish-easter-eggs.mjs',
-	'server/scripts/modules/support.mjs',
-	'server/scripts/modules/social-instagram.mjs',
-	'server/scripts/modules/social-youtube.mjs',
-	'server/scripts/modules/social-reddit.mjs',
-	'server/scripts/modules/social-onlyfans.mjs',
-	'server/scripts/modules/style-editor.mjs',
+	...readdirSync(modulesDir)
+		.filter((f) => f.endsWith('.mjs') && f !== 'radar-worker.mjs')
+		.sort()
+		.map((f) => `${modulesDir}/${f}`),
 	'server/scripts/index.mjs',
 ];
 
