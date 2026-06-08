@@ -4,10 +4,48 @@ import fs from 'fs';
 import Stripe from 'stripe';
 import playlist from './src/playlist.mjs';
 import OVERRIDES from './src/overrides.mjs';
+import rateLimit from 'express-rate-limit';
 
+// ── TASK 2: production guard ─────────────────────────────────────────────────
+if (process.env.NODE_ENV === 'production' && process.env.DIST !== '1') {
+	throw new Error(
+		'Production mode requires DIST=1. Bundled assets are missing — set DIST=1 in Railway environment variables.',
+	);
+}
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
+
+// ── TASK 5: security headers ─────────────────────────────────────────────────
+app.use((req, res, next) => {
+	res.set('X-Frame-Options', 'DENY');
+	// script-src includes 'unsafe-inline' because the OVERRIDES global is inlined
+	// in views/index.ejs at render time and cannot be externalized without a nonce refactor.
+	res.set(
+		'Content-Security-Policy',
+		[
+			"default-src 'self'",
+			"script-src 'self' 'unsafe-inline'",
+			"style-src 'self' 'unsafe-inline'",
+			"img-src 'self' data: blob: https://mesonet.agron.iastate.edu https://www.spc.noaa.gov",
+			"connect-src 'self' https://api.weather.gov https://phish.in https://api.open-meteo.com https://mesonet.agron.iastate.edu https://www.spc.noaa.gov https://www.cpc.ncep.noaa.gov https://geocode.arcgis.com",
+			"worker-src 'self'",
+			"font-src 'self'",
+			"frame-ancestors 'none'",
+			"frame-src 'none'",
+		].join('; '),
+	);
+	next();
+});
+
+// ── TASK 1: phish API rate limiter (10 req/min per IP) ───────────────────────
+const phishRateLimit = rateLimit({
+	windowMs: 60 * 1000,
+	limit: 10,
+	standardHeaders: 'draft-7',
+	legacyHeaders: false,
+});
+
 const port = process.env.PORT ?? process.env.WS4KP_PORT ?? 8080;
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -617,6 +655,7 @@ if (process.env?.DIST === '1') {
 	app.use('/geoip', geoip);
 	app.use('/resources', express.static('./server/scripts/modules'));
 	app.get('/', index);
+	app.use('/api/phish', phishRateLimit);
 	app.get('/api/phish/on-this-day', phishOnThisDay);
 	app.get('/api/phish/summer-tour', phishSummerTour);
 	app.get('*name', express.static('./server'));
