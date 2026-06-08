@@ -23,73 +23,77 @@
 
 	// ── Info Card ────────────────────────────────────────────────────────────
 	.card-info {
-		.show-date {
-			font-size: 20pt;
-			color: c.$column-header-text;
-			line-height: 1.2;
-			margin-top: 8px;
-			white-space: nowrap;
-		}
+		.info-header {
+			padding: 4px 8px 6px;
 
-		.show-countdown {
-			font-size: 16pt;
-			color: white;
-			margin-top: 2px;
-
-			&.tonight {
+			.info-header-top {
+				font-size: 15pt;
 				color: c.$column-header-text;
-				font-family: 'Star4000 Large';
-				font-size: 20pt;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.info-header-bot {
+				font-size: 12pt;
+				color: white;
+				display: flex;
+				align-items: baseline;
+				gap: 0;
+
+				.show-counter {
+					margin-left: auto;
+					font-size: 11pt;
+					color: rgba(255, 255, 255, 0.6);
+				}
+			}
+
+			.info-dot {
+				margin: 0 6px;
+				opacity: 0.5;
+			}
+
+			.show-countdown {
+				&.tonight {
+					color: c.$column-header-text;
+					font-family: 'Star4000 Large';
+				}
 			}
 		}
 
-		.show-venue {
-			font-size: 19pt;
-			color: c.$column-header-text;
-			line-height: 1.25;
-			margin-top: 10px;
-			overflow: hidden;
-			display: -webkit-box;
-			-webkit-line-clamp: 2;
-			-webkit-box-orient: vertical;
+		.policy-panels {
+			margin-left: 11px;
+			margin-top: 8px;
+			font-size: 0;
 		}
 
-		.show-city {
-			font-size: 17pt;
-			color: white;
-			line-height: 1.3;
-			margin-top: 3px;
-		}
+		.policy-panel {
+			display: inline-block;
+			width: 155px;
+			height: 265px;
+			padding: 14px 8px;
+			margin: 0 15px;
+			vertical-align: top;
 
-		.policy-row {
-			display: flex;
-			align-items: baseline;
-			gap: 8px;
-			margin-top: 6px;
-
-			.policy-label {
-				font-size: 12pt;
+			.pp-label {
+				font-size: 13pt;
 				color: c.$column-header-text;
-				width: 72px;
-				flex-shrink: 0;
 				font-family: 'Star4000 Small';
+				text-align: center;
+				line-height: 1.3;
+				margin-bottom: 20px;
 			}
 
 			.policy-bottles,
-			.policy-tubes {
-				font-size: 13pt;
+			.policy-tubes,
+			.policy-water-station {
+				font-size: 18pt;
 				color: white;
-				font-family: 'Star4000 Small';
+				text-align: center;
+				line-height: 1.3;
 				word-wrap: break-word;
 				overflow-wrap: break-word;
 			}
-		}
-
-		.show-counter {
-			font-size: 13pt;
-			color: rgba(255, 255, 255, 0.65);
-			margin-top: 8px;
-			text-align: right;
 		}
 	}
 
