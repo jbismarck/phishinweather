@@ -359,7 +359,6 @@ const SERVICES = [
 			{
 				name: 'Railway',
 				url: 'https://railway.com/project/f58ae63c-29c0-49e4-8cc0-fb90b0e73ef3',
-				login: 'GitHub OAuth (rstownsend81@gmail.com)',
 				does: 'Hosts the Node server. Auto-deploys on every push to main.',
 				breaks: 'Entire site offline. Nothing works.',
 				cost: '$5/mo',
@@ -368,7 +367,6 @@ const SERVICES = [
 			{
 				name: 'GitHub — jbismarck/phishinweather',
 				url: 'https://github.com/jbismarck/phishinweather',
-				login: 'github.com — rstownsend81@gmail.com',
 				does: 'Source code. Pushing to main triggers Railway deploy.',
 				breaks: 'Can\'t deploy new code. Site keeps running on last deploy.',
 				cost: 'Free',
@@ -377,7 +375,6 @@ const SERVICES = [
 			{
 				name: 'Porkbun — phishinweather.com',
 				url: 'https://porkbun.com',
-				login: 'porkbun.com — rstownsend81@gmail.com',
 				does: 'Domain registrar. DNS points phishinweather.com → Railway.',
 				breaks: 'Site unreachable at phishinweather.com. Railway URL still works.',
 				cost: '~$0.83/mo',
@@ -391,7 +388,6 @@ const SERVICES = [
 			{
 				name: 'UptimeRobot',
 				url: 'https://uptimerobot.com',
-				login: 'uptimerobot.com — rstownsend81@gmail.com',
 				does: 'Pings phishinweather.com every 5 min. Emails on downtime.',
 				breaks: 'No downtime alerts. Site unaffected.',
 				cost: 'Free',
@@ -405,7 +401,6 @@ const SERVICES = [
 			{
 				name: 'Ko-fi — phishinweather',
 				url: 'https://ko-fi.com/phishinweather',
-				login: 'ko-fi.com — rstownsend81@gmail.com',
 				does: 'Donation page. QR code on the support display card.',
 				breaks: 'No donations. Site unaffected.',
 				cost: 'Free (Ko-fi takes 0% on donations)',
@@ -414,7 +409,6 @@ const SERVICES = [
 			{
 				name: 'Stripe',
 				url: 'https://dashboard.stripe.com',
-				login: 'stripe.com — rstownsend81@gmail.com',
 				does: 'Payment processing. Currently used by Ko-fi for payouts. Will power /shop directly.',
 				breaks: 'Ko-fi payouts pause. Future /shop revenue stops.',
 				cost: '2.9% + 30¢ per transaction',
@@ -428,7 +422,6 @@ const SERVICES = [
 			{
 				name: 'NWS — api.weather.gov',
 				url: 'https://www.weather.gov/documentation/services-web-api',
-				login: 'No account needed',
 				does: 'Current conditions, hourly/extended forecasts, alerts, radar stations.',
 				breaks: 'All weather displays show Failed. Phish tour forecast card fails. Core site is broken.',
 				cost: 'Free',
@@ -437,7 +430,6 @@ const SERVICES = [
 			{
 				name: 'SPC — spc.noaa.gov',
 				url: 'https://www.spc.noaa.gov',
-				login: 'No account needed',
 				does: 'Storm Prediction Center outlook (SPC display).',
 				breaks: 'SPC Outlook display fails only.',
 				cost: 'Free',
@@ -446,7 +438,6 @@ const SERVICES = [
 			{
 				name: 'phish.in API',
 				url: 'https://phish.in',
-				login: 'No account needed',
 				does: 'Show history, setlists, tour dates, venue data, audio tracks.',
 				breaks: 'Phish History/Tour/Countdown displays fail. Music stops. On-this-day feature breaks.',
 				cost: 'Free',
@@ -455,7 +446,6 @@ const SERVICES = [
 			{
 				name: 'Open-Meteo',
 				url: 'https://open-meteo.com',
-				login: 'No account needed',
 				does: 'Venue weather forecasts for Phish Tour card.',
 				breaks: 'Tour forecast card shows no weather. Other displays unaffected.',
 				cost: 'Free',
@@ -464,7 +454,6 @@ const SERVICES = [
 			{
 				name: 'Iowa State Mesonet (radar)',
 				url: 'https://mesonet.agron.iastate.edu',
-				login: 'No account needed',
 				does: 'Doppler radar tile images.',
 				breaks: 'Radar display fails only.',
 				cost: 'Free',
@@ -478,7 +467,6 @@ const SERVICES = [
 			{
 				name: 'Instagram — @phishinweather',
 				url: 'https://instagram.com',
-				login: 'NOT CREATED YET',
 				does: 'Social presence. Placeholder card in display rotation.',
 				breaks: 'N/A until created.',
 				cost: 'Free',
@@ -487,7 +475,6 @@ const SERVICES = [
 			{
 				name: 'YouTube — @phishinweather',
 				url: 'https://youtube.com',
-				login: 'NOT CREATED YET — use rstownsend81@gmail.com Google account',
 				does: 'Ambient tour stream. Placeholder card in display rotation.',
 				breaks: 'N/A until created.',
 				cost: 'Free',
@@ -496,7 +483,6 @@ const SERVICES = [
 			{
 				name: 'Reddit — r/phishinweather',
 				url: 'https://reddit.com',
-				login: 'NOT CREATED YET — requires 30-day-old account to mod',
 				does: 'Community hub. Placeholder card in display rotation.',
 				breaks: 'N/A until created.',
 				cost: 'Free',
@@ -506,16 +492,30 @@ const SERVICES = [
 	},
 ];
 
-const adminDashboard = (_req, res) => {
+const adminDashboard = (req, res) => {
+	const password = process.env.ADMIN_PASSWORD;
+	if (password) {
+		const auth = req.headers.authorization ?? '';
+		if (!auth.startsWith('Basic ')) {
+			res.set('WWW-Authenticate', 'Basic realm="phishinweather admin"');
+			return res.status(401).send('Unauthorized');
+		}
+		const decoded = Buffer.from(auth.slice(6), 'base64').toString();
+		const pass = decoded.slice(decoded.indexOf(':') + 1);
+		if (pass !== password) {
+			res.set('WWW-Authenticate', 'Basic realm="phishinweather admin"');
+			return res.status(401).send('Unauthorized');
+		}
+	}
+
 	const totalMonthly = MONTHLY_BURN.reduce((sum, e) => sum + e.monthly, 0);
 	const totalAnnual = totalMonthly * 12;
 
 	const serviceHTML = SERVICES.map(({ category, items }) => `
 		<h2>${category}</h2>
-		${items.map(({ name, url, login, does, breaks, cost, critical }) => `
+		${items.map(({ name, url, does, breaks, cost, critical }) => `
 		<div class="svc ${critical ? 'critical' : ''}">
 			<div class="svc-name"><a href="${url}" target="_blank">${name}</a> <span class="cost">${cost}</span>${critical ? ' <span class="tag">CRITICAL</span>' : ''}</div>
-			<div class="svc-row"><span class="label">Login</span><span>${login}</span></div>
 			<div class="svc-row"><span class="label">Does</span><span>${does}</span></div>
 			<div class="svc-row ${critical ? 'break-critical' : 'break-minor'}"><span class="label">If down</span><span>${breaks}</span></div>
 		</div>`).join('')}
@@ -553,6 +553,9 @@ ${serviceHTML}
 </body></html>`);
 };
 
+app.get('/admin', adminDashboard);
+app.get('/poster', (req, res) => res.render('poster', { version }));
+
 // debugging
 if (process.env?.DIST === '1') {
 	// distribution
@@ -567,8 +570,6 @@ if (process.env?.DIST === '1') {
 	app.get('/', index);
 	app.get('/api/phish/on-this-day', phishOnThisDay);
 	app.get('/api/phish/summer-tour', phishSummerTour);
-	app.get('/admin', adminDashboard);
-	app.get('/poster', (req, res) => res.render('poster', { version }));
 	app.get('*name', express.static('./server'));
 	// cors pass-thru to api.weather.gov
 	app.get('/playlist.json', playlist);
