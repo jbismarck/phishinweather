@@ -98,6 +98,7 @@ const mjsSources = [
 	'server/scripts/modules/social-youtube.mjs',
 	'server/scripts/modules/social-reddit.mjs',
 	'server/scripts/modules/social-onlyfans.mjs',
+	'server/scripts/modules/style-editor.mjs',
 	'server/scripts/index.mjs',
 ];
 
