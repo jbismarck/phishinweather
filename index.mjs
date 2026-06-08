@@ -13,7 +13,7 @@ app.set('view engine', 'ejs');
 
 // version
 const { version } = JSON.parse(fs.readFileSync('package.json'));
-const buildHash = process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 8) ?? version;
+const buildHash = process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 8) ?? false;
 
 // read and parse environment variables to append to the query string
 // use the permalink (share) button on the web app to generate a starting point for your configuration
