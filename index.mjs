@@ -299,6 +299,38 @@ const phishSummerTour = async (req, res) => {
 	}
 };
 
+const MONTHLY_BURN = [
+	{ name: 'Railway Hobby', monthly: 5.00 },
+	{ name: 'Porkbun domain (phishinweather.com)', monthly: 10.00 / 12 },
+];
+
+const adminDashboard = (_req, res) => {
+	const totalMonthly = MONTHLY_BURN.reduce((sum, e) => sum + e.monthly, 0);
+	const totalAnnual = totalMonthly * 12;
+	const rows = MONTHLY_BURN.map((e) => `<tr><td>${e.name}</td><td>$${e.monthly.toFixed(2)}/mo</td></tr>`).join('');
+	res.send(`<!DOCTYPE html><html><head><title>phishinweather admin</title>
+<style>body{font-family:monospace;max-width:600px;margin:40px auto;padding:0 20px}
+table{border-collapse:collapse;width:100%}td{padding:6px 12px;border:1px solid #ccc}
+h2{margin-top:2em}.green{color:green}.red{color:#c00}</style></head><body>
+<h1>phishinweather admin</h1>
+<h2>Monthly Burn</h2>
+<table>${rows}
+<tr><td><strong>Total</strong></td><td><strong>$${totalMonthly.toFixed(2)}/mo ($${totalAnnual.toFixed(0)}/yr)</strong></td></tr>
+</table>
+<h2>Break-even</h2>
+<p>Need <strong>$${totalMonthly.toFixed(2)}/month</strong> to cover costs.</p>
+<h2>Links</h2>
+<ul>
+<li><a href="https://railway.com/project/f58ae63c-29c0-49e4-8cc0-fb90b0e73ef3" target="_blank">Railway dashboard</a></li>
+<li><a href="https://porkbun.com" target="_blank">Porkbun (domain)</a></li>
+<li><a href="https://ko-fi.com/phishinweather" target="_blank">Ko-fi dashboard</a></li>
+<li><a href="https://uptimerobot.com" target="_blank">UptimeRobot</a></li>
+</ul>
+<h2>Revenue tracking</h2>
+<p>Check Ko-fi and Shopify dashboards directly for current revenue.</p>
+</body></html>`);
+};
+
 // debugging
 if (process.env?.DIST === '1') {
 	// distribution
@@ -313,6 +345,7 @@ if (process.env?.DIST === '1') {
 	app.get('/', index);
 	app.get('/api/phish/on-this-day', phishOnThisDay);
 	app.get('/api/phish/summer-tour', phishSummerTour);
+	app.get('/admin', adminDashboard);
 	app.get('*name', express.static('./server'));
 	// cors pass-thru to api.weather.gov
 	app.get('/playlist.json', playlist);
