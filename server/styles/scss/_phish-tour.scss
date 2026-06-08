@@ -32,6 +32,9 @@
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
+
+				.show-venue { font-size: 19pt; }
+				.show-city  { font-size: 17pt; }
 			}
 
 			.info-header-bot {
@@ -40,6 +43,9 @@
 				display: flex;
 				align-items: baseline;
 				gap: 0;
+
+				.show-date       { font-size: 20pt; }
+				.show-countdown  { font-size: 16pt; }
 
 				.show-counter {
 					margin-left: auto;
@@ -254,7 +260,7 @@
 
 		.sd-row {
 			display: flex;
-			align-items: baseline;
+			align-items: flex-start;
 			margin-bottom: 8px;
 			gap: 8px;
 
