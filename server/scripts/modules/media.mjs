@@ -4,6 +4,8 @@ import Setting from './utils/setting.mjs';
 let playlist;
 let currentTrack = 0;
 let player;
+let mediaReady = false;
+const mediaReadyQueue = [];
 
 const mediaPlaying = new Setting('mediaPlaying', {
 	name: 'Media Playing',
@@ -62,6 +64,11 @@ const getMedia = async () => {
 };
 
 const enableMediaPlayer = () => {
+	// notify any waiting callbacks (e.g. easter-eggs music injection)
+	mediaReady = true;
+	mediaReadyQueue.forEach((cb) => cb());
+	mediaReadyQueue.length = 0;
+
 	// see if files are available
 	if (playlist?.availableFiles?.length > 0) {
 		// randomize the list
@@ -241,7 +248,16 @@ const injectTracks = (tracks) => {
 	if (mediaPlaying.value) player.play().catch(() => {});
 };
 
+const whenMediaReady = (cb) => {
+	if (mediaReady) { cb(); return; }
+	mediaReadyQueue.push(cb);
+};
+
+const getCurrentTrackUrl = () => playlist?.availableFiles?.[currentTrack] ?? null;
+
 export {
 	toggleMedia,
 	injectTracks,
+	whenMediaReady,
+	getCurrentTrackUrl,
 };

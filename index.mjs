@@ -112,9 +112,11 @@ const phishOnThisDay = async (req, res) => {
 			const detail = await r.json();
 
 			const sets = {};
-			(detail.tracks || []).forEach(({ set_name: setName, title }) => {
+			const tracks = [];
+			(detail.tracks || []).forEach(({ set_name: setName, title, mp3_url: mp3 }) => {
 				if (!sets[setName]) sets[setName] = [];
 				sets[setName].push(title);
+				if (mp3) tracks.push({ mp3, title });
 			});
 
 			return {
@@ -123,10 +125,42 @@ const phishOnThisDay = async (req, res) => {
 				venue: show.venue_name,
 				location: show.venue?.location || '',
 				sets,
+				tracks,
 			};
 		}));
 
-		phishCache = { shows, monthDay };
+		// Featured show: most recent on-this-day show with recordings
+		const withTracks = shows.filter((s) => s.tracks.length > 0);
+		let featured = null;
+		if (withTracks.length > 0) {
+			withTracks.sort((a, b) => a.date.localeCompare(b.date));
+			const pick = withTracks[withTracks.length - 1];
+			featured = { date: pick.date, venue: pick.venue, tracks: pick.tracks };
+		} else {
+			// Fallback: random show from 50 most recent on phish.in
+			try {
+				const poolR = await fetch('https://phish.in/api/v2/shows?sort_attr=date&sort_dir=desc&per_page=50', {
+					headers: { Accept: 'application/json' },
+				});
+				const poolData = await poolR.json();
+				const pool = poolData.shows ?? [];
+				if (pool.length > 0) {
+					const pick = pool[Math.floor(Math.random() * pool.length)];
+					const detailR = await fetch(`https://phish.in/api/v2/shows/${pick.date}`, {
+						headers: { Accept: 'application/json' },
+					});
+					const randomDetail = await detailR.json();
+					const randomTracks = (randomDetail.tracks || [])
+						.filter((t) => t.mp3_url)
+						.map((t) => ({ mp3: t.mp3_url, title: t.title }));
+					featured = { date: pick.date, venue: pick.venue_name, tracks: randomTracks, isRandom: true };
+				}
+			} catch (e) {
+				console.error('Daily music fallback failed:', e.message);
+			}
+		}
+
+		phishCache = { shows, monthDay, featured };
 		phishCacheDate = todayKey;
 		return res.json(phishCache);
 	} catch (err) {
@@ -150,7 +184,21 @@ const phishSummerTour = async (req, res) => {
 
 	try {
 		const tourData = JSON.parse(fs.readFileSync('./server/data/summer-tour.json'));
-		const { shows } = tourData;
+		const { shows: allShows } = tourData;
+
+		// Filter to current + next venue only
+		const todayStr = new Date().toISOString().slice(0, 10);
+		const firstIdx = allShows.findIndex((s) => s.date >= todayStr);
+		const shows = [];
+		if (firstIdx >= 0) {
+			const venuesSeen = new Set();
+			for (const s of allShows.slice(firstIdx)) {
+				const wouldAdd = venuesSeen.size + (venuesSeen.has(s.venue) ? 0 : 1);
+				if (wouldAdd > 2) break;
+				venuesSeen.add(s.venue);
+				shows.push(s);
+			}
+		}
 
 		// Fetch Open-Meteo forecast for each unique venue (deduped by lat/lon)
 		const venueKeys = new Set();

@@ -2,8 +2,6 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
-import { injectTracks } from './media.mjs';
-import { setHFBScroll } from './phish-easter-eggs.mjs';
 
 const WMO_DESC = {
 	0: 'CLEAR', 1: 'MAINLY CLEAR', 2: 'PARTLY CLOUDY', 3: 'OVERCAST',
@@ -63,7 +61,6 @@ class PhishTour extends WeatherDisplay {
 		this.timing.baseDelay = 8000;
 		this.lastShowIndex = -1;
 		this.mockWeather = false;
-		this.okToDrawCurrentConditions = false;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -136,11 +133,7 @@ class PhishTour extends WeatherDisplay {
 			counter.classList.remove('dicks');
 		}
 
-		// swap music when entering a new show's info card
-		if (cardIndex === 0 && showIndex !== this.lastShowIndex) {
-			this.lastShowIndex = showIndex;
-			if (show.musicTracks?.length) injectTracks(show.musicTracks);
-		}
+		if (cardIndex === 0) this.lastShowIndex = showIndex;
 
 		switch (cardIndex) {
 			case 0: this.renderInfo(show, isMSG); break;
@@ -151,7 +144,6 @@ class PhishTour extends WeatherDisplay {
 		}
 
 		this.finishDraw();
-		setHFBScroll(this.elem);
 	}
 
 	renderInfo(show, isMSG = false) {

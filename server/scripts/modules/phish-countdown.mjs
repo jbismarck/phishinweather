@@ -2,7 +2,6 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
-import { setHFBScroll } from './phish-easter-eggs.mjs';
 
 const msUntil = (dateStr) => {
 	const target = new Date(`${dateStr}T00:00:00`);
@@ -26,7 +25,6 @@ class PhishCountdown extends WeatherDisplay {
 		this.timing.baseDelay = 12000;
 		this.countdownInterval = null;
 		this.events = [];
-		this.okToDrawCurrentConditions = false;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -73,7 +71,6 @@ class PhishCountdown extends WeatherDisplay {
 
 		this.renderEvent(event);
 		this.finishDraw();
-		setHFBScroll(this.elem);
 	}
 
 	renderEvent(event) {

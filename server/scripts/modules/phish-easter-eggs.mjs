@@ -1,5 +1,7 @@
 import { currentDisplay, displayNavMessage, msg } from './navigation.mjs';
 import { gamehendgeWeather } from './gamehendge-weather.mjs';
+import { addScreen } from './currentweatherscroll.mjs';
+import { injectTracks, whenMediaReady, getCurrentTrackUrl } from './media.mjs';
 
 const HFB = [
 	'ICCULUS IS WATCHING — SEEK AND YE SHALL FIND THE HELPING FRIENDLY BOOK',
@@ -17,11 +19,65 @@ const HFB = [
 ];
 
 let hfbIdx = 0;
+let nowPlayingDate = '';
+let titleByUrl = new Map();
 
+const formatShowDate = (d) => {
+	const [yr, mm, dd] = d.split('-');
+	const mon = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][+mm - 1];
+	return `${mon} ${+dd} ${yr}`;
+};
+
+// After the local playlist is set up, inject today's on-this-day show (or random fallback)
+whenMediaReady(async () => {
+	try {
+		const r = await fetch('/api/phish/on-this-day');
+		const data = await r.json();
+		if (data.featured?.tracks?.length) {
+			nowPlayingDate = data.featured.date;
+			titleByUrl = new Map(data.featured.tracks.map(({ mp3, title }) => [mp3, title]));
+			injectTracks(data.featured.tracks.map((t) => t.mp3));
+		}
+	} catch (e) {
+		console.error('Daily music fetch failed:', e);
+	}
+});
+
+// Inject HFB quotes into the main weather scroll cycle (every ~4 screens)
+addScreen(() => ({ type: 'scroll', text: HFB[hfbIdx++ % HFB.length] }));
+addScreen(() => ({ type: 'scroll', text: HFB[hfbIdx++ % HFB.length] }));
+
+// Now-playing screen: show date + current track title
+addScreen(() => {
+	if (!document.getElementById('ToggleMedia')?.classList.contains('playing')) return false;
+	const url = getCurrentTrackUrl();
+	const title = url ? titleByUrl.get(url) : null;
+	if (!title || !nowPlayingDate) return false;
+	return { type: 'scroll', text: `♪ ${formatShowDate(nowPlayingDate)}  ${title.toUpperCase()}` };
+});
+
+// Used by the Gamehendge overlay (Shift+G) which doesn't go through the main scroller
 export const setHFBScroll = (elem) => {
 	setTimeout(() => {
 		const fixed = elem?.querySelector('.scroll .fixed');
-		if (fixed) fixed.textContent = HFB[hfbIdx++ % HFB.length];
+		if (!fixed) return;
+		const text = HFB[hfbIdx++ % HFB.length];
+
+		const scrollEl = document.createElement('div');
+		scrollEl.classList.add('scroll-area');
+		scrollEl.textContent = text;
+		scrollEl.style.left = '0px';
+
+		fixed.innerHTML = '';
+		fixed.append(scrollEl);
+
+		const scrollDistance = Math.max(scrollEl.scrollWidth - fixed.clientWidth, 0);
+		const scrollTime = scrollDistance / 75;
+		scrollEl.style.transition = `left linear ${scrollTime.toFixed(1)}s`;
+
+		setTimeout(() => {
+			scrollEl.style.left = `-${scrollDistance.toFixed(0)}px`;
+		}, 1000);
 	}, 150);
 };
 
