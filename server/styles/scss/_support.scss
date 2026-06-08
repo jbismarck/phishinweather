@@ -1,0 +1,55 @@
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
+
+#support-html.weather-display {
+	background-image: url('../images/backgrounds/2.png');
+}
+
+.weather-display .main.support {
+	font-family: 'Star4000';
+	@include u.text-shadow();
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	box-sizing: border-box;
+
+	.support-inner {
+		text-align: center;
+		padding: 8px 16px;
+	}
+
+	.support-headline {
+		font-size: 16pt;
+		color: c.$column-header-text;
+		letter-spacing: 0.05em;
+		margin-bottom: 16px;
+	}
+
+	.support-qr {
+		display: inline-block;
+		padding: 10px;
+		background: rgba(0, 0, 0, 0.45);
+		border: 2px solid rgba(255, 255, 255, 0.2);
+		margin-bottom: 14px;
+
+		img {
+			display: block;
+			width: 180px;
+			height: 180px;
+			image-rendering: pixelated;
+		}
+	}
+
+	.support-url {
+		font-size: 15pt;
+		color: white;
+		margin-bottom: 6px;
+	}
+
+	.support-sub {
+		font-size: 11pt;
+		color: rgba(255, 255, 255, 0.5);
+		font-family: 'Star4000 Small';
+	}
+}
