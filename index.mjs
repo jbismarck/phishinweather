@@ -664,6 +664,23 @@ if (process.env?.DIST === '1') {
 
 const server = app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
+
+	if (!process.env.ADMIN_PASSWORD) {
+		console.warn('WARNING: ADMIN_PASSWORD not set — /admin is open to anyone');
+	}
+
+	try {
+		const tourData = JSON.parse(fs.readFileSync('./server/data/summer-tour.json', 'utf8'));
+		const lastShow = tourData.shows?.at(-1);
+		if (lastShow) {
+			const daysSince = Math.floor((Date.now() - new Date(lastShow.date)) / 86_400_000);
+			if (daysSince > 30) {
+				console.warn(`WARNING: summer-tour.json last show was ${daysSince} days ago (${lastShow.date}) — update for next tour`);
+			}
+		}
+	} catch {
+		console.warn('WARNING: summer-tour.json missing or unreadable');
+	}
 });
 
 // graceful shutdown
