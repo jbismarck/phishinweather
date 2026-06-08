@@ -640,7 +640,11 @@ app.get('/shop/success', async (req, res) => {
 	res.render('shop-success', { version, email });
 });
 
-// debugging
+// phish API routes — registered unconditionally so they work in both dev and production
+app.use('/api/phish', phishRateLimit);
+app.get('/api/phish/on-this-day', phishOnThisDay);
+app.get('/api/phish/summer-tour', phishSummerTour);
+
 if (process.env?.DIST === '1') {
 	// distribution
 	app.use('/scripts', express.static('./server/scripts'));
@@ -653,9 +657,6 @@ if (process.env?.DIST === '1') {
 	app.use('/geoip', geoip);
 	app.use('/resources', express.static('./server/scripts/modules'));
 	app.get('/', index);
-	app.use('/api/phish', phishRateLimit);
-	app.get('/api/phish/on-this-day', phishOnThisDay);
-	app.get('/api/phish/summer-tour', phishSummerTour);
 	app.get('*name', express.static('./server'));
 	// cors pass-thru to api.weather.gov
 	app.get('/playlist.json', playlist);

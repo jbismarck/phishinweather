@@ -60,6 +60,24 @@ const getMedia = async () => {
                 playlist = await scanMusicDirectory();
         }
 
+        // No custom local tracks — seed from today's featured show on phish.in.
+        // Falls back silently to default ambient tracks if the API is unavailable.
+        const hasCustomTracks = playlist.availableFiles.some((f) => !f.startsWith('default/'));
+        if (!hasCustomTracks) {
+                try {
+                        const r = await fetch('/api/phish/on-this-day');
+                        if (r.ok) {
+                                const data = await r.json();
+                                const phishTracks = (data?.featured?.tracks ?? [])
+                                        .map((t) => t.mp3)
+                                        .filter(Boolean);
+                                if (phishTracks.length > 0) {
+                                        playlist = { availableFiles: phishTracks };
+                                }
+                        }
+                } catch { /* stay with default ambient tracks */ }
+        }
+
         enableMediaPlayer();
 };
 
