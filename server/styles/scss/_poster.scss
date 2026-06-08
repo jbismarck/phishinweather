@@ -1,0 +1,147 @@
+@use 'shared/_colors' as c;
+
+#poster-page {
+	position: relative;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(180deg, #102080 0%, #001040 100%);
+	color: white;
+	font-family: 'Star4000';
+	text-align: center;
+	overflow: hidden;
+	box-sizing: border-box;
+	padding: 6vh 8vw;
+
+	// scanlines
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 2px,
+			rgba(0, 0, 0, 0.18) 2px,
+			rgba(0, 0, 0, 0.18) 4px
+		);
+		pointer-events: none;
+		z-index: 1;
+	}
+
+	> * { position: relative; z-index: 2; }
+
+	.poster-eyebrow {
+		font-family: 'Star4000 Small';
+		font-size: clamp(12pt, 1.8vw, 18pt);
+		color: rgba(255, 255, 255, 0.55);
+		letter-spacing: 0.25em;
+		margin-bottom: 1.5vh;
+	}
+
+	.poster-title {
+		font-family: 'Star4000 Large';
+		font-size: clamp(48pt, 11vw, 110pt);
+		color: #ffff00;
+		line-height: 0.95;
+		text-shadow: 0 0 40px rgba(255, 255, 0, 0.35), 3px 3px 0 rgba(0, 0, 0, 0.6);
+		letter-spacing: -0.01em;
+		margin-bottom: 0.5vh;
+	}
+
+	.poster-tld {
+		font-family: 'Star4000 Large';
+		font-size: clamp(24pt, 5vw, 52pt);
+		color: rgba(255, 255, 0, 0.65);
+		letter-spacing: 0.05em;
+		margin-bottom: 3vh;
+	}
+
+	.poster-rule {
+		width: clamp(180px, 40vw, 520px);
+		height: 3px;
+		background: #ffff00;
+		margin: 0 auto 3vh;
+		border: none;
+	}
+
+	.poster-tagline {
+		font-family: 'Star4000 Small';
+		font-size: clamp(14pt, 2.2vw, 22pt);
+		color: white;
+		letter-spacing: 0.18em;
+		margin-bottom: 5vh;
+	}
+
+	.poster-qr-wrap {
+		display: inline-block;
+		border: 2px dashed rgba(255, 255, 255, 0.3);
+		padding: 16px;
+		margin-bottom: 5vh;
+		background: rgba(0, 0, 0, 0.35);
+
+		.poster-qr-placeholder {
+			width: clamp(100px, 18vw, 200px);
+			height: clamp(100px, 18vw, 200px);
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			font-family: 'Star4000 Small';
+			font-size: 9pt;
+			color: rgba(255, 255, 255, 0.4);
+			letter-spacing: 0.1em;
+
+			&::before {
+				content: '▦';
+				font-size: 32pt;
+				color: rgba(255, 255, 255, 0.2);
+				margin-bottom: 8px;
+			}
+		}
+	}
+
+	.poster-url {
+		font-size: clamp(14pt, 2vw, 20pt);
+		color: rgba(255, 255, 255, 0.75);
+		letter-spacing: 0.1em;
+		margin-bottom: 1.5vh;
+	}
+
+	.poster-est {
+		font-family: 'Star4000 Small';
+		font-size: 9pt;
+		color: rgba(255, 255, 255, 0.3);
+		letter-spacing: 0.2em;
+		position: absolute;
+		bottom: 3vh;
+		right: 4vw;
+		z-index: 2;
+	}
+}
+
+@media print {
+	@page { size: 18in 24in; margin: 0; }
+
+	body {
+		margin: 0;
+		background: #001040;
+	}
+
+	body > *:not(#poster-page) {
+		display: none !important;
+	}
+
+	#poster-page {
+		width: 18in;
+		height: 24in;
+
+		.poster-title  { font-size: 160pt; }
+		.poster-tld    { font-size: 72pt; }
+		.poster-tagline { font-size: 30pt; }
+		.poster-url    { font-size: 26pt; }
+	}
+}

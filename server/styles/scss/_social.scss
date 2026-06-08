@@ -1,0 +1,51 @@
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
+
+#social-instagram-html.weather-display,
+#social-youtube-html.weather-display,
+#social-reddit-html.weather-display,
+#social-onlyfans-html.weather-display {
+	background-image: url('../images/backgrounds/2.png');
+}
+
+.weather-display .main.social-card {
+	font-family: 'Star4000';
+	@include u.text-shadow();
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	box-sizing: border-box;
+
+	.social-inner {
+		text-align: center;
+		padding: 8px 24px;
+		border-left: 4px solid var(--accent, #{c.$column-header-text});
+		padding-left: 20px;
+	}
+
+	.social-platform {
+		font-size: 22pt;
+		color: c.$column-header-text;
+		letter-spacing: 0.05em;
+		margin-bottom: 10px;
+	}
+
+	.social-handle {
+		font-size: 18pt;
+		color: white;
+		margin-bottom: 12px;
+	}
+
+	.social-cta {
+		font-family: 'Star4000 Small';
+		font-size: 11pt;
+		color: rgba(255, 255, 255, 0.55);
+		letter-spacing: 0.08em;
+	}
+
+	.social-inner[data-platform="instagram"] { --accent: #e1306c; }
+	.social-inner[data-platform="youtube"]   { --accent: #ff3333; }
+	.social-inner[data-platform="reddit"]    { --accent: #ff4500; }
+	.social-inner[data-platform="onlyfans"]  { --accent: #00aff0; }
+}

@@ -394,6 +394,7 @@ if (process.env?.DIST === '1') {
 	app.get('/api/phish/on-this-day', phishOnThisDay);
 	app.get('/api/phish/summer-tour', phishSummerTour);
 	app.get('/admin', adminDashboard);
+	app.get('/poster', (req, res) => res.render('poster', { version }));
 	app.get('*name', express.static('./server'));
 	// cors pass-thru to api.weather.gov
 	app.get('/playlist.json', playlist);
