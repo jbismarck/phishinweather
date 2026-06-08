@@ -70,9 +70,33 @@ const geoip = (req, res) => {
 	res.json({});
 };
 
-// Phish "on this day" — in-memory cache keyed by calendar date
+const PHISH_CACHE_FILE = './server/data/phish-cache.json';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Disk-backed cache: survives process restarts within the same deploy
+const loadDiskCache = () => {
+	try {
+		const raw = fs.readFileSync(PHISH_CACHE_FILE, 'utf8');
+		return JSON.parse(raw);
+	} catch {
+		return {};
+	}
+};
+
+const saveDiskCache = (data) => {
+	try {
+		fs.writeFileSync(PHISH_CACHE_FILE, JSON.stringify(data), 'utf8');
+	} catch (e) {
+		console.error('Failed to write phish cache:', e.message);
+	}
+};
+
+// In-memory cache (warm path — avoids disk read on every request)
 let phishCache = null;
 let phishCacheDate = null;
+// Show list cached separately for 7 days — it barely changes
+let allShowsCache = null;
+let allShowsCacheDate = null;
 
 const phishOnThisDay = async (req, res) => {
 	const today = new Date();
@@ -81,34 +105,53 @@ const phishOnThisDay = async (req, res) => {
 	const monthDay = `${mm}-${dd}`;
 	const todayKey = `${today.getFullYear()}-${monthDay}`;
 
+	// 1. In-memory hit
 	if (phishCache && phishCacheDate === todayKey) {
 		return res.json(phishCache);
 	}
 
+	// 2. Disk hit (survives restarts)
+	const disk = loadDiskCache();
+	if (disk.date === todayKey && disk.payload) {
+		phishCache = disk.payload;
+		phishCacheDate = todayKey;
+		return res.json(phishCache);
+	}
+
 	try {
-		// Fetch all show pages from phish.in
-		const allShows = [];
-		let page = 1;
-		let totalPages = 1;
-		while (page <= totalPages) {
-			// eslint-disable-next-line no-await-in-loop
-			const r = await fetch(`https://phish.in/api/v2/shows?sort_attr=date&sort_dir=asc&per_page=300&page=${page}`, {
-				headers: { Accept: 'application/json' },
-			});
-			const data = await r.json();
-			totalPages = data.total_pages;
-			allShows.push(...data.shows);
-			page += 1;
+		// 3. Fetch full show list — cached for 7 days to avoid paginated burst
+		const weekKey = `${today.getFullYear()}-W${Math.floor((today - new Date(today.getFullYear(), 0, 1)) / 6048e5)}`;
+		if (!allShowsCache || allShowsCacheDate !== weekKey) {
+			const allShows = [];
+			let page = 1;
+			let totalPages = 1;
+			while (page <= totalPages) {
+				// eslint-disable-next-line no-await-in-loop
+				const r = await fetch(`https://phish.in/api/v2/shows?sort_attr=date&sort_dir=asc&per_page=300&page=${page}`, {
+					headers: { Accept: 'application/json' },
+				});
+				// eslint-disable-next-line no-await-in-loop
+				const data = await r.json();
+				totalPages = data.total_pages;
+				allShows.push(...data.shows);
+				page += 1;
+				if (page <= totalPages) await sleep(150);
+			}
+			allShowsCache = allShows;
+			allShowsCacheDate = weekKey;
 		}
 
 		// Filter to today's month/day across all years
-		const todayShows = allShows.filter((s) => s.date.slice(5) === monthDay);
+		const todayShows = allShowsCache.filter((s) => s.date.slice(5) === monthDay);
 
-		// Fetch track details for each matching show
-		const shows = await Promise.all(todayShows.map(async (show) => {
+		// Fetch track details serially with a small delay — avoids bursting phish.in
+		const shows = [];
+		for (const show of todayShows) {
+			// eslint-disable-next-line no-await-in-loop
 			const r = await fetch(`https://phish.in/api/v2/shows/${show.date}`, {
 				headers: { Accept: 'application/json' },
 			});
+			// eslint-disable-next-line no-await-in-loop
 			const detail = await r.json();
 
 			const sets = {};
@@ -119,15 +162,17 @@ const phishOnThisDay = async (req, res) => {
 				if (mp3) tracks.push({ mp3, title });
 			});
 
-			return {
+			shows.push({
 				date: show.date,
 				year: show.date.slice(0, 4),
 				venue: show.venue_name,
 				location: show.venue?.location || '',
 				sets,
 				tracks,
-			};
-		}));
+			});
+			// eslint-disable-next-line no-await-in-loop
+			await sleep(150);
+		}
 
 		// Featured show: most recent on-this-day show with recordings
 		const withTracks = shows.filter((s) => s.tracks.length > 0);
@@ -145,6 +190,7 @@ const phishOnThisDay = async (req, res) => {
 				const poolData = await poolR.json();
 				const pool = poolData.shows ?? [];
 				if (pool.length > 0) {
+					await sleep(150);
 					const pick = pool[Math.floor(Math.random() * pool.length)];
 					const detailR = await fetch(`https://phish.in/api/v2/shows/${pick.date}`, {
 						headers: { Accept: 'application/json' },
@@ -162,6 +208,7 @@ const phishOnThisDay = async (req, res) => {
 
 		phishCache = { shows, monthDay, featured };
 		phishCacheDate = todayKey;
+		saveDiskCache({ date: todayKey, payload: phishCache });
 		return res.json(phishCache);
 	} catch (err) {
 		console.error('Phish history error:', err.message);
