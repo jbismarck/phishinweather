@@ -145,6 +145,16 @@ let phishCacheDate = null;
 let allShowsCache = null;
 let allShowsCacheDate = null;
 
+// Wraps phish.in fetches with a hard timeout — prevents hung requests from
+// piling up if phish.in stops responding without closing the connection.
+const PHISH_TIMEOUT_MS = 8000;
+const phishFetch = (url) => {
+	const controller = new AbortController();
+	const id = setTimeout(() => controller.abort(), PHISH_TIMEOUT_MS);
+	return fetch(url, { headers: { Accept: 'application/json' }, signal: controller.signal })
+		.finally(() => clearTimeout(id));
+};
+
 const phishOnThisDay = async (req, res) => {
 	const today = new Date();
 	const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -174,9 +184,7 @@ const phishOnThisDay = async (req, res) => {
 			let totalPages = 1;
 			while (page <= totalPages) {
 				// eslint-disable-next-line no-await-in-loop
-				const r = await fetch(`https://phish.in/api/v2/shows?sort_attr=date&sort_dir=asc&per_page=300&page=${page}`, {
-					headers: { Accept: 'application/json' },
-				});
+				const r = await phishFetch(`https://phish.in/api/v2/shows?sort_attr=date&sort_dir=asc&per_page=300&page=${page}`);
 				// eslint-disable-next-line no-await-in-loop
 				const data = await r.json();
 				totalPages = data.total_pages;
@@ -195,9 +203,7 @@ const phishOnThisDay = async (req, res) => {
 		const shows = [];
 		for (const show of todayShows) {
 			// eslint-disable-next-line no-await-in-loop
-			const r = await fetch(`https://phish.in/api/v2/shows/${show.date}`, {
-				headers: { Accept: 'application/json' },
-			});
+			const r = await phishFetch(`https://phish.in/api/v2/shows/${show.date}`);
 			// eslint-disable-next-line no-await-in-loop
 			const detail = await r.json();
 
@@ -231,17 +237,13 @@ const phishOnThisDay = async (req, res) => {
 		} else {
 			// Fallback: random show from 50 most recent on phish.in
 			try {
-				const poolR = await fetch('https://phish.in/api/v2/shows?sort_attr=date&sort_dir=desc&per_page=50', {
-					headers: { Accept: 'application/json' },
-				});
+				const poolR = await phishFetch('https://phish.in/api/v2/shows?sort_attr=date&sort_dir=desc&per_page=50');
 				const poolData = await poolR.json();
 				const pool = poolData.shows ?? [];
 				if (pool.length > 0) {
 					await sleep(150);
 					const pick = pool[Math.floor(Math.random() * pool.length)];
-					const detailR = await fetch(`https://phish.in/api/v2/shows/${pick.date}`, {
-						headers: { Accept: 'application/json' },
-					});
+					const detailR = await phishFetch(`https://phish.in/api/v2/shows/${pick.date}`);
 					const randomDetail = await detailR.json();
 					const randomTracks = (randomDetail.tracks || [])
 						.filter((t) => t.mp3_url)
@@ -330,18 +332,14 @@ const phishSummerTour = async (req, res) => {
 		await Promise.all(uniqueSlugs.map(async (show) => {
 			const { phishin_venue_slug: slug } = show;
 			try {
-				const listR = await fetch(
+				const listR = await phishFetch(
 					`https://phish.in/api/v2/shows?venue_slug=${encodeURIComponent(slug)}&sort_attr=date&sort_dir=desc&per_page=1`,
-					{ headers: { Accept: 'application/json' } },
 				);
 				const listData = await listR.json();
 				const recentShow = listData.shows?.[0];
 				if (!recentShow) { tracksBySlug[slug] = []; return; }
 
-				const detailR = await fetch(
-					`https://phish.in/api/v2/shows/${recentShow.date}`,
-					{ headers: { Accept: 'application/json' } },
-				);
+				const detailR = await phishFetch(`https://phish.in/api/v2/shows/${recentShow.date}`);
 				const detail = await detailR.json();
 				tracksBySlug[slug] = (detail.tracks || [])
 					.filter((t) => t.mp3)
