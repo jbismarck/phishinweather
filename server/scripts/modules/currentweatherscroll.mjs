@@ -7,8 +7,10 @@ import getHazards from './hazards.mjs';
 const degree = String.fromCharCode(176);
 const SCROLL_SPEED = 60; // pixels/second — medium crawl
 const SEPARATOR = '   •   ';
+const DATA_REFRESH_MS = 5 * 60 * 1000; // refresh weather data every 5 min
 
 let loopActive = false;
+let currentLoopId = 0; // incremented each runLoop call to cancel stale animation closures
 
 // ── Screen definitions ────────────────────────────────────────────────────────
 
@@ -78,6 +80,7 @@ const buildScrollText = (data) => {
 
 const runLoop = async () => {
 	if (!loopActive) return;
+	const loopId = ++currentLoopId;
 
 	const data = await getCurrentWeather();
 	if (!data) {
@@ -102,43 +105,61 @@ const runLoop = async () => {
 	// clear header
 	elemForEach('.weather-display .scroll .scroll-header', (el) => { el.innerHTML = ''; });
 
-	// build the scroll element
+	const firstFixed = document.querySelector('.weather-display .scroll .fixed');
+	if (!firstFixed) return;
+
+	// measure one copy's rendered width in the correct font context
+	const tempEl = document.createElement('div');
+	tempEl.classList.add('scroll-area');
+	tempEl.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;top:-9999px';
+	tempEl.textContent = text + SEPARATOR;
+	firstFixed.appendChild(tempEl);
+	const oneCopyWidth = tempEl.scrollWidth;
+	firstFixed.removeChild(tempEl);
+
+	if (oneCopyWidth === 0) return;
+
+	// duplicate content: at left:-oneCopyWidth the view is identical to left:0
 	const scrollArea = document.createElement('div');
 	scrollArea.classList.add('scroll-area');
-	scrollArea.textContent = text;
+	scrollArea.textContent = text + SEPARATOR + text;
 	scrollArea.style.left = '0px';
 
-	// mount to all fixed containers
 	elemForEach('.weather-display .scroll .fixed', (el) => {
 		el.innerHTML = '';
 		el.append(scrollArea.cloneNode(true));
 	});
 
-	// measure from first mounted copy
-	const firstFixed = document.querySelector('.weather-display .scroll .fixed');
-	if (!firstFixed) return;
 	const firstArea = firstFixed.querySelector('.scroll-area');
-	const scrollDistance = Math.max(firstArea.scrollWidth - firstFixed.clientWidth, 0);
+	const duration = oneCopyWidth / SCROLL_SPEED;
 
-	if (scrollDistance === 0) {
-		// content fits without scrolling — show briefly then loop
-		setTimeout(runLoop, 5000);
-		return;
-	}
+	const animate = () => {
+		if (!loopActive || currentLoopId !== loopId) return;
 
-	const duration = scrollDistance / SCROLL_SPEED;
-	elemForEach('.weather-display .scroll .fixed .scroll-area', (el) => {
-		el.style.transition = `left linear ${duration.toFixed(1)}s`;
-	});
-
-	// double rAF so browser paints the initial position before triggering the transition
-	requestAnimationFrame(() => requestAnimationFrame(() => {
-		if (!loopActive) return;
+		// instant reset to start position (no transition)
 		elemForEach('.weather-display .scroll .fixed .scroll-area', (el) => {
-			el.style.left = `-${scrollDistance}px`;
+			el.style.transition = 'none';
+			el.style.left = '0px';
 		});
-		firstArea.addEventListener('transitionend', runLoop, { once: true });
-	}));
+
+		// force reflow so the reset is applied before the transition is added
+		// eslint-disable-next-line no-unused-expressions
+		firstFixed.offsetHeight;
+
+		requestAnimationFrame(() => requestAnimationFrame(() => {
+			if (!loopActive || currentLoopId !== loopId) return;
+			elemForEach('.weather-display .scroll .fixed .scroll-area', (el) => {
+				el.style.transition = `left linear ${duration.toFixed(1)}s`;
+				el.style.left = `-${oneCopyWidth}px`;
+			});
+			firstArea.addEventListener('transitionend', animate, { once: true });
+		}));
+	};
+
+	animate();
+
+	// refresh weather data after 5 minutes without interrupting the visual loop
+	setTimeout(runLoop, DATA_REFRESH_MS);
 };
 
 // ── Public API ────────────────────────────────────────────────────────────────
