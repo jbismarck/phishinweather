@@ -130,7 +130,6 @@ const toggleMedia = (forcedState) => {
 
 const startMedia = async () => {
 	try {
-		console.log('[media] startMedia, player exists:', !!player, 'playlist length:', playlist?.availableFiles?.length);
 		if (!player) {
 			await initializePlayer();
 		} else {

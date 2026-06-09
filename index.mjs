@@ -29,6 +29,7 @@ app.use((req, res, next) => {
 			"style-src 'self' 'unsafe-inline'",
 			"img-src 'self' data: blob: https://mesonet.agron.iastate.edu https://www.spc.noaa.gov",
 			"connect-src 'self' https://api.weather.gov https://phish.in https://api.open-meteo.com https://mesonet.agron.iastate.edu https://www.spc.noaa.gov https://www.cpc.ncep.noaa.gov https://geocode.arcgis.com",
+			"media-src 'self' https://phish.in",
 			"worker-src 'self'",
 			"font-src 'self'",
 			"frame-ancestors 'none'",
