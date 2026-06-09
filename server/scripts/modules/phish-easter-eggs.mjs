@@ -1,7 +1,7 @@
 import { currentDisplay, displayNavMessage, msg } from './navigation.mjs';
 import { gamehendgeWeather } from './gamehendge-weather.mjs';
 import { addScreen } from './currentweatherscroll.mjs';
-import { injectTracks, whenMediaReady, getCurrentTrackUrl } from './media.mjs';
+import { whenMediaReady, getCurrentTrackUrl } from './media.mjs';
 
 const HFB = [
 	// Icculus & the Book
@@ -59,7 +59,8 @@ const formatShowDate = (d) => {
 	return `${mon} ${+dd} ${yr}`;
 };
 
-// After the local playlist is set up, inject today's on-this-day show (or random fallback)
+// Fetch track metadata for the now-playing scroller display.
+// media.mjs already loaded the phish.in playlist — don't inject again or it aborts play().
 whenMediaReady(async () => {
 	try {
 		const r = await fetch('/api/phish/on-this-day');
@@ -67,7 +68,6 @@ whenMediaReady(async () => {
 		if (data.featured?.tracks?.length) {
 			nowPlayingDate = data.featured.date;
 			titleByUrl = new Map(data.featured.tracks.map(({ mp3, title }) => [mp3, title]));
-			injectTracks(data.featured.tracks.map((t) => t.mp3));
 		}
 	} catch (e) {
 		console.error('Daily music fetch failed:', e);
