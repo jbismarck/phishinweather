@@ -122,10 +122,11 @@ const htmlSources = [
 const compressHtml = async () => {
 	const packageJson = await readFile('package.json');
 	const { version } = JSON.parse(packageJson);
+	const buildHash = process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 8) ?? version;
 
 	return src(htmlSources)
 		.pipe(ejs({
-			production: version,
+			production: buildHash,
 			version,
 			OVERRIDES,
 		}))
