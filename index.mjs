@@ -539,18 +539,17 @@ const SERVICES = [
 
 const adminDashboard = (req, res) => {
 	const password = process.env.ADMIN_PASSWORD;
-	if (password) {
-		const auth = req.headers.authorization ?? '';
-		if (!auth.startsWith('Basic ')) {
-			res.set('WWW-Authenticate', 'Basic realm="phishinweather admin"');
-			return res.status(401).send('Unauthorized');
-		}
-		const decoded = Buffer.from(auth.slice(6), 'base64').toString();
-		const pass = decoded.slice(decoded.indexOf(':') + 1);
-		if (pass !== password) {
-			res.set('WWW-Authenticate', 'Basic realm="phishinweather admin"');
-			return res.status(401).send('Unauthorized');
-		}
+	if (!password) return res.status(503).send('Admin not configured — set ADMIN_PASSWORD env var');
+	const auth = req.headers.authorization ?? '';
+	if (!auth.startsWith('Basic ')) {
+		res.set('WWW-Authenticate', 'Basic realm="phishinweather admin"');
+		return res.status(401).send('Unauthorized');
+	}
+	const decoded = Buffer.from(auth.slice(6), 'base64').toString();
+	const pass = decoded.slice(decoded.indexOf(':') + 1);
+	if (pass !== password) {
+		res.set('WWW-Authenticate', 'Basic realm="phishinweather admin"');
+		return res.status(401).send('Unauthorized');
 	}
 
 	const totalMonthly = MONTHLY_BURN.reduce((sum, e) => sum + e.monthly, 0);
@@ -665,10 +664,6 @@ if (process.env?.DIST === '1') {
 
 const server = app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
-
-	if (!process.env.ADMIN_PASSWORD) {
-		console.warn('WARNING: ADMIN_PASSWORD not set — /admin is open to anyone');
-	}
 
 	try {
 		const tourData = JSON.parse(fs.readFileSync('./server/data/summer-tour.json', 'utf8'));
