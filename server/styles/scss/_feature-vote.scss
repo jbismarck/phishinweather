@@ -1,0 +1,77 @@
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
+
+#feature-vote-html.weather-display {
+	background-image: url('../images/backgrounds/3.png');
+}
+
+.weather-display .main.feature-vote {
+	font-family: 'Star4000';
+	@include u.text-shadow();
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	box-sizing: border-box;
+
+	.fv-inner {
+		text-align: center;
+		padding: 8px 24px;
+		width: 100%;
+	}
+
+	.fv-headline {
+		font-size: 17pt;
+		color: c.$column-header-text;
+		letter-spacing: 0.06em;
+		margin-bottom: 6px;
+	}
+
+	.fv-sub {
+		font-size: 10pt;
+		color: rgba(255, 255, 255, 0.55);
+		font-family: 'Star4000 Small';
+		margin-bottom: 22px;
+	}
+
+	.fv-platforms {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0;
+	}
+
+	.fv-platform {
+		flex: 1;
+		max-width: 220px;
+		padding: 12px 10px;
+		background: rgba(0, 0, 0, 0.4);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+	}
+
+	.fv-divider {
+		font-size: 20pt;
+		color: rgba(255, 255, 255, 0.2);
+		padding: 0 10px;
+	}
+
+	.fv-platform-name {
+		font-size: 14pt;
+		color: c.$column-header-text;
+		letter-spacing: 0.08em;
+		margin-bottom: 4px;
+	}
+
+	.fv-platform-detail {
+		font-size: 9pt;
+		color: rgba(255, 255, 255, 0.5);
+		font-family: 'Star4000 Small';
+		margin-bottom: 8px;
+	}
+
+	.fv-platform-url {
+		font-size: 10pt;
+		color: white;
+		font-family: 'Star4000 Small';
+	}
+}
