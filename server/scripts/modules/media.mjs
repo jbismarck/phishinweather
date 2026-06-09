@@ -246,18 +246,6 @@ const setTrackName = (fileName) => {
         document.getElementById('musicTrack').innerHTML = trackName;
 };
 
-const injectTracks = (tracks) => {
-	if (!tracks?.length) return;
-	playlist = { availableFiles: [...tracks] };
-	randomizePlaylist();
-	currentTrack = 0;
-	if (!player) return;
-	const track = playlist.availableFiles[0];
-	player.src = getTrackUrl(track);
-	setTrackName(track);
-	if (mediaPlaying.value) player.play().catch(() => {});
-};
-
 const whenMediaReady = (cb) => {
 	if (mediaReady) { cb(); return; }
 	mediaReadyQueue.push(cb);
@@ -267,7 +255,6 @@ const getCurrentTrackUrl = () => playlist?.availableFiles?.[currentTrack] ?? nul
 
 export {
 	toggleMedia,
-	injectTracks,
 	whenMediaReady,
 	getCurrentTrackUrl,
 };
