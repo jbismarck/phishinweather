@@ -129,22 +129,19 @@ const toggleMedia = (forcedState) => {
 };
 
 const startMedia = async () => {
-	// if there's not media player yet, enable it
-	if (!player) {
-		initializePlayer();
-	} else {
-		try {
+	try {
+		if (!player) {
+			await initializePlayer();
+		} else {
 			await player.play();
 			setTrackName(playlist.availableFiles[currentTrack]);
-		} catch (e) {
-			// report the error
-			console.error('Couldn\'t play music');
-			console.error(e);
-			// set state back to not playing for good UI experience
-			mediaPlaying.value = false;
-			stateChanged();
-			setTrackName('Not playing');
 		}
+	} catch (e) {
+		console.error('Couldn\'t play music');
+		console.error(e);
+		mediaPlaying.value = false;
+		stateChanged();
+		setTrackName('Not playing');
 	}
 };
 
@@ -200,7 +197,7 @@ const mediaVolume = new Setting('mediaVolume', {
 
 const getTrackUrl = (track) => (track.startsWith('http') ? track : `music/${track}`);
 
-const initializePlayer = () => {
+const initializePlayer = async () => {
 	// basic sanity checks
 	if (!playlist.availableFiles || playlist?.availableFiles.length === 0) {
 		throw new Error('No playlist available');
@@ -215,7 +212,6 @@ const initializePlayer = () => {
 	currentTrack = 0;
 
 	// add event handlers
-	player.addEventListener('canplay', playerCanPlay);
 	player.addEventListener('ended', playerEnded);
 
 	// get the first file
@@ -223,13 +219,9 @@ const initializePlayer = () => {
 	setTrackName(playlist.availableFiles[currentTrack]);
 	player.type = 'audio/mpeg';
 	setVolume(mediaVolume.value);
-};
 
-const playerCanPlay = async () => {
-	// check to make sure they user still wants music (protect against slow loading music)
-	if (!mediaPlaying.value) return;
-	// start playing
-	startMedia();
+	// play() must be called within the user gesture context — don't wait for canplay
+	await player.play();
 };
 
 const playerEnded = () => {
