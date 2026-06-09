@@ -130,6 +130,7 @@ const toggleMedia = (forcedState) => {
 
 const startMedia = async () => {
 	try {
+		console.log('[media] startMedia, player exists:', !!player, 'playlist length:', playlist?.availableFiles?.length);
 		if (!player) {
 			await initializePlayer();
 		} else {
@@ -137,8 +138,7 @@ const startMedia = async () => {
 			setTrackName(playlist.availableFiles[currentTrack]);
 		}
 	} catch (e) {
-		console.error('Couldn\'t play music');
-		console.error(e);
+		console.error('[media] Couldn\'t play music:', e.name, e.message);
 		mediaPlaying.value = false;
 		stateChanged();
 		setTrackName('Not playing');
@@ -232,10 +232,11 @@ const playerEnded = () => {
 		randomizePlaylist();
 		currentTrack = 0;
 	}
-	// update the player source
+	// update the player source and continue playing
 	const track = playlist.availableFiles[currentTrack];
 	player.src = getTrackUrl(track);
 	setTrackName(track);
+	player.play().catch(() => {});
 };
 
 const setTrackName = (fileName) => {
