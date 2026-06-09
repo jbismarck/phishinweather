@@ -451,7 +451,7 @@ class WeatherDisplay {
 
 	setAutoReload() {
 		// refresh time can be forced by the user (for hazards)
-		const refreshTime = this.refreshTime ?? settings.refreshTime.value;
+		const refreshTime = this.refreshTime ?? settings.refreshTime?.value ?? 600_000;
 		this.autoRefreshHandle = this.autoRefreshHandle ?? setInterval(() => this.getData(false, true), refreshTime);
 	}
 }
