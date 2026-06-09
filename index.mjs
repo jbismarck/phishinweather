@@ -25,10 +25,10 @@ app.use((req, res, next) => {
 		'Content-Security-Policy',
 		[
 			"default-src 'self'",
-			"script-src 'self' 'unsafe-inline'",
+			"script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
 			"style-src 'self' 'unsafe-inline'",
 			"img-src 'self' data: blob: https://mesonet.agron.iastate.edu https://www.spc.noaa.gov",
-			"connect-src 'self' https://api.weather.gov https://phish.in https://api.open-meteo.com https://mesonet.agron.iastate.edu https://www.spc.noaa.gov https://www.cpc.ncep.noaa.gov https://geocode.arcgis.com",
+			"connect-src 'self' https://api.weather.gov https://phish.in https://api.open-meteo.com https://mesonet.agron.iastate.edu https://www.spc.noaa.gov https://www.cpc.ncep.noaa.gov https://geocode.arcgis.com https://www.google-analytics.com https://region1.google-analytics.com",
 			"media-src 'self' https://phish.in",
 			"worker-src 'self'",
 			"font-src 'self'",
