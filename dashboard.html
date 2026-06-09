@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHISHINWEATHER OPS</title>
+<style>
+  :root {
+    --bg-top: #102080;
+    --bg-bottom: #001040;
+    --panel: #26235a;
+    --panel-border: #3a3680;
+    --yellow: #ffff00;
+    --yellow-dim: #cccc00;
+    --white: #e8e8f0;
+    --dim: #8888aa;
+    --orange: #ff8800;
+    --red: #ff4444;
+    --green: #44ff88;
+    --glow: rgba(255, 255, 0, 0.15);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    min-height: 100%;
+  }
+
+  body {
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    background-attachment: fixed;
+    color: var(--white);
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.06) 2px,
+      rgba(0, 0, 0, 0.06) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* CRT screen vignette */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 10, 0.45) 100%);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    padding: 36px 24px 28px;
+    position: relative;
+    border-bottom: 2px solid var(--yellow);
+    margin-bottom: 8px;
+  }
+
+  .header-timestamp {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  .header-timestamp .ts-label {
+    color: var(--yellow-dim);
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+
+  .header-ws-bar {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: bold;
+    color: var(--yellow);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-shadow:
+      0 0 20px rgba(255, 255, 0, 0.6),
+      0 0 60px rgba(255, 255, 0, 0.2);
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+
+  .tagline {
+    font-size: 13px;
+    color: #99aacc;
+    letter-spacing: 0.15em;
+  }
+
+  .tagline a {
+    color: #aabbdd;
+    text-decoration: none;
+  }
+
+  .tagline a:hover {
+    color: var(--yellow);
+  }
+
+  /* Status bar below header */
+  .status-bar {
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid var(--panel-border);
+    padding: 6px 24px;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── MAIN CONTENT ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--yellow);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,0,0.4), transparent);
+  }
+
+  .section-count {
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── CARD GRID ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 3px;
+    padding: 16px 18px;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    position: relative;
+    transition:
+      transform 0.12s ease,
+      border-color 0.12s ease,
+      box-shadow 0.12s ease,
+      background 0.12s ease;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,0,0.04) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.12s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--yellow);
+    box-shadow:
+      0 4px 20px rgba(255,255,0,0.1),
+      0 0 0 1px rgba(255,255,0,0.2),
+      inset 0 1px 0 rgba(255,255,0,0.1);
+    background: #302d6a;
+  }
+
+  .card:hover::before {
+    opacity: 1;
+  }
+
+  .card:active {
+    transform: translateY(0px);
+  }
+
+  .card-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--yellow);
+    letter-spacing: 0.05em;
+    margin-bottom: 5px;
+    line-height: 1.2;
+  }
+
+  .card-desc {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+
+  .card-url {
+    font-size: 10px;
+    color: #556688;
+    margin-top: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.02em;
+  }
+
+  /* Placeholder badge */
+  .badge-placeholder {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--orange);
+    color: #000;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  /* New / pending badge */
+  .badge-pending {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #446699;
+    color: #aaccff;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--panel-border);
+    padding: 16px 24px;
+    text-align: center;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header {
+      padding: 48px 16px 20px;
+    }
+    .header-timestamp {
+      position: static;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    main {
+      padding: 24px 14px 48px;
+    }
+    .card-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-timestamp" id="ts">
+    <div class="ts-label">opened</div>
+    <div id="ts-date">—</div>
+    <div id="ts-time">—</div>
+  </div>
+  <div class="header-ws-bar">★ WEATHERSTAR 4000+ ★</div>
+  <h1>PHISHINWEATHER OPS</h1>
+  <div class="tagline">
+    <a href="https://phishinweather.com" target="_blank">phishinweather.com</a>
+    &nbsp;·&nbsp; operations dashboard
+  </div>
+</header>
+
+<div class="status-bar">
+  <span class="status-dot"></span>
+  <span>LOCAL DASHBOARD &nbsp;·&nbsp; CLICK ANY CARD TO OPEN &nbsp;·&nbsp; ALL LINKS OPEN IN NEW TAB</span>
+</div>
+
+<main>
+
+  <!-- DEPLOY & CODE -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">Deploy &amp; Code</span>
+      <div class="section-rule"></div>
+      <span class="section-count">3 services</span>
+    </div>
+    <div class="card-grid">
+      <a class="card" href="https://github.com/jbismarck/phishinweather" target="_blank" rel="noopener">
+        <div class="card-name">GitHub</div>
+        <div class="card-desc">source + deploy trigger<br>push to main → live in ~60s</div>
+        <div class="card-url">github.com/jbismarck/phishinweather</div>
+      </a>
+      <a class="card" href="https://railway.app" target="_blank" rel="noopener">
+        <div class="card-name">Railway</div>
+        <div class="card-desc">hosting · logs · env vars<br>Nixpacks build pipeline</div>
+        <div class="card-url">railway.app</div>
+      </a>
+      <a class="card" href="https://dashboard.uptimerobot.com/monitors" target="_blank" rel="noopener">
+        <div class="card-name">Uptime Robot</div>
+        <div class="card-desc">uptime monitoring<br>alerts on downtime</div>
+        <div class="card-url">dashboard.uptimerobot.com/monitors</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- THE SITE -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">The Site</span>
+      <div class="section-rule"></div>
+      <span class="section-count">2 pages</span>
+    </div>
+    <div class="card-grid">
+      <a class="card" href="https://phishinweather.com" target="_blank" rel="noopener">
+        <div class="card-name">Live Site</div>
+        <div class="card-desc">phishinweather.com<br>production · always on</div>
+        <div class="card-url">phishinweather.com</div>
+      </a>
+      <a class="card" href="https://phishinweather.com/poster" target="_blank" rel="noopener">
+        <div class="card-name">Poster Page</div>
+        <div class="card-desc">18×24" print poster<br>/poster route</div>
+        <div class="card-url">phishinweather.com/poster</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- REVENUE -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">Revenue</span>
+      <div class="section-rule"></div>
+      <span class="section-count">2 services</span>
+    </div>
+    <div class="card-grid">
+      <a class="card" href="https://ko-fi.com/Manage/" target="_blank" rel="noopener">
+        <div class="card-name">Ko-fi</div>
+        <div class="card-desc">donations · supporters<br>linked from display card</div>
+        <div class="card-url">ko-fi.com/Manage/</div>
+      </a>
+      <a class="card" href="https://dashboard.stripe.com/acct_1TfvJdBY3paAWqF0/dashboard" target="_blank" rel="noopener">
+        <div class="card-name">Stripe</div>
+        <div class="card-desc">payments dashboard<br>transactions · payouts</div>
+        <div class="card-url">dashboard.stripe.com</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- SOCIAL & CONTENT -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">Social &amp; Content</span>
+      <div class="section-rule"></div>
+      <span class="section-count">4 services</span>
+    </div>
+    <div class="card-grid">
+      <a class="card" href="https://mail.google.com" target="_blank" rel="noopener">
+        <div class="card-name">Gmail</div>
+        <div class="card-desc">rstownsend81@gmail.com<br>support · contact</div>
+        <div class="card-url">mail.google.com</div>
+      </a>
+      <a class="card" href="https://studio.youtube.com" target="_blank" rel="noopener" title="Update to your channel URL">
+        <span class="badge-placeholder">update url</span>
+        <div class="card-name">YouTube</div>
+        <div class="card-desc">stream · channel<br>Studio dashboard</div>
+        <div class="card-url">studio.youtube.com</div>
+      </a>
+      <a class="card" href="https://instagram.com" target="_blank" rel="noopener" title="Update to your Instagram profile URL">
+        <span class="badge-placeholder">update url</span>
+        <div class="card-name">Instagram</div>
+        <div class="card-desc">display card · navId 25<br>linked in rotation</div>
+        <div class="card-url">instagram.com</div>
+      </a>
+      <a class="card" href="https://reddit.com/r/phish" target="_blank" rel="noopener" title="Update to your exact subreddit or profile">
+        <span class="badge-placeholder">update url</span>
+        <div class="card-name">Reddit</div>
+        <div class="card-desc">display card · navId 27<br>r/phish community</div>
+        <div class="card-url">reddit.com/r/phish</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- APIs & DATA -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">APIs &amp; Data</span>
+      <div class="section-rule"></div>
+      <span class="section-count">2 services</span>
+    </div>
+    <div class="card-grid">
+      <a class="card" href="https://phish.in" target="_blank" rel="noopener">
+        <div class="card-name">phish.in</div>
+        <div class="card-desc">show data API<br>on-this-day · tour data<br>daily/weekly disk cache</div>
+        <div class="card-url">phish.in</div>
+      </a>
+      <a class="card" href="https://www.weather.gov" target="_blank" rel="noopener">
+        <div class="card-name">NWS</div>
+        <div class="card-desc">weather API<br>National Weather Service<br>blocks headless Chrome</div>
+        <div class="card-url">weather.gov</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- DOMAIN & ANALYTICS -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">Domain &amp; Analytics</span>
+      <div class="section-rule"></div>
+      <span class="section-count">2 services</span>
+    </div>
+    <div class="card-grid">
+      <a class="card" href="https://porkbun.com/account/domainsSpeedy" target="_blank" rel="noopener">
+        <div class="card-name">Porkbun</div>
+        <div class="card-desc">phishinweather.com<br>DNS · renewal · records</div>
+        <div class="card-url">porkbun.com/account/domainsSpeedy</div>
+      </a>
+      <a class="card" href="https://analytics.google.com" target="_blank" rel="noopener">
+        <span class="badge-pending">pending</span>
+        <div class="card-name">Google Analytics</div>
+        <div class="card-desc">GA4 — not yet set up<br>traffic · sessions · referrers</div>
+        <div class="card-url">analytics.google.com</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- NETWORK -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">Network</span>
+      <div class="section-rule"></div>
+      <span class="section-count" id="network-count">0 dashboards</span>
+    </div>
+    <div class="card-grid" id="network-grid">
+      <div class="card" style="opacity:0.5; cursor:default;">
+        <div class="card-name" style="color:var(--dim);">No other dashboards yet</div>
+        <div class="card-desc">Run /ops-dashboard in another project<br>to add it to the network</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  phishinweather ops dashboard &nbsp;·&nbsp; local file &nbsp;·&nbsp; edit dashboard.html to update urls
+</footer>
+
+<script>
+  // Timestamp on load
+  function updateTimestamp() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+    }).toUpperCase();
+    const timeStr = now.toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+    document.getElementById('ts-date').textContent = dateStr;
+    document.getElementById('ts-time').textContent = timeStr;
+  }
+
+  updateTimestamp();
+  // Keep time live
+  setInterval(() => {
+    document.getElementById('ts-time').textContent = new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  }, 1000);
+
+  // Network — edit this object when you add new project dashboards
+  // or run /ops-dashboard in any project to auto-update
+  const DASHBOARD_NETWORK = {
+    // "project-name": "file:///absolute/path/to/dashboard.html"
+    // other projects will appear here automatically
+  };
+
+  (function renderNetwork() {
+    const entries = Object.entries(DASHBOARD_NETWORK);
+    const grid = document.getElementById('network-grid');
+    const count = document.getElementById('network-count');
+    if (entries.length === 0) return;
+    grid.innerHTML = '';
+    count.textContent = entries.length + ' dashboard' + (entries.length > 1 ? 's' : '');
+    entries.forEach(([name, url]) => {
+      const a = document.createElement('a');
+      a.className = 'card';
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      const displayUrl = url.replace('file://', '').replace(/\/dashboard\.html$/, '');
+      a.innerHTML = `
+        <div class="card-name">${name}</div>
+        <div class="card-desc">ops dashboard</div>
+        <div class="card-url">${displayUrl}</div>
+      `;
+      grid.appendChild(a);
+    });
+  })();
+
+  // Keyboard shortcut: press R to open Railway, G to open GitHub
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    const shortcuts = {
+      'r': 'https://railway.app',
+      'g': 'https://github.com/jbismarck/phishinweather',
+      's': 'https://phishinweather.com',
+      'm': 'https://mail.google.com',
+    };
+    const url = shortcuts[e.key.toLowerCase()];
+    if (url && !e.metaKey && !e.ctrlKey) {
+      window.open(url, '_blank', 'noopener');
+    }
+  });
+</script>
+</body>
+</html>
