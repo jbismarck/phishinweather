@@ -216,3 +216,67 @@ git push   # → Railway deploys in ~60s
 ```
 
 Always include compiled `server/styles/main.css` and `server/styles/main.css.map` in commits when SCSS changed.
+
+---
+
+## Architecture Gotchas
+
+### Sparse displays array
+`displays[]` in `navigation.mjs` is **sparse** — navIds 12–19 are holes. `displays.length` returns 23+ while only 15 entries actually exist. Always use:
+- `displays.filter(Boolean).length` not `displays.length` for counts
+- `displays[n]?.property` not `displays[n].property` for access
+
+**navId 0 is hardcoded** in the navigation status logic (~lines 92–107). Do not renumber it — status reporting breaks silently.
+
+### alwaysEnabled cards
+navIds 24–28 (Ko-fi, Instagram, YouTube, Reddit, OnlyFans) are `alwaysEnabled = true` in their constructors. They are excluded from the settings checkbox panel and are always in rotation. New ad/social cards should follow this pattern.
+
+### Gamehendge (navId 23) is intentionally unregistered
+`gamehendge-weather.mjs` does NOT call `registerDisplay()`. It never appears in the settings menu or normal rotation — Shift+G only. `isEnabled = true` is force-set in the constructor to bypass the base class getData check.
+
+### isEnabled init chain
+For all other displays: `isEnabled` is set in `generateCheckbox()` → called from `registerDisplay()` → called from `init()` on DOMContentLoaded. A display that skips `registerDisplay()` stays permanently disabled.
+
+---
+
+## Style Editor → SCSS Transfer
+
+The style editor (Shift+E) is for tuning values interactively. Once finalized, **transfer into SCSS source** — `localStorage` is ephemeral, browser-scoped, and doesn't deploy.
+
+1. Get current values: open Shift+E or run `localStorage.getItem('phish-style-editor-v2')` in console
+2. Write values into the relevant SCSS file (`_phish-countdown.scss`, `_phish-tour.scss`, etc.)
+3. Update the matching `def` values in the `GROUPS` array in `style-editor.mjs` — this ensures `applyStyles()` sees `val(c) === c.def` and injects no `!important` override
+4. Run `npm run build`, commit SCSS + recompiled `main.css` + `style-editor.mjs`
+
+After this, the display is correct in any browser, any device, with or without localStorage.
+
+---
+
+## Production Debugging
+
+### Verifying what Railway is actually serving
+Fetch the asset URL directly to bypass browser cache:
+```
+https://phishinweather.com/styles/main.css
+https://phishinweather.com/resources/ws.min.css
+```
+
+### Safari cache
+`Ctrl+Option+R` does NOT clear the CSS cache — it just reloads. To verify a production CSS fix:
+- Develop → Empty Caches (`Cmd+Option+E`), then reload
+- Or use Private Browsing (`Cmd+Shift+N`) — always starts fresh
+
+### Railway env var drift
+Setting or editing any Railway variable triggers a full redeploy. `DIST=1` has been accidentally dropped this way before, causing a broken production deploy. After any variable change, verify `DIST=1` and `NODE_ENV=production` are still set. The startup assertion will throw immediately if they're missing — check Railway deploy logs.
+
+---
+
+## phish.in API Notes
+
+- Track URL field is **`mp3_url`** (not `mp3`) — double-check this on any new API work
+- `whenMediaReady(cb)` in `media.mjs` — fires after `enableMediaPlayer()` completes (local playlist loaded). Use this to inject phish.in tracks so they override local tracks
+- `getCurrentTrackUrl()` — returns URL of the currently queued track (used by scroller)
+- `injectTracks(urls)` — replaces playlist with new URL array, randomizes, starts playing
+
+### Autoplay gesture window
+`player.play()` must be called **directly inside** the user gesture handler (click/keydown), not deferred to an async event like `canplay` or `loadedmetadata`. Deferring closes the gesture window and causes a silent failure or AbortError. Call it synchronously, let the browser buffer after.
