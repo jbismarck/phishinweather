@@ -496,13 +496,18 @@
     <div class="section-header">
       <span class="section-label">Domain &amp; Analytics</span>
       <div class="section-rule"></div>
-      <span class="section-count">2 services</span>
+      <span class="section-count">3 services</span>
     </div>
     <div class="card-grid">
       <a class="card" href="https://porkbun.com/account/domainsSpeedy" target="_blank" rel="noopener">
         <div class="card-name">Porkbun</div>
-        <div class="card-desc">phishinweather.com<br>DNS · renewal · records</div>
+        <div class="card-desc">phishinweather.com<br>domain registrar · renewal</div>
         <div class="card-url">porkbun.com/account/domainsSpeedy</div>
+      </a>
+      <a class="card" href="https://dash.cloudflare.com/539644899d44b1b1a35a04f077c368c9/phishinweather.com" target="_blank" rel="noopener">
+        <div class="card-name">Cloudflare</div>
+        <div class="card-desc">DNS · CDN · SSL<br>phishinweather.com zone</div>
+        <div class="card-url">dash.cloudflare.com</div>
       </a>
       <a class="card" href="https://analytics.google.com/analytics/web/#/p{G-91J7JKK2SJ}/reports/intelligenthome" target="_blank" rel="noopener">
         <div class="card-name">Google Analytics</div>
@@ -558,8 +563,7 @@
   // Network — edit this object when you add new project dashboards
   // or run /ops-dashboard in any project to auto-update
   const DASHBOARD_NETWORK = {
-    // "project-name": "file:///absolute/path/to/dashboard.html"
-    // other projects will appear here automatically
+    "property-quest": "file:///Users/johnnybismarck/Applications/property-quest/dashboard.html",
   };
 
   (function renderNetwork() {
