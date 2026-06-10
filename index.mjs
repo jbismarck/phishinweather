@@ -537,7 +537,77 @@ const SERVICES = [
 	},
 ];
 
-const adminDashboard = (req, res) => {
+const CF_ZONE_ID = '539644899d44b1b1a35a04f077c368c9';
+
+async function fetchCfAnalytics() {
+	const token = process.env.CLOUDFLARE_API_TOKEN;
+	if (!token) return null;
+
+	const today = new Date().toISOString().slice(0, 10);
+	const weekAgo = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+	const query = `{
+		viewer {
+			zones(filter: { zoneTag: "${CF_ZONE_ID}" }) {
+				httpRequests1dGroups(
+					limit: 7
+					filter: { date_geq: "${weekAgo}", date_leq: "${today}" }
+					orderBy: [date_DESC]
+				) {
+					dimensions { date }
+					sum { requests pageViews bytes threats }
+					uniq { uniques }
+				}
+			}
+		}
+	}`;
+
+	const controller = new AbortController();
+	const id = setTimeout(() => controller.abort(), 8000);
+	try {
+		const r = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+			method: 'POST',
+			headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+			body: JSON.stringify({ query }),
+			signal: controller.signal,
+		});
+		if (!r.ok) return null;
+		const data = await r.json();
+		return data?.data?.viewer?.zones?.[0]?.httpRequests1dGroups ?? null;
+	} catch {
+		return null;
+	} finally {
+		clearTimeout(id);
+	}
+}
+
+function renderCfSection(rows) {
+	const cfUrl = `https://dash.cloudflare.com/${CF_ZONE_ID}/phishinweather.com/analytics`;
+	if (!rows) {
+		return `<h2>Cloudflare Analytics</h2><p style="color:#888">Set <code>CLOUDFLARE_API_TOKEN</code> Railway env var to enable live stats.<br>Token needs <em>Analytics → Read</em> permission. <a href="${cfUrl}" target="_blank">View in CF dashboard →</a></p>`;
+	}
+
+	const fmt = (n) => n >= 1e9 ? (n / 1e9).toFixed(1) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n);
+	const fmtBytes = (b) => b >= 1e9 ? (b / 1e9).toFixed(2) + ' GB' : b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.round(b / 1e3) + ' KB';
+
+	const tableRows = rows.map((d) => `<tr>
+		<td>${d.dimensions.date}</td>
+		<td>${fmt(d.uniq.uniques)}</td>
+		<td>${fmt(d.sum.requests)}</td>
+		<td>${fmt(d.sum.pageViews)}</td>
+		<td>${fmtBytes(d.sum.bytes)}</td>
+		<td>${d.sum.threats > 0 ? `<span style="color:#f88">${d.sum.threats}</span>` : '0'}</td>
+	</tr>`).join('');
+
+	return `<h2>Cloudflare Analytics</h2>
+<p style="color:#888; margin-bottom:1em">Last 7 days UTC · today may be partial · <a href="${cfUrl}" target="_blank">CF dashboard →</a></p>
+<table>
+<tr><th>Date</th><th>Unique Visitors</th><th>Requests</th><th>Page Views</th><th>Bandwidth</th><th>Threats</th></tr>
+${tableRows}
+</table>`;
+}
+
+const adminDashboard = async (req, res) => {
 	const password = process.env.ADMIN_PASSWORD;
 	if (!password) return res.status(503).send('Admin not configured — set ADMIN_PASSWORD env var');
 	const auth = req.headers.authorization ?? '';
@@ -552,7 +622,10 @@ const adminDashboard = (req, res) => {
 		return res.status(401).send('Unauthorized');
 	}
 
-	const totalMonthly = MONTHLY_BURN.reduce((sum, e) => sum + e.monthly, 0);
+	const [cfRows, totalMonthly] = await Promise.all([
+		fetchCfAnalytics(),
+		Promise.resolve(MONTHLY_BURN.reduce((sum, e) => sum + e.monthly, 0)),
+	]);
 	const totalAnnual = totalMonthly * 12;
 
 	const serviceHTML = SERVICES.map(({ category, items }) => `
@@ -583,6 +656,7 @@ const adminDashboard = (req, res) => {
   .break-minor span:last-child { color: #888; }
   table { border-collapse: collapse; width: 100%; }
   td { padding: 6px 12px; border: 1px solid #333; }
+  th { padding: 6px 12px; border: 1px solid #333; color: #ff0; text-align: left; background: #111; }
   .total { color: #ff0; }
 </style></head><body>
 <h1>phishinweather /admin</h1>
@@ -592,6 +666,8 @@ const adminDashboard = (req, res) => {
 <tr class="total"><td><strong>Total</strong></td><td><strong>$${totalMonthly.toFixed(2)}/mo ($${totalAnnual.toFixed(0)}/yr)</strong></td></tr>
 </table>
 <p style="color:#888">Break-even: $${totalMonthly.toFixed(2)}/month. Check <a href="https://ko-fi.com/phishinweather" target="_blank">Ko-fi</a> and <a href="https://dashboard.stripe.com" target="_blank">Stripe</a> for revenue.</p>
+
+${renderCfSection(cfRows)}
 
 ${serviceHTML}
 </body></html>`);
