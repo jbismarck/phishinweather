@@ -3,7 +3,7 @@ import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 
-const VIEW_HEIGHT = 260; // visible scroll window: Y=90 to Y=350
+const VIEW_HEIGHT = 270; // visible scroll window: Y=80 to Y=350
 const SCROLL_PX_PER_SEC = 35;
 const SCROLL_DELAY_MS = 1500; // pause at top before scrolling
 
