@@ -73,6 +73,15 @@ const getWeather = async (latLon, haveDataCallback) => {
 	// draw the progress canvas and hide others
 	hideAllCanvases();
 	document.querySelector('#loading').style.display = 'none';
+	const locationSet = document.querySelector('#divLocationSet');
+	if (locationSet) {
+		const cityEl = document.querySelector('#spanCity');
+		const stateEl = document.querySelector('#spanState');
+		const city = cityEl?.textContent ?? '';
+		const state = stateEl?.textContent ?? '';
+		document.querySelector('#locationSetCity').textContent = city && state ? `${city}, ${state}` : city || state;
+		locationSet.style.display = 'block';
+	}
 	if (progress) {
 		await progress.drawCanvas();
 		progress.showCanvas();

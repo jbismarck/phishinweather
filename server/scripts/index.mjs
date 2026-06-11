@@ -52,6 +52,12 @@ const init = () => {
 
 	document.querySelector('#btnGetLatLng').addEventListener('click', () => autoComplete.directFormSubmit());
 
+	document.querySelector('#btnChangeLocation').addEventListener('click', () => {
+		document.querySelector('#divLocationSet').style.display = 'none';
+		document.querySelector('#loading').style.display = 'flex';
+		document.querySelector(TXT_ADDRESS_SELECTOR).focus();
+	});
+
 	document.addEventListener('keydown', documentKeydown);
 	document.addEventListener('touchmove', (e) => { if (document.fullscreenElement) e.preventDefault(); });
 
