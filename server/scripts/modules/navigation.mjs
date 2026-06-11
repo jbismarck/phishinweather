@@ -75,10 +75,7 @@ const getWeather = async (latLon, haveDataCallback) => {
 	document.querySelector('#loading').style.display = 'none';
 	const locationSet = document.querySelector('#divLocationSet');
 	if (locationSet) {
-		const cityEl = document.querySelector('#spanCity');
-		const stateEl = document.querySelector('#spanState');
-		const city = cityEl?.textContent ?? '';
-		const state = stateEl?.textContent ?? '';
+		const { city, state } = weatherParameters;
 		document.querySelector('#locationSetCity').textContent = city && state ? `${city}, ${state}` : city || state;
 		locationSet.style.display = 'block';
 	}
@@ -311,7 +308,10 @@ const populateWeatherParameters = (params) => {
 };
 
 const latLonReceived = (data, haveDataCallback) => {
-	getWeather(data, haveDataCallback);
+	getWeather(data, haveDataCallback).catch((err) => {
+		console.error('Failed to load weather data:', err);
+		document.querySelector('#loading').style.display = 'flex';
+	});
 };
 
 const timeZone = () => weatherParameters.timeZone;
@@ -329,5 +329,6 @@ export {
 	msg,
 	message,
 	latLonReceived,
+	hideAllCanvases,
 	timeZone,
 };

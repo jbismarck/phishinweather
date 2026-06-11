@@ -18,3 +18,7 @@ dist/*
 
 #runtime cache
 server/data/phish-cache.json
+
+#local ops files
+dashboard.html
+wiki.html

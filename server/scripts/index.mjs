@@ -1,7 +1,7 @@
 import { json } from './modules/utils/fetch.mjs';
 import noSleep from './modules/utils/nosleep.mjs';
 import {
-	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived,
+	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, hideAllCanvases,
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
 import { parseQueryString } from './modules/share.mjs';
@@ -54,8 +54,11 @@ const init = () => {
 
 	document.querySelector('#btnChangeLocation').addEventListener('click', () => {
 		document.querySelector('#divLocationSet').style.display = 'none';
+		hideAllCanvases();
 		document.querySelector('#loading').style.display = 'flex';
 		document.querySelector(TXT_ADDRESS_SELECTOR).focus();
+		localStorage.removeItem('latLonFromGPS');
+		document.querySelector(BNT_GET_GPS_SELECTOR).classList.remove('active');
 	});
 
 	document.addEventListener('keydown', documentKeydown);
@@ -109,6 +112,7 @@ const init = () => {
 	if (play === null || play === 'true') postMessage('navButton', 'play');
 
 	document.querySelector('#btnClearQuery').addEventListener('click', () => {
+		document.querySelector('#divLocationSet').style.display = 'none';
 		document.querySelector('#spanCity').innerHTML = '';
 		document.querySelector('#spanState').innerHTML = '';
 		document.querySelector('#spanStationId').innerHTML = '';
