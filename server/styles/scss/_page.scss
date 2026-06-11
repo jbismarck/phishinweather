@@ -798,9 +798,38 @@ body {
 	>.info,
 	>.related-links,
 	.ui-section,
+	.site-footer,
 	#enabledDisplays,
 	#settings,
 	#divInfo {
 		display: none;
+	}
+}
+
+.site-footer {
+	max-width: 640px;
+	margin-top: 12px;
+	font-family: 'Star4000 Small';
+	font-size: 9pt;
+	color: rgba(255, 255, 255, 0.3);
+
+	a {
+		color: rgba(255, 255, 255, 0.3);
+		text-decoration: none;
+
+		&:hover {
+			color: rgba(255, 255, 255, 0.6);
+		}
+	}
+
+	.site-footer-logo {
+		height: 14px;
+		vertical-align: middle;
+		margin-right: 5px;
+		opacity: 0.4;
+	}
+
+	.site-footer-sep {
+		opacity: 0.4;
 	}
 }
