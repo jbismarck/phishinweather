@@ -12,6 +12,8 @@ Phishinweather is a heavily customized fork of the WeatherStar 4000+ project, re
 | Styles | SCSS → compiled to `server/styles/main.css` → bundled to `dist/resources/ws.min.css` |
 | Scripts | ES modules (`server/scripts/modules/*.mjs`) → bundled to `dist/resources/ws.min.js` via Webpack/Gulp |
 | Deploy | Railway — auto-deploys on every push to `main` via Nixpacks (runs `npm run build` then `node index.mjs`) |
+| Icons/Sprites | Aseprite — pixel art + animated GIF authoring for weather icons (`server/images/icons/`) |
+| Backgrounds | GIMP — 640×480 PNG backgrounds using `design/phishinweather.gpl` palette |
 
 ---
 
