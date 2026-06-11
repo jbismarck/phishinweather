@@ -1,10 +1,9 @@
 // Layout editor — visual drag tool for positioning card content.
 // Toggle with Shift+L. Escape to close.
-// Drag the yellow line to set translateY on the active card's content element.
+// Drag the yellow handle to set translateY on the active card's content element.
 
 import { currentDisplay } from './navigation.mjs';
 
-// Maps display elem IDs → the content selector controlled by translateY
 const CONTENT_MAP = {
 	'social-instagram-html': '.social-inner',
 	'social-youtube-html':   '.social-inner',
@@ -14,13 +13,14 @@ const CONTENT_MAP = {
 	'feature-vote-html':     '.fv-inner',
 };
 
-const HEADER_H      = 60;
-const CONTENT_H     = 310;
-const CONTENT_TOP   = HEADER_H;
-const CONTENT_MID   = HEADER_H + Math.round(CONTENT_H / 2); // 215
-const SCROLL_TOP    = HEADER_H + CONTENT_H;                 // 370
-const DISPLAY_H     = 480;
-const DISPLAY_W     = 640;
+const HEADER_H    = 60;
+const CONTENT_H   = 310;
+const CONTENT_MID = HEADER_H + Math.round(CONTENT_H / 2); // 215
+const CONTENT_TOP = HEADER_H;
+const SCROLL_TOP  = HEADER_H + CONTENT_H; // 370
+const DISPLAY_H   = 480;
+const DISPLAY_W   = 640;
+const HIT_HALF    = 16; // px above/below the visual line that accepts clicks
 
 let overlayElem = null;
 let isOpen = false;
@@ -39,8 +39,7 @@ function setTranslateY(elem, y) {
 
 function getContainerScale() {
 	const c = document.getElementById('container');
-	if (!c) return 1;
-	return c.getBoundingClientRect().width / DISPLAY_W;
+	return c ? c.getBoundingClientRect().width / DISPLAY_W : 1;
 }
 
 function getActiveInfo() {
@@ -48,207 +47,228 @@ function getActiveInfo() {
 	if (!disp) return null;
 	const elemId = disp.elemId + '-html';
 	const sel = CONTENT_MAP[elemId];
-	if (!sel) return { name: disp.title ?? disp.elemId, elem: null };
-	const elem = disp.elem?.querySelector(sel);
-	return { name: disp.title ?? disp.elemId, elem: elem ?? null };
-}
-
-// ── build overlay ──────────────────────────────────────────────────────────
-
-function css(el, styles) {
-	Object.assign(el.style, styles);
+	const elem = sel ? disp.elem?.querySelector(sel) : null;
+	return { name: disp.name ?? disp.elemId, elem: elem ?? null };
 }
 
 function el(tag, styles = {}, text = '') {
 	const e = document.createElement(tag);
-	css(e, styles);
+	Object.assign(e.style, styles);
 	if (text) e.textContent = text;
 	return e;
 }
 
-function buildOverlay() {
+// ── overlay background ─────────────────────────────────────────────────────
+
+function buildBackground() {
 	const wrap = el('div', {
 		position: 'absolute', top: '0', left: '0',
 		width: `${DISPLAY_W}px`, height: `${DISPLAY_H}px`,
-		pointerEvents: 'none', zIndex: '9500',
+		pointerEvents: 'none', zIndex: '9400',
 		fontFamily: "'Star4000 Small', monospace",
 	});
-	wrap.id = 'layout-editor-overlay';
 
-	// ── zone bands ────────────────────────────────────────────────────────
 	const zones = [
-		{ y: 0,          h: HEADER_H,  bg: 'rgba(255,220,0,0.06)',  label: `HEADER · ${HEADER_H}px` },
-		{ y: CONTENT_TOP, h: CONTENT_H, bg: 'rgba(0,180,255,0.05)', label: `CONTENT · ${CONTENT_H}px` },
-		{ y: SCROLL_TOP, h: 70,         bg: 'rgba(255,80,0,0.06)',  label: `SCROLL · 70px` },
+		{ y: 0,          h: HEADER_H,  bg: 'rgba(255,220,0,0.07)', label: `HEADER  ${HEADER_H}px` },
+		{ y: CONTENT_TOP, h: CONTENT_H, bg: 'rgba(0,180,255,0.05)', label: `CONTENT  ${CONTENT_H}px` },
+		{ y: SCROLL_TOP, h: 70,         bg: 'rgba(255,80,0,0.07)',  label: `SCROLL  70px` },
 	];
+
 	zones.forEach(z => {
 		const band = el('div', {
 			position: 'absolute', left: '0', width: `${DISPLAY_W}px`,
 			top: `${z.y}px`, height: `${z.h}px`,
-			background: z.bg,
-			borderTop: '1px solid rgba(255,255,255,0.1)',
+			background: z.bg, borderTop: '1px solid rgba(255,255,255,0.1)',
 			boxSizing: 'border-box',
 		});
-		const lbl = el('div', {
+		band.append(el('div', {
 			position: 'absolute', right: '6px', top: '4px',
-			fontSize: '9px', letterSpacing: '0.08em',
-			color: 'rgba(255,255,255,0.3)',
-		}, z.label);
-		band.append(lbl);
+			fontSize: '9px', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.3)',
+		}, z.label));
 		wrap.append(band);
 	});
 
-	// ── fixed boundary lines ───────────────────────────────────────────────
+	// hard boundary lines
 	[CONTENT_TOP, SCROLL_TOP].forEach(y => {
 		wrap.append(el('div', {
 			position: 'absolute', left: '0', width: `${DISPLAY_W}px`,
-			top: `${y}px`, height: '1px',
-			background: 'rgba(255,255,255,0.2)',
+			top: `${y}px`, height: '1px', background: 'rgba(255,255,255,0.2)',
 		}));
 	});
 
-	// ── ruler marks every 30px on left edge ───────────────────────────────
+	// ruler ticks every 30px
 	for (let y = 0; y <= DISPLAY_H; y += 30) {
-		const tick = el('div', {
-			position: 'absolute', left: '0', width: '14px',
-			top: `${y}px`, height: '1px',
-			background: 'rgba(255,255,255,0.18)',
-		});
-		const tickLbl = el('div', {
-			position: 'absolute', left: '16px',
-			top: `${y - 7}px`,
-			fontSize: '8px', color: 'rgba(255,255,255,0.25)',
-		}, `${y}`);
-		wrap.append(tick, tickLbl);
+		wrap.append(el('div', {
+			position: 'absolute', left: '0', width: '12px',
+			top: `${y}px`, height: '1px', background: 'rgba(255,255,255,0.18)',
+		}));
+		wrap.append(el('div', {
+			position: 'absolute', left: '15px', top: `${y - 7}px`,
+			fontSize: '8px', color: 'rgba(255,255,255,0.22)',
+		}, `${y}`));
 	}
 
 	return wrap;
 }
 
-function buildHandle(handleY, contentElem, cardName) {
-	// horizontal draggable line
-	const line = el('div', {
-		position: 'absolute', left: '0', width: `${DISPLAY_W}px`,
-		top: `${handleY}px`, height: '2px',
-		background: 'rgba(255,220,0,0.95)',
-		pointerEvents: 'auto', cursor: 'ns-resize', zIndex: '9501',
-	});
-	line.id = 'layout-editor-handle';
+// ── draggable handle ───────────────────────────────────────────────────────
 
-	// pill badge showing value + card name
+function buildHandle(centerY, contentElem, cardName) {
+	// Outer hit zone — 32px tall, centered on centerY, easy to click
+	const hit = el('div', {
+		position: 'absolute', left: '0', width: `${DISPLAY_W}px`,
+		top: `${centerY - HIT_HALF}px`, height: `${HIT_HALF * 2}px`,
+		pointerEvents: 'auto', cursor: 'ns-resize', zIndex: '9500',
+		background: 'transparent',
+	});
+	hit.id = 'layout-editor-handle';
+
+	// Visual 2px yellow line in the center of the hit zone
+	hit.append(el('div', {
+		position: 'absolute', left: '0', width: '100%',
+		top: `${HIT_HALF - 1}px`, height: '2px',
+		background: 'rgba(255,220,0,0.9)', pointerEvents: 'none',
+	}));
+
+	// Left grip — obvious drag target so user knows where to click
+	const grip = el('div', {
+		position: 'absolute', left: '6px',
+		top: `${HIT_HALF - 10}px`, width: '20px', height: '20px',
+		background: 'rgba(255,220,0,0.95)', borderRadius: '2px',
+		display: 'flex', alignItems: 'center', justifyContent: 'center',
+		cursor: 'ns-resize', pointerEvents: 'none',
+		fontSize: '10px', color: '#000', lineHeight: '1',
+	}, '⠿'); // braille dots as a drag grip icon
+
+	hit.append(grip);
+
+	// Value badge
 	const badge = el('div', {
-		position: 'absolute', left: '50px', top: '-22px',
-		padding: '3px 10px', background: 'rgba(255,220,0,0.95)',
-		color: '#000', fontSize: '11px', letterSpacing: '0.06em',
-		whiteSpace: 'nowrap', cursor: 'ns-resize', userSelect: 'none',
-		borderRadius: '2px',
+		position: 'absolute', left: '34px',
+		top: `${HIT_HALF - 10}px`,
+		padding: '2px 8px',
+		background: 'rgba(0,0,0,0.75)', border: '1px solid rgba(255,220,0,0.6)',
+		color: 'rgba(255,220,0,0.9)', fontSize: '11px', letterSpacing: '0.05em',
+		whiteSpace: 'nowrap', pointerEvents: 'none',
 	});
 	badge.id = 'layout-editor-badge';
-	line.append(badge);
+	hit.append(badge);
 
-	// copy button
+	// Copy button
 	const copyBtn = el('div', {
-		position: 'absolute', right: '12px', top: '-20px',
-		padding: '2px 8px', background: 'rgba(0,0,0,0.7)',
-		border: '1px solid rgba(255,220,0,0.6)',
-		color: 'rgba(255,220,0,0.9)', fontSize: '10px',
-		cursor: 'pointer', userSelect: 'none',
+		position: 'absolute', right: '12px',
+		top: `${HIT_HALF - 10}px`,
+		padding: '2px 8px',
+		background: 'rgba(0,0,0,0.75)', border: '1px solid rgba(255,220,0,0.4)',
+		color: 'rgba(255,220,0,0.7)', fontSize: '10px',
+		cursor: 'pointer', userSelect: 'none', pointerEvents: 'auto',
 	}, 'COPY');
 	copyBtn.addEventListener('click', (e) => {
 		e.stopPropagation();
-		const ty = getTranslateY(contentElem);
+		const ty = centerYToTranslateY(parseInt(hit.style.top, 10) + HIT_HALF);
 		navigator.clipboard?.writeText(`transform: translateY(${ty}px);`);
 		copyBtn.textContent = 'COPIED';
 		setTimeout(() => { copyBtn.textContent = 'COPY'; }, 1500);
 	});
-	line.append(copyBtn);
+	hit.append(copyBtn);
 
-	updateBadge(handleY, cardName);
-	makeDraggable(line, contentElem, cardName);
-	return line;
+	updateBadge(centerY, cardName);
+	makeDraggable(hit, contentElem, cardName);
+	return hit;
 }
 
-function updateBadge(handleY, cardName) {
+function centerYToTranslateY(centerY) {
+	return centerY - CONTENT_MID;
+}
+
+function updateBadge(centerY, cardName) {
 	const badge = document.getElementById('layout-editor-badge');
 	if (!badge) return;
-	const ty = handleY - CONTENT_MID;
-	badge.textContent = `${cardName}  ·  translateY(${ty}px)  ·  Y:${handleY}px`;
+	const ty = centerYToTranslateY(centerY);
+	badge.textContent = `${cardName}  ·  translateY(${ty}px)  ·  y=${centerY}`;
 }
 
-function makeDraggable(line, contentElem, cardName) {
-	let dragging = false, startMouseY = 0, startHandleY = 0;
+function makeDraggable(hit, contentElem, cardName) {
+	let dragging = false;
+	let startClientY = 0;
+	let startCenterY = 0;
 
-	line.addEventListener('mousedown', (e) => {
+	hit.addEventListener('mousedown', (e) => {
 		if (e.button !== 0) return;
 		dragging = true;
-		startMouseY  = e.clientY;
-		startHandleY = parseInt(line.style.top, 10);
+		startClientY = e.clientY;
+		startCenterY = parseInt(hit.style.top, 10) + HIT_HALF;
 		e.preventDefault();
+		e.stopPropagation();
 	});
 
 	const onMove = (e) => {
 		if (!dragging) return;
 		const scale = getContainerScale();
-		const dy = (e.clientY - startMouseY) / scale;
-		const newY = Math.round(startHandleY + dy);
-		const clamped = Math.max(CONTENT_TOP, Math.min(SCROLL_TOP, newY));
-		line.style.top = `${clamped}px`;
-		setTranslateY(contentElem, clamped - CONTENT_MID);
+		const newCenter = Math.round(startCenterY + (e.clientY - startClientY) / scale);
+		const clamped = Math.max(CONTENT_TOP, Math.min(SCROLL_TOP, newCenter));
+		hit.style.top = `${clamped - HIT_HALF}px`;
+		setTranslateY(contentElem, centerYToTranslateY(clamped));
 		updateBadge(clamped, cardName);
 	};
 
 	const onUp = () => { dragging = false; };
 
 	document.addEventListener('mousemove', onMove);
-	document.addEventListener('mouseup',   onUp);
-	line._cleanup = () => {
+	document.addEventListener('mouseup', onUp);
+
+	hit._cleanup = () => {
 		document.removeEventListener('mousemove', onMove);
-		document.removeEventListener('mouseup',   onUp);
+		document.removeEventListener('mouseup', onUp);
 	};
 }
 
-// ── status bar (shown when no content elem is mapped) ─────────────────────
+// ── status message when no content elem is mapped ─────────────────────────
 
-function buildStatusBar(message) {
-	return el('div', {
+function buildStatusMsg(text) {
+	const msg = el('div', {
 		position: 'absolute', bottom: '80px', left: '0', width: `${DISPLAY_W}px`,
-		padding: '8px 0', textAlign: 'center',
-		background: 'rgba(0,0,0,0.6)',
-		color: 'rgba(255,220,0,0.8)', fontSize: '11px', letterSpacing: '0.08em',
-		pointerEvents: 'none',
-	}, message);
+		padding: '8px 0', textAlign: 'center', pointerEvents: 'none',
+		background: 'rgba(0,0,0,0.6)', color: 'rgba(255,220,0,0.7)',
+		fontSize: '11px', letterSpacing: '0.08em',
+	}, text);
+	msg.style.zIndex = '9401';
+	return msg;
 }
 
-// ── public API ─────────────────────────────────────────────────────────────
+// ── open / close ───────────────────────────────────────────────────────────
 
 function open() {
 	close();
-
 	const container = document.getElementById('container');
 	if (!container) return;
 
-	overlayElem = buildOverlay();
+	const bg = buildBackground();
+	container.append(bg);
 
 	const info = getActiveInfo();
 	if (info?.elem) {
 		const ty = getTranslateY(info.elem);
-		const handleY = CONTENT_MID + ty;
-		overlayElem.append(buildHandle(handleY, info.elem, info.name ?? ''));
+		const centerY = CONTENT_MID + ty;
+		const handle = buildHandle(centerY, info.elem, info.name ?? '');
+		container.append(handle);
+		overlayElem = { bg, handle };
 	} else {
-		const msg = info?.name
-			? `${info.name.toUpperCase()} — not mapped (navigate to a supported card)`
-			: 'Navigate to a card to edit its position';
-		overlayElem.append(buildStatusBar(msg));
+		const msg = info
+			? `${(info.name ?? '').toUpperCase()}  —  navigate to a supported card to edit`
+			: 'Navigate to a supported card to edit its position';
+		bg.append(buildStatusMsg(msg));
+		overlayElem = { bg, handle: null };
 	}
 
-	container.append(overlayElem);
 	isOpen = true;
 }
 
 function close() {
-	const handle = document.getElementById('layout-editor-handle');
-	handle?._cleanup?.();
-	overlayElem?.remove();
+	if (!overlayElem) { isOpen = false; return; }
+	overlayElem.handle?._cleanup?.();
+	overlayElem.handle?.remove();
+	overlayElem.bg?.remove();
 	overlayElem = null;
 	isOpen = false;
 }
