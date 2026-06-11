@@ -204,34 +204,40 @@
   </div>
 	<div class="media"></div>
 
-	<div class='heading'>Selected displays</div>
-	<div id='enabledDisplays'>
+	<details class="ui-section" open>
+		<summary>Selected Displays</summary>
+		<div id='enabledDisplays'></div>
+	</details>
 
-	</div>
+	<details class="ui-section">
+		<summary>Settings</summary>
+		<div id='settings'></div>
+	</details>
 
-	<div class='heading'>Settings</div>
-	<div id='settings'>
-	</div>
-
-	<div class='heading'>Sharing</div>
-	<div class='info'>
-		<a href='' id='share-link'>Copy Permalink</a> <span id="share-link-copied">Link copied to clipboard!</span>
-		<div id="share-link-instructions">
-			Copy this long URL:
-			<input type='text' id="share-link-url">
+	<details class="ui-section">
+		<summary>Sharing</summary>
+		<div class='info'>
+			<a href='' id='share-link'>Copy Permalink</a> <span id="share-link-copied">Link copied to clipboard!</span>
+			<div id="share-link-instructions">
+				Copy this long URL:
+				<input type='text' id="share-link-url">
+			</div>
 		</div>
-	</div>
+	</details>
+
 	</div>
 
-	<div class='heading'>Forecast Information</div>
-	<div id="divInfo">
-		Location: <span id="spanCity"></span> <span id="spanState"></span><br />
-		Station Id: <span id="spanStationId"></span><br />
-		Radar Id: <span id="spanRadarId"></span><br />
-		Zone Id: <span id="spanZoneId"></span><br />
-		Music: <span id="musicTrack">Not playing</span><br />
-		Phishin Weather Version: <span><%- version %></span>
-	</div>
+	<details class="ui-section">
+		<summary>Forecast Information</summary>
+		<div id="divInfo">
+			Location: <span id="spanCity"></span> <span id="spanState"></span><br />
+			Station Id: <span id="spanStationId"></span><br />
+			Radar Id: <span id="spanRadarId"></span><br />
+			Zone Id: <span id="spanZoneId"></span><br />
+			Music: <span id="musicTrack">Not playing</span><br />
+			Phishin Weather Version: <span><%- version %></span>
+		</div>
+	</details>
 
 </body>
 
