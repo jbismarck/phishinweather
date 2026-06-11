@@ -30,6 +30,18 @@ const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SE
 const CARDS_PER_SHOW = 4;
 const CARD_SUBTITLES = ['SHOW INFO', 'FORECAST', 'LOT EATS', 'SHAKEDOWN'];
 
+const VENUE_SHORT = {
+	'Madison Square Garden': 'MSG',
+	"Dick's Sporting Goods Park": "DICK'S",
+	'Fenway Park': 'FENWAY',
+	'Merriweather Post Pavilion': 'MERRIWEATHER',
+	'Kohl Center': 'KOHL',
+	'Enmarket Arena': 'ENMARKET',
+	'Ruoff Music Center': 'RUOFF',
+	'Coastal Credit Union Music Park at Walnut Creek': 'WALNUT CREEK',
+	'Empower FCU Amphitheater at Lakeview': 'LAKEVIEW',
+};
+
 const formatShowDate = (dateStr) => {
 	// "2026-06-17" → "WED  JUN 17  2026"
 	const d = new Date(`${dateStr}T12:00:00`);
@@ -96,8 +108,12 @@ class PhishTour extends WeatherDisplay {
 
 		const isMSG = show.venue === 'Madison Square Garden';
 
-		// update header subtitle
+		// update header title + subtitle
+		const headerTop = this.elem.querySelector('.title .top');
 		const headerBottom = this.elem.querySelector('.title .bottom');
+		if (headerTop) headerTop.textContent = cardIndex === 0
+			? (VENUE_SHORT[show.venue] ?? show.venue.split(' ')[0].toUpperCase())
+			: 'PHISH';
 		if (headerBottom) {
 			let subtitle;
 			if (cardIndex === 1) {
