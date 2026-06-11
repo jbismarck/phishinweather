@@ -2,6 +2,11 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+
+const VIEW_HEIGHT = 310; // .has-scroll height constant
+const SCROLL_PX_PER_SEC = 35;
+const SCROLL_DELAY_MS = 1500; // pause at top before scrolling
+
 class PhishHistory extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Phish History', true);
@@ -33,6 +38,7 @@ class PhishHistory extends WeatherDisplay {
 	buildScreens() {
 		const container = this.elem.querySelector('.shows-container');
 		container.innerHTML = '';
+		container.style.cssText = '';
 
 		this.data.shows.forEach((show) => {
 			const block = this.fillTemplate('show', {
@@ -59,24 +65,32 @@ class PhishHistory extends WeatherDisplay {
 			container.append(block);
 		});
 
-		// scroll-container is 310px (from CSS .has-scroll height) — measure at runtime but
-		// fall back to the fixed value when the element is hidden (offsetHeight=0)
-		this.pageHeight = this.elem.querySelector('.scroll-container').offsetHeight || 310;
-
-		// round each show block up to a multiple of pageHeight so screens align cleanly
-		container.querySelectorAll('.show').forEach((showBlock) => {
-			const rounded = Math.ceil(showBlock.scrollHeight / this.pageHeight) * this.pageHeight;
-			showBlock.style.minHeight = `${rounded}px`;
-		});
-
-		this.timing.totalScreens = Math.max(1, Math.round(container.scrollHeight / this.pageHeight));
+		// estimate content height to set baseDelay before calcNavTiming
+		// scrollHeight works even when hidden; use it if non-zero, else estimate
+		const contentHeight = container.scrollHeight || 1200;
+		const scrollDist = Math.max(0, contentHeight - VIEW_HEIGHT);
+		const scrollSecs = scrollDist / SCROLL_PX_PER_SEC;
+		this.timing.baseDelay = Math.round((scrollSecs + SCROLL_DELAY_MS / 1000 + 2) * 1000);
+		this.timing.totalScreens = 1;
 		this.calcNavTiming();
 	}
 
 	async drawCanvas() {
 		super.drawCanvas();
-		const top = -this.screenIndex * this.pageHeight;
-		this.elem.querySelector('.shows-container').style.top = `${top}px`;
+		const container = this.elem.querySelector('.shows-container');
+		const contentHeight = container.scrollHeight;
+		const scrollDist = Math.max(0, contentHeight - VIEW_HEIGHT);
+
+		container.style.animation = 'none';
+		void container.offsetHeight; // force reflow to reset animation
+
+		if (scrollDist > 0) {
+			const scrollSecs = scrollDist / SCROLL_PX_PER_SEC;
+			const delaySecs = SCROLL_DELAY_MS / 1000;
+			container.style.setProperty('--ph-scroll-dist', `-${scrollDist}px`);
+			container.style.animation = `ph-scroll ${scrollSecs.toFixed(1)}s ${delaySecs}s linear forwards`;
+		}
+
 		this.finishDraw();
 	}
 }
