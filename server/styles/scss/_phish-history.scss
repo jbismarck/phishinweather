@@ -15,7 +15,8 @@
 	@include u.text-shadow();
 
 	.scroll-container {
-		height: 100%;
+		margin-top: 40px;  // Y=100 from display top (header 60 + 40)
+		height: 260px;     // Y=100 to Y=360
 		overflow: hidden;
 		position: relative;
 	}
