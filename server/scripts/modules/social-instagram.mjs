@@ -6,6 +6,7 @@ class SocialInstagram extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Instagram', true);
 		this.alwaysEnabled = true;
+		this.okToDrawCurrentConditions = true;
 		this.timing.baseDelay = 12000;
 	}
 
