@@ -116,10 +116,13 @@ class PhishTour extends WeatherDisplay {
 			: 'PHISH';
 		if (headerBottom) {
 			let subtitle;
-			if (cardIndex === 1) {
-				subtitle = `${show.city.toUpperCase()}, ${show.state}`;
-			} else if (cardIndex === 0 && isMSG) {
+			if (cardIndex === 0 && isMSG) {
 				subtitle = 'YEMSG';
+			} else if (cardIndex === 0) {
+				const [, mm, dd] = show.date.split('-');
+				subtitle = `${show.city.toUpperCase()}, ${show.state}  ·  ${MONTH_NAMES[parseInt(mm) - 1]} ${parseInt(dd)}`;
+			} else if (cardIndex === 1) {
+				subtitle = `${show.city.toUpperCase()}, ${show.state}`;
 			} else {
 				subtitle = CARD_SUBTITLES[cardIndex];
 			}
