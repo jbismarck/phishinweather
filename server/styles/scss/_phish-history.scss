@@ -15,9 +15,9 @@
 	@include u.text-shadow();
 
 	.scroll-container {
-		margin-top: 40px;   // Y=100 from display top (header 60 + 40)
-		margin-left: 40px;
-		height: 250px;      // Y=100 to Y=350
+		margin-top: 30px;   // Y=90 from display top (header 60 + 30)
+		margin-left: 50px;
+		height: 260px;      // Y=90 to Y=350
 		overflow: hidden;
 		position: relative;
 	}
