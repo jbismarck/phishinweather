@@ -10,7 +10,8 @@
 		"build:css": "sass --style=compressed --no-source-map ./server/styles/scss/main.scss ./server/styles/main.css",
 		"build": "npm run build:css && gulp buildDist",
 		"lint": "eslint ./server/scripts/**/*.mjs",
-		"lint:fix": "eslint --fix ./server/scripts/**/*.mjs"
+		"lint:fix": "eslint --fix ./server/scripts/**/*.mjs",
+		"smoke": "bash scripts/smoke.sh"
 	},
 	"repository": {
 		"type": "git",
