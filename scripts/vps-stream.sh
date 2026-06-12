@@ -57,15 +57,17 @@ sleep 2
 
 # ── 2. Virtual audio sink ─────────────────────────────────────────────────────
 echo "Starting audio..."
-pulseaudio --start --exit-idle-time=-1 2>/dev/null || true
+# Kill any stale PulseAudio before starting fresh
+pulseaudio --kill 2>/dev/null || pkill -u "$(id -un)" pulseaudio 2>/dev/null || true
+sleep 1
+# -n = no default config; load only what we need so ALSA/HDMI failures don't stop startup
+pulseaudio --daemonize=yes --exit-idle-time=-1 -n \
+  --load="module-native-protocol-unix" \
+  --load="module-null-sink sink_name=vstream sink_properties=device.description=VirtualStreamSink"
 sleep 2
 PULSE_PID=$(pgrep -u "$(id -un)" pulseaudio 2>/dev/null || true)
 
 echo "Audio server: $(pactl info 2>/dev/null | grep 'Server Name' || echo 'unknown')"
-
-pactl load-module module-null-sink \
-  sink_name=vstream \
-  sink_properties=device.description=VirtualStreamSink 2>/dev/null || true
 pactl set-default-sink vstream 2>/dev/null || true
 export PULSE_SINK=vstream
 
