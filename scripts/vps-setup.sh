@@ -19,8 +19,8 @@ apt-get install -y --no-install-recommends \
   xdg-utils
 
 echo "==> Installing Chromium..."
-if ! command -v chromium-browser &>/dev/null; then
-  apt-get install -y chromium-browser
+if ! command -v chromium &>/dev/null && ! command -v chromium-browser &>/dev/null; then
+  apt-get install -y chromium
 else
   echo "    Chromium already installed, skipping."
 fi
@@ -53,6 +53,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
+User=pi
+Group=pi
 EnvironmentFile=/etc/${SERVICE_NAME}.env
 ExecStart=${STREAM_SCRIPT_DIR}/vps-stream.sh
 Restart=always
