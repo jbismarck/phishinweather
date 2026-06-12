@@ -57,18 +57,22 @@ sleep 2
 
 # ── 2. Virtual audio sink ─────────────────────────────────────────────────────
 echo "Starting audio..."
+# Use a fixed socket path so both pactl and Chromium can find the server
+PULSE_SOCKET="/tmp/pw-stream.socket"
+export PULSE_SERVER="unix:${PULSE_SOCKET}"
+rm -f "${PULSE_SOCKET}"
 # Kill any stale PulseAudio before starting fresh
 pulseaudio --kill 2>/dev/null || pkill -u "$(id -un)" pulseaudio 2>/dev/null || true
 sleep 1
-# -n = no default config; load only what we need so ALSA/HDMI failures don't stop startup
+# -n = no default config; only load null sink + socket at our fixed path
 pulseaudio --daemonize=yes --exit-idle-time=-1 -n \
-  --load="module-native-protocol-unix" \
+  --load="module-native-protocol-unix auth-anonymous=1 socket=${PULSE_SOCKET}" \
   --load="module-null-sink sink_name=vstream sink_properties=device.description=VirtualStreamSink"
 sleep 2
 PULSE_PID=$(pgrep -u "$(id -un)" pulseaudio 2>/dev/null || true)
 
-echo "Audio server: $(pactl info 2>/dev/null | grep 'Server Name' || echo 'unknown')"
-pactl set-default-sink vstream 2>/dev/null || true
+echo "Audio server: $(PULSE_SERVER="${PULSE_SERVER}" pactl info 2>/dev/null | grep 'Server Name' || echo 'unknown')"
+PULSE_SERVER="${PULSE_SERVER}" pactl set-default-sink vstream 2>/dev/null || true
 export PULSE_SINK=vstream
 
 # ── 3. Chromium ───────────────────────────────────────────────────────────────
