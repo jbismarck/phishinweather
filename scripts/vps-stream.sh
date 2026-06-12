@@ -17,7 +17,7 @@ export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 mkdir -p "$XDG_RUNTIME_DIR"
 
 YOUTUBE_RTMP="rtmp://a.rtmp.youtube.com/live2//${YOUTUBE_STREAM_KEY}"
-PAGE_LOAD_WAIT=30   # seconds to let the page fully load before clicking / streaming
+PAGE_LOAD_WAIT=45   # seconds to let the page fully load before clicking / streaming
 
 # ── Validate env ─────────────────────────────────────────────────────────────
 if [ -z "$YOUTUBE_STREAM_KEY" ] || [ "$YOUTUBE_STREAM_KEY" = "paste-your-key-here" ]; then
@@ -49,6 +49,7 @@ trap cleanup EXIT INT TERM
 # ── 1. Virtual display ────────────────────────────────────────────────────────
 echo "Starting Xvfb ${DISPLAY} (${SCREEN_RES})..."
 pkill -f "Xvfb ${DISPLAY}" 2>/dev/null || true
+pkill -u "$(id -un)" chromium 2>/dev/null || true   # kill stale Chromium windows
 sleep 1
 rm -f "/tmp/.X${DISPLAY_NUM}-lock" "/tmp/.X11-unix/X${DISPLAY_NUM}" 2>/dev/null || true
 Xvfb "${DISPLAY}" -screen 0 "${SCREEN_RES}x24" -ac +extension GLX +render -noreset &
@@ -91,6 +92,7 @@ chromium \
   --autoplay-policy=no-user-gesture-required \
   --window-size=640,560 \
   --window-position=0,0 \
+  --user-data-dir=/tmp/chromium-stream \
   --app="$NAV_URL" \
   2>/dev/null &
 CHROME_PID=$!
