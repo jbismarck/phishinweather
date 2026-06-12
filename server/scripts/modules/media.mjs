@@ -69,7 +69,7 @@ const getMedia = async () => {
                         if (r.ok) {
                                 const data = await r.json();
                                 const phishTracks = (data?.featured?.tracks ?? [])
-                                        .map((t) => t.mp3)
+                                        .map((t) => t.mp3_url)
                                         .filter(Boolean);
                                 if (phishTracks.length > 0) {
                                         playlist = { availableFiles: phishTracks };
