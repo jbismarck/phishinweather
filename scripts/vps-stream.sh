@@ -65,7 +65,6 @@ DISPLAY="${DISPLAY}" PULSE_SINK=vstream chromium \
   --disable-extensions \
   --disable-blink-features=AutomationControlled \
   --autoplay-policy=no-user-gesture-required \
-  --remote-debugging-port=9222 \
   --kiosk \
   --window-size="${SCREEN_RES/x/,}" \
   --window-position=0,0 \
@@ -76,46 +75,7 @@ CHROME_PID=$!
 echo "Waiting ${PAGE_LOAD_WAIT}s for page to load..."
 sleep "$PAGE_LOAD_WAIT"
 
-# ── 4. Click the media button via remote debugging ───────────────────────────
-echo "Triggering media playback..."
-python3 - <<'PYEOF'
-import urllib.request, json, time, socket, base64, struct
-
-try:
-    pages = json.loads(urllib.request.urlopen('http://localhost:9222/json', timeout=5).read())
-    if not pages:
-        print("No pages found")
-        exit(0)
-    ws_url = pages[0]['webSocketDebuggerUrl']
-    path = ws_url.split('localhost:9222')[1]
-
-    s = socket.socket()
-    s.connect(('localhost', 9222))
-    s.settimeout(5)
-    key = base64.b64encode(b'phishinweather!1').decode()
-    s.send(f'GET {path} HTTP/1.1\r\nHost: localhost:9222\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\r\n'.encode())
-    s.recv(4096)  # consume handshake response
-
-    def ws_send(sock, msg):
-        data = json.dumps(msg).encode()
-        mask = b'\x00\x00\x00\x00'
-        length = len(data)
-        if length < 126:
-            header = bytes([0x81, 0x80 | length]) + mask
-        else:
-            header = bytes([0x81, 0x80 | 126, length >> 8, length & 0xff]) + mask
-        sock.sendall(header + data)
-
-    ws_send(s, {'id': 1, 'method': 'Runtime.evaluate', 'params': {
-        'expression': 'document.getElementById("ToggleMedia").click()'
-    }})
-    time.sleep(0.5)
-    print("Media button clicked")
-except Exception as e:
-    print(f"Could not click media button: {e}")
-PYEOF
-
-# ── 5. FFmpeg → YouTube ───────────────────────────────────────────────────────
+# ── 4. FFmpeg → YouTube ───────────────────────────────────────────────────────
 echo "Starting FFmpeg stream..."
 ffmpeg \
   -f x11grab \
