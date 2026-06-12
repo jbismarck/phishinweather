@@ -6,14 +6,20 @@ set -e
 
 DISPLAY_NUM=99
 DISPLAY=":${DISPLAY_NUM}"
-SCREEN_RES="640x480"
+# Extra 80px below the 640×480 display area so the nav bar renders in normal
+# document flow and xdotool can click it (kiosk CSS hides nav children when
+# the window is exactly 480px tall).
+SCREEN_RES="640x560"
+CAPTURE_RES="640x480"   # FFmpeg only grabs the top 480px; nav bar stays off-stream
 
-# Ensure PulseAudio finds the correct runtime socket (needed under systemd)
+# Ensure PulseAudio/PipeWire finds the correct runtime socket (needed under systemd)
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 mkdir -p "$XDG_RUNTIME_DIR"
+# Point pactl and Chromium at the same audio server socket
+export PULSE_SERVER="unix:${XDG_RUNTIME_DIR}/pulse/native"
 
 YOUTUBE_RTMP="rtmp://a.rtmp.youtube.com/live2//${YOUTUBE_STREAM_KEY}"
-PAGE_LOAD_WAIT=25   # seconds to let the page fully load before FFmpeg starts
+PAGE_LOAD_WAIT=30   # seconds to let the page fully load before clicking / streaming
 
 # ── Validate env ─────────────────────────────────────────────────────────────
 if [ -z "$YOUTUBE_STREAM_KEY" ] || [ "$YOUTUBE_STREAM_KEY" = "paste-your-key-here" ]; then
@@ -22,7 +28,14 @@ if [ -z "$YOUTUBE_STREAM_KEY" ] || [ "$YOUTUBE_STREAM_KEY" = "paste-your-key-her
 fi
 
 STREAM_URL="${STREAM_URL:-https://phishinweather.com}"
-echo "Streaming: $STREAM_URL → YouTube"
+
+# Strip kiosk and mediaPlaying params — we click the button ourselves below.
+# Kiosk CSS hides nav children (display:none) so xdotool can't reach them.
+NAV_URL=$(echo "$STREAM_URL" \
+  | sed 's/[?&]kiosk=true//g' \
+  | sed 's/[?&]settings-kiosk-checkbox=true//g' \
+  | sed 's/[?&]settings-mediaPlaying-boolean=true//g')
+echo "Streaming: $NAV_URL → YouTube"
 
 # ── Cleanup on exit ───────────────────────────────────────────────────────────
 cleanup() {
@@ -36,17 +49,19 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # ── 1. Virtual display ────────────────────────────────────────────────────────
-echo "Starting Xvfb ${DISPLAY}..."
+echo "Starting Xvfb ${DISPLAY} (${SCREEN_RES})..."
 rm -f "/tmp/.X${DISPLAY_NUM}-lock" 2>/dev/null || true
 Xvfb "${DISPLAY}" -screen 0 "${SCREEN_RES}x24" -ac +extension GLX +render -noreset &
 XVFB_PID=$!
 sleep 2
 
 # ── 2. Virtual audio sink ─────────────────────────────────────────────────────
-echo "Starting PulseAudio..."
+echo "Starting audio..."
 pulseaudio --start --exit-idle-time=-1 2>/dev/null || true
 sleep 2
-PULSE_PID=$(pgrep pulseaudio || true)
+PULSE_PID=$(pgrep -u "$(id -un)" pulseaudio 2>/dev/null || true)
+
+echo "Audio server: $(pactl info 2>/dev/null | grep 'Server Name' || echo 'unknown')"
 
 pactl load-module module-null-sink \
   sink_name=vstream \
@@ -54,9 +69,12 @@ pactl load-module module-null-sink \
 pactl set-default-sink vstream 2>/dev/null || true
 export PULSE_SINK=vstream
 
-# ── 3. Chrome ─────────────────────────────────────────────────────────────────
-echo "Starting Chromium → $STREAM_URL"
-DISPLAY="${DISPLAY}" PULSE_SINK=vstream chromium \
+# ── 3. Chromium ───────────────────────────────────────────────────────────────
+echo "Starting Chromium → $NAV_URL"
+DISPLAY="${DISPLAY}" \
+PULSE_SERVER="${PULSE_SERVER}" \
+PULSE_SINK=vstream \
+chromium \
   --no-sandbox \
   --test-type \
   --disable-dev-shm-usage \
@@ -65,22 +83,34 @@ DISPLAY="${DISPLAY}" PULSE_SINK=vstream chromium \
   --disable-extensions \
   --disable-blink-features=AutomationControlled \
   --autoplay-policy=no-user-gesture-required \
-  --kiosk \
-  --window-size="${SCREEN_RES/x/,}" \
+  --window-size=640,560 \
   --window-position=0,0 \
-  --app="$STREAM_URL" \
+  --app="$NAV_URL" \
   2>/dev/null &
 CHROME_PID=$!
 
 echo "Waiting ${PAGE_LOAD_WAIT}s for page to load..."
 sleep "$PAGE_LOAD_WAIT"
 
-# ── 4. FFmpeg → YouTube ───────────────────────────────────────────────────────
-echo "Starting FFmpeg stream..."
+# ── 4. Click ToggleMedia (volume button) ──────────────────────────────────────
+# Nav bar renders below the 480px display in normal document flow.
+# #divTwcBottomRight is right-aligned; ToggleMedia is its first (leftmost) button.
+# Buttons are 48px images at 0.75 scale; right section center ≈ x=520, y=504.
+echo "Clicking ToggleMedia (audio on)..."
+DISPLAY="${DISPLAY}" xdotool mousemove 520 504
+sleep 0.3
+DISPLAY="${DISPLAY}" xdotool click 1
+sleep 2
+
+echo "Sink inputs after click:"
+pactl list sink-inputs short 2>/dev/null || true
+
+# ── 5. FFmpeg → YouTube ───────────────────────────────────────────────────────
+echo "Starting FFmpeg stream (capturing ${CAPTURE_RES})..."
 ffmpeg \
   -f x11grab \
     -framerate 24 \
-    -video_size "${SCREEN_RES}" \
+    -video_size "${CAPTURE_RES}" \
     -i "${DISPLAY}.0+0,0" \
   -f pulse \
     -i vstream.monitor \
