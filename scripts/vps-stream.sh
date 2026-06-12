@@ -15,8 +15,6 @@ CAPTURE_RES="640x480"   # FFmpeg only grabs the top 480px; nav bar stays off-str
 # Ensure PulseAudio/PipeWire finds the correct runtime socket (needed under systemd)
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 mkdir -p "$XDG_RUNTIME_DIR"
-# Point pactl and Chromium at the same audio server socket
-export PULSE_SERVER="unix:${XDG_RUNTIME_DIR}/pulse/native"
 
 YOUTUBE_RTMP="rtmp://a.rtmp.youtube.com/live2//${YOUTUBE_STREAM_KEY}"
 PAGE_LOAD_WAIT=30   # seconds to let the page fully load before clicking / streaming
@@ -50,7 +48,9 @@ trap cleanup EXIT INT TERM
 
 # ── 1. Virtual display ────────────────────────────────────────────────────────
 echo "Starting Xvfb ${DISPLAY} (${SCREEN_RES})..."
-rm -f "/tmp/.X${DISPLAY_NUM}-lock" 2>/dev/null || true
+pkill -f "Xvfb ${DISPLAY}" 2>/dev/null || true
+sleep 1
+rm -f "/tmp/.X${DISPLAY_NUM}-lock" "/tmp/.X11-unix/X${DISPLAY_NUM}" 2>/dev/null || true
 Xvfb "${DISPLAY}" -screen 0 "${SCREEN_RES}x24" -ac +extension GLX +render -noreset &
 XVFB_PID=$!
 sleep 2
