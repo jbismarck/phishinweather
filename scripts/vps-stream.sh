@@ -97,9 +97,9 @@ sleep "$PAGE_LOAD_WAIT"
 # ── 4. Click ToggleMedia (volume button) ──────────────────────────────────────
 # Nav bar renders below the 480px display in normal document flow.
 # #divTwcBottomRight is right-aligned; ToggleMedia is its first (leftmost) button.
-# Buttons are 48px images at 0.75 scale; right section center ≈ x=520, y=504.
+# Screenshot-verified position: volume icon at approximately x=490, y=487.
 echo "Clicking ToggleMedia (audio on)..."
-DISPLAY="${DISPLAY}" xdotool mousemove 520 504
+DISPLAY="${DISPLAY}" xdotool mousemove 490 487
 sleep 0.3
 DISPLAY="${DISPLAY}" xdotool click 1
 sleep 2
