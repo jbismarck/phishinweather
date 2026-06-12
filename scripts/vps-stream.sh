@@ -92,6 +92,7 @@ chromium \
   --autoplay-policy=no-user-gesture-required \
   --window-size=640,560 \
   --window-position=0,0 \
+  --hide-scrollbars \
   --user-data-dir=/tmp/chromium-stream \
   --app="$NAV_URL" \
   2>/dev/null &
