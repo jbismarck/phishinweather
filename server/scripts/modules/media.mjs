@@ -1,6 +1,22 @@
 import { text } from './utils/fetch.mjs';
 import Setting from './utils/setting.mjs';
 
+// A Live One (1995) — one track per source show, disc 1 → disc 2 order
+const A_LIVE_ONE = [
+	{ mp3: 'https://phish.in/blob/d3powwkr6jzeisx2du2n7dmb6jlb.mp3', title: 'Bouncing Around the Room (12/31/94)' },
+	{ mp3: 'https://phish.in/blob/wquyi4a36p68f5wjbx380e7jrjlh.mp3', title: 'Stash (7/8/94)' },
+	{ mp3: 'https://phish.in/blob/iwyekfo5d8qewcmku86dvdf37q3m.mp3', title: 'Gumbo (12/2/94)' },
+	{ mp3: 'https://phish.in/blob/3pxpewkp4rad96a2c5pa1536jz7t.mp3', title: 'Tweezer > Montana (11/28/94)' },
+	{ mp3: 'https://phish.in/blob/fcg3nhknda2ont07cmg2w03dvmtf.mp3', title: 'You Enjoy Myself (12/7/94)' },
+	{ mp3: 'https://phish.in/blob/muahryzmb492q5z0et4bw7qbu3fy.mp3', title: 'Chalk Dust Torture (11/16/94)' },
+	{ mp3: 'https://phish.in/blob/ko6r0b5g0aggswieeph3dm8z6dmv.mp3', title: 'Slave to the Traffic Light (11/26/94)' },
+	{ mp3: 'https://phish.in/blob/f3touiq9is0r02wl5cp81luel5bp.mp3', title: 'Wilson (12/30/94)' },
+	{ mp3: 'https://phish.in/blob/ejma2p7g604cqz3rdqkb8xdxohce.mp3', title: 'Tweezer (11/2/94)' },
+	{ mp3: 'https://phish.in/blob/ge5ebfencfjm0nqcidts0vgfztfh.mp3', title: 'Simple (12/10/94)' },
+	{ mp3: 'https://phish.in/blob/9vtanzkje44n80haz2o746p6hmxh.mp3', title: 'Harry Hood (10/23/94)' },
+	{ mp3: 'https://phish.in/blob/v01onxzm936add0kg6sxhifeupvm.mp3', title: 'The Squirming Coil (10/23/94)' },
+];
+
 let playlist;
 let currentTrack = 0;
 let player;
@@ -60,22 +76,25 @@ const getMedia = async () => {
                 playlist = await scanMusicDirectory();
         }
 
-        // No custom local tracks — seed from today's featured show on phish.in.
-        // Falls back silently to default ambient tracks if the API is unavailable.
+        // No custom local tracks — play today-in-history shows in full, in order.
+        // Falls back to A Live One if no shows exist for today's date.
         const hasCustomTracks = playlist.availableFiles.some((f) => !f.startsWith('default/'));
         if (!hasCustomTracks) {
                 try {
                         const r = await fetch('/api/phish/on-this-day');
                         if (r.ok) {
                                 const data = await r.json();
-                                const phishTracks = (data?.featured?.tracks ?? [])
-                                        .map((t) => t.mp3)
-                                        .filter(Boolean);
-                                if (phishTracks.length > 0) {
-                                        playlist = { availableFiles: phishTracks };
-                                }
+                                // All shows for today, oldest → newest, tracks in set order
+                                const todayTracks = (data?.shows ?? [])
+                                        .filter((s) => s.tracks.length > 0)
+                                        .sort((a, b) => a.date.localeCompare(b.date))
+                                        .flatMap((s) => s.tracks.map((t) => ({ mp3: t.mp3, title: t.title })));
+                                const tracks = todayTracks.length > 0 ? todayTracks : A_LIVE_ONE;
+                                playlist = { availableFiles: tracks.map((t) => t.mp3), sequential: true };
+                        } else {
+                                playlist = { availableFiles: A_LIVE_ONE.map((t) => t.mp3), sequential: true };
                         }
-                } catch { /* stay with default ambient tracks */ }
+                } catch { playlist = { availableFiles: A_LIVE_ONE.map((t) => t.mp3), sequential: true }; }
         }
 
         enableMediaPlayer();
@@ -89,8 +108,7 @@ const enableMediaPlayer = () => {
 
 	// see if files are available
 	if (playlist?.availableFiles?.length > 0) {
-		// randomize the list
-		randomizePlaylist();
+		if (!playlist.sequential) randomizePlaylist();
 		// enable the icon
 		const icon = document.getElementById('ToggleMedia');
 		icon.classList.add('available');
@@ -212,6 +230,7 @@ const initializePlayer = async () => {
 
 	// add event handlers
 	player.addEventListener('ended', playerEnded);
+	player.addEventListener('error', playerEnded);
 
 	// get the first file
 	player.src = getTrackUrl(playlist.availableFiles[currentTrack]);
@@ -226,9 +245,8 @@ const initializePlayer = async () => {
 const playerEnded = () => {
 	// next track
 	currentTrack += 1;
-	// roll over and re-randomize the tracks
 	if (currentTrack >= playlist.availableFiles.length) {
-		randomizePlaylist();
+		if (!playlist.sequential) randomizePlaylist();
 		currentTrack = 0;
 	}
 	// update the player source and continue playing
