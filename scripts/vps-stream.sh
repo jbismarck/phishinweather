@@ -39,10 +39,11 @@ echo "Streaming: $NAV_URL → YouTube"
 # ── Cleanup on exit ───────────────────────────────────────────────────────────
 cleanup() {
   echo "Shutting down..."
-  kill "$FFMPEG_PID"  2>/dev/null || true
-  kill "$CHROME_PID"  2>/dev/null || true
-  kill "$PULSE_PID"   2>/dev/null || true
-  kill "$XVFB_PID"    2>/dev/null || true
+  kill "$FFMPEG_PID"    2>/dev/null || true
+  kill "$WATCHDOG_PID"  2>/dev/null || true
+  kill "$CHROME_PID"    2>/dev/null || true
+  kill "$PULSE_PID"     2>/dev/null || true
+  kill "$XVFB_PID"      2>/dev/null || true
   rm -f "/tmp/.X${DISPLAY_NUM}-lock" "/tmp/.X11-unix/X${DISPLAY_NUM}" 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
@@ -140,4 +141,22 @@ ffmpeg \
 FFMPEG_PID=$!
 
 echo "Stream live. FFmpeg PID: $FFMPEG_PID"
+
+# ── 6. Audio watchdog ─────────────────────────────────────────────────────────
+# Checks every 60s; if phish.in stops playing, clicks ToggleMedia to restart.
+(
+  sleep 90  # give phish.in time to fully load before first check
+  while kill -0 "$FFMPEG_PID" 2>/dev/null; do
+    if ! PULSE_SERVER="${PULSE_SERVER}" pactl list sink-inputs short 2>/dev/null | grep -q .; then
+      echo "Watchdog: no audio sink input — clicking ToggleMedia to restart..."
+      DISPLAY="${DISPLAY}" xdotool mousemove 490 487
+      sleep 0.3
+      DISPLAY="${DISPLAY}" xdotool click 1
+      sleep 5  # wait for playback to resume before next check
+    fi
+    sleep 60
+  done
+) &
+WATCHDOG_PID=$!
+
 wait "$FFMPEG_PID"
