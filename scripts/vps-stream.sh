@@ -119,7 +119,7 @@ pactl list sink-inputs short 2>/dev/null || true
 echo "Starting FFmpeg stream (capturing ${CAPTURE_RES})..."
 ffmpeg \
   -f x11grab \
-    -framerate 24 \
+    -framerate 30 \
     -video_size "${CAPTURE_RES}" \
     -i "${DISPLAY}.0+0,0" \
   -f pulse \
@@ -127,13 +127,13 @@ ffmpeg \
   -c:v libx264 \
     -preset ultrafast \
     -tune zerolatency \
-    -b:v 1000k \
-    -maxrate 1200k \
-    -bufsize 2000k \
+    -b:v 2000k \
+    -maxrate 2500k \
+    -bufsize 4000k \
     -pix_fmt yuv420p \
-    -g 48 \
+    -g 60 \
   -c:a aac \
-    -b:a 96k \
+    -b:a 128k \
     -ar 44100 \
   -f flv \
   "$YOUTUBE_RTMP" &
