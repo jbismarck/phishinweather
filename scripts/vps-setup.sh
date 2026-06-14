@@ -16,7 +16,8 @@ apt-get install -y --no-install-recommends \
   ffmpeg \
   curl \
   ca-certificates \
-  xdg-utils
+  xdg-utils \
+  xdotool
 
 echo "==> Installing Chromium..."
 if ! command -v chromium &>/dev/null && ! command -v chromium-browser &>/dev/null; then

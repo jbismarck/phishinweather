@@ -13,8 +13,9 @@ SCREEN_RES="640x560"
 CAPTURE_RES="640x480"   # FFmpeg only grabs the top 480px; nav bar stays off-stream
 
 # Ensure PulseAudio/PipeWire finds the correct runtime socket (needed under systemd)
-export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export XDG_RUNTIME_DIR="/tmp/xdg-runtime-stream"
 mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
 
 YOUTUBE_RTMP="rtmp://a.rtmp.youtube.com/live2//${YOUTUBE_STREAM_KEY}"
 PAGE_LOAD_WAIT=45   # seconds to let the page fully load before clicking / streaming
