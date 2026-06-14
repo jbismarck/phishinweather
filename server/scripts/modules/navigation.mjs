@@ -300,11 +300,11 @@ const registerProgress = (_progress) => {
 };
 
 const populateWeatherParameters = (params) => {
-	document.querySelector('#spanCity').innerHTML = `${params.city}, `;
-	document.querySelector('#spanState').innerHTML = params.state;
-	document.querySelector('#spanStationId').innerHTML = params.stationId;
-	document.querySelector('#spanRadarId').innerHTML = params.radarId;
-	document.querySelector('#spanZoneId').innerHTML = params.zoneId;
+	document.querySelector('#spanCity').textContent = `${params.city}, `;
+	document.querySelector('#spanState').textContent = params.state;
+	document.querySelector('#spanStationId').textContent = params.stationId;
+	document.querySelector('#spanRadarId').textContent = params.radarId;
+	document.querySelector('#spanZoneId').textContent = params.zoneId;
 };
 
 const latLonReceived = (data, haveDataCallback) => {

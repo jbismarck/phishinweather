@@ -423,8 +423,7 @@ class WeatherDisplay {
 
 			// fill based on type provided
 			if (typeof value === 'string' || typeof value === 'number') {
-				// string and number fill the first found selector
-				elem.innerHTML = value;
+				elem.textContent = value;
 			} else if (value?.type === 'img') {
 				// fill the image source
 				elem.querySelector('img').src = value.src;

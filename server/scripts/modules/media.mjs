@@ -261,7 +261,7 @@ const setTrackName = (fileName) => {
         const trackName = decodeURIComponent(
                 baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, '')
         );
-        document.getElementById('musicTrack').innerHTML = trackName;
+        document.getElementById('musicTrack').textContent = trackName;
 };
 
 const whenMediaReady = (cb) => {
