@@ -22,4 +22,4 @@ server/data/phish-cache.json
 #local ops files
 dashboard.html
 wiki.html
-ideas.md
+ideas.md.DS_Store
