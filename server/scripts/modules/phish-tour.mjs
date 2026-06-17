@@ -178,6 +178,30 @@ class PhishTour extends WeatherDisplay {
 		card.querySelector('.policy-tubes').textContent = policy.poster_tubes ?? 'Check venue website';
 		card.querySelector('.policy-water-station').textContent = policy.water_station ?? 'Check venue website';
 
+		const BOTTLE_SPRITE = {
+			'Factory-sealed only': 'policy-bottles-sealed.png',
+			'Empty reusable or factory-sealed': 'policy-bottles-personal.png',
+			'Factory-sealed or empty reusable (1 liter max)': 'policy-bottles-personal.png',
+		};
+		const WATER_SPRITE = {
+			'Available': 'policy-water-station.png',
+			'Water fountains': 'policy-water-fountain.png',
+			'Water bottle filler': 'policy-water-filler.png',
+		};
+		const panels = card.querySelectorAll('.policy-panel');
+		const setSpriteImg = (panel, filename) => {
+			const img = panel?.querySelector('.pp-sprite img');
+			if (!img) return;
+			if (filename) {
+				img.src = `images/icons/sprites/${filename}`;
+				img.style.display = '';
+			} else {
+				img.style.display = 'none';
+			}
+		};
+		setSpriteImg(panels[0], BOTTLE_SPRITE[policy.water_bottles]);
+		setSpriteImg(panels[2], WATER_SPRITE[policy.water_station]);
+
 		const days = daysUntil(show.date);
 		const countdownElem = card.querySelector('.show-countdown');
 		if (days === 0) {
