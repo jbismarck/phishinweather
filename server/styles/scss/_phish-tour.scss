@@ -69,19 +69,17 @@
 		}
 
 		.policy-panels {
-			margin-left: 11px;
+			display: flex;
+			justify-content: space-around;
 			margin-top: 4px;
-			font-size: 0;
 		}
 
 		.policy-panel {
-			display: inline-flex;
+			display: flex;
 			flex-direction: column;
 			width: 155px;
 			height: 295px;
 			padding: 14px 8px;
-			margin: 0 15px;
-			vertical-align: top;
 			box-sizing: border-box;
 
 			.pp-label {
