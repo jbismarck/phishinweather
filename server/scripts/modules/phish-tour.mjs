@@ -111,16 +111,23 @@ class PhishTour extends WeatherDisplay {
 		// update header title + subtitle
 		const headerTop = this.elem.querySelector('.title .top');
 		const headerBottom = this.elem.querySelector('.title .bottom');
-		if (headerTop) headerTop.textContent = cardIndex === 0
-			? (VENUE_SHORT[show.venue] ?? show.venue.split(' ')[0].toUpperCase())
-			: 'PHISH';
+		if (headerTop) {
+			const venueName = cardIndex === 0
+				? (VENUE_SHORT[show.venue] ?? show.venue.split(' ')[0].toUpperCase())
+				: 'PHISH';
+			if (cardIndex === 0) {
+				const [, mm, dd] = show.date.split('-');
+				headerTop.textContent = `${venueName}  ·  ${MONTH_NAMES[parseInt(mm) - 1]} ${parseInt(dd)}`;
+			} else {
+				headerTop.textContent = venueName;
+			}
+		}
 		if (headerBottom) {
 			let subtitle;
 			if (cardIndex === 0 && isMSG) {
 				subtitle = 'YEMSG';
 			} else if (cardIndex === 0) {
-				const [, mm, dd] = show.date.split('-');
-				subtitle = `${show.city.toUpperCase()}, ${show.state}  ·  ${MONTH_NAMES[parseInt(mm) - 1]} ${parseInt(dd)}`;
+				subtitle = `${show.city.toUpperCase()}, ${show.state}`;
 			} else if (cardIndex === 1) {
 				subtitle = `${show.city.toUpperCase()}, ${show.state}`;
 			} else {
