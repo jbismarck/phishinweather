@@ -15,6 +15,7 @@ if (process.env.NODE_ENV === 'production' && process.env.DIST !== '1') {
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 // ── TASK 5: security headers ─────────────────────────────────────────────────
 app.use((req, res, next) => {
@@ -119,6 +120,10 @@ const geoip = (req, res) => {
 };
 
 const PHISH_CACHE_FILE = './server/data/phish-cache.json';
+
+const HFB_QUOTES_FILE = './server/data/hfb-quotes.json';
+let hfbQuotes = [];
+try { hfbQuotes = JSON.parse(fs.readFileSync(HFB_QUOTES_FILE, 'utf8')); } catch { hfbQuotes = []; }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Disk-backed cache: survives process restarts within the same deploy
@@ -607,7 +612,16 @@ ${tableRows}
 </table>`;
 }
 
-const adminDashboard = async (req, res) => {
+const BOTTLE_OPTIONS = [
+	'Factory-sealed only',
+	'Empty reusable or factory-sealed',
+	'Factory-sealed or empty reusable (1 liter max)',
+	'Check venue website',
+];
+const TUBES_OPTIONS = ['Not permitted', 'Permitted', 'Check venue website'];
+const WATER_OPTIONS = ['Available', 'Water fountains', 'Water bottle filler', 'Check venue website'];
+
+const requireAdmin = (req, res, next) => {
 	const password = process.env.ADMIN_PASSWORD;
 	if (!password) return res.status(503).send('Admin not configured — set ADMIN_PASSWORD env var');
 	const auth = req.headers.authorization ?? '';
@@ -621,6 +635,100 @@ const adminDashboard = async (req, res) => {
 		res.set('WWW-Authenticate', 'Basic realm="phishinweather admin"');
 		return res.status(401).send('Unauthorized');
 	}
+	next();
+};
+
+const renderQuotesSection = (password) => {
+	const token = Buffer.from(':' + password).toString('base64');
+	const rows = hfbQuotes.map((q, i) =>
+		'<div class="q-row"><span>' + q.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>'
+		+ '<button class="q-del" onclick="hfbDel(' + i + ')">×</button></div>'
+	).join('');
+	return '<h2>HFB Quotes <span class="q-count">(' + hfbQuotes.length + ')</span></h2>'
+		+ '<style>'
+		+ '.q-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #1e1e1e}'
+		+ '.q-row span{flex:1;font-size:.85em}'
+		+ '.q-del{background:#1a1a1a;border:1px solid #444;color:#f88;cursor:pointer;padding:2px 8px;font-size:1em}'
+		+ '.q-del:hover{background:#2a1a1a}'
+		+ '.q-count{color:#888;font-size:.7em;font-weight:normal}'
+		+ '.q-note{color:#666;font-size:.8em;margin:.5em 0 1em}'
+		+ '</style>'
+		+ '<div id="hfb-list">' + rows + '</div>'
+		+ '<p class="q-note">Changes persist until next deploy. To make permanent: commit <code>server/data/hfb-quotes.json</code>.</p>'
+		+ '<form id="hfb-form" style="display:flex;gap:8px;margin-top:8px">'
+		+ '<input id="hfb-input" type="text" placeholder="NEW QUOTE — UPPERCASE RECOMMENDED" '
+		+ 'style="flex:1;padding:6px;background:#111;border:1px solid #444;color:#ccc;font-family:monospace;font-size:.9em">'
+		+ '<button type="submit" style="padding:6px 16px;background:#ff0;color:#000;border:none;cursor:pointer;font-family:monospace;font-weight:bold;letter-spacing:1px">ADD</button>'
+		+ '</form>'
+		+ '<script>'
+		+ 'var _hT="' + token + '";'
+		+ 'function hfbDel(i){if(!confirm("Delete this quote?"))return;'
+		+ 'fetch("/api/hfb-quotes/"+i,{method:"DELETE",headers:{Authorization:"Basic "+_hT}})'
+		+ '.then(function(){location.reload();});}'
+		+ 'document.getElementById("hfb-form").addEventListener("submit",function(e){'
+		+ 'e.preventDefault();'
+		+ 'var v=document.getElementById("hfb-input").value.trim();if(!v)return;'
+		+ 'fetch("/api/hfb-quotes",{method:"POST",'
+		+ 'headers:{"Content-Type":"application/json",Authorization:"Basic "+_hT},'
+		+ 'body:JSON.stringify({quote:v})})'
+		+ '.then(function(){location.reload();});'
+		+ '});'
+		+ '</script>';
+};
+
+const renderTourSection = (password) => {
+	const token = Buffer.from(':' + password).toString('base64');
+	let tourData;
+	try { tourData = JSON.parse(fs.readFileSync('./server/data/summer-tour.json', 'utf8')); }
+	catch { return '<h2>Tour Policy</h2><p style="color:#f88">Could not load summer-tour.json</p>'; }
+
+	const selEl = (field, current, options, showIdx) => {
+		const allOpts = options.includes(current) ? options : [...options, current];
+		return '<select id="ts-' + showIdx + '-' + field + '" onchange="tourSave(' + showIdx + ',\'' + field + '\',this.value)" '
+			+ 'style="background:#111;border:1px solid #333;color:#ccc;font-family:monospace;font-size:.75em;width:100%">'
+			+ allOpts.map((o) => '<option' + (o === current ? ' selected' : '') + '>' + o.replace(/</g, '&lt;') + '</option>').join('')
+			+ '</select>';
+	};
+
+	const rows = tourData.shows.map((show, i) => {
+		const d = new Date(show.date + 'T12:00:00');
+		const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+		const p = show.policy ?? {};
+		return '<tr>'
+			+ '<td style="white-space:nowrap;color:#888;font-size:.85em">' + dateStr + '</td>'
+			+ '<td style="font-size:.85em">' + show.venue + '</td>'
+			+ '<td style="white-space:nowrap;color:#888;font-size:.85em">' + show.city + ', ' + show.state + '</td>'
+			+ '<td>' + selEl('water_bottles', p.water_bottles ?? 'Check venue website', BOTTLE_OPTIONS, i) + '</td>'
+			+ '<td>' + selEl('poster_tubes', p.poster_tubes ?? 'Check venue website', TUBES_OPTIONS, i) + '</td>'
+			+ '<td>' + selEl('water_station', p.water_station ?? 'Check venue website', WATER_OPTIONS, i) + '</td>'
+			+ '</tr>';
+	}).join('');
+
+	return `<h2>Tour Policy</h2>
+<div style="overflow-x:auto">
+<table>
+<tr><th>Date</th><th>Venue</th><th>City</th><th>Water Bottles</th><th>Tubes</th><th>Water Station</th></tr>
+${rows}
+</table>
+</div>
+<p class="q-note">Auto-saves on change. Changes persist until next deploy. To make permanent: commit <code>server/data/summer-tour.json</code>.</p>
+<script>
+function tourSave(i,field,val){
+  var body={};body[field]=val;
+  var sel=document.getElementById('ts-'+i+'-'+field);
+  fetch('/api/tour-policy/'+i,{method:'PATCH',
+    headers:{'Content-Type':'application/json',Authorization:'Basic ${token}'},
+    body:JSON.stringify(body)
+  }).then(function(r){
+    if(r.ok){sel.style.borderColor='#4f4';setTimeout(function(){sel.style.borderColor='';},1200);}
+    else{sel.style.borderColor='#f44';}
+  });
+}
+</script>`;
+};
+
+const adminDashboard = async (req, res) => {
+	const password = process.env.ADMIN_PASSWORD;
 
 	const [cfRows, totalMonthly] = await Promise.all([
 		fetchCfAnalytics(),
@@ -669,11 +777,48 @@ const adminDashboard = async (req, res) => {
 
 ${renderCfSection(cfRows)}
 
+${renderQuotesSection(password)}
+
+${renderTourSection(password)}
+
 ${serviceHTML}
 </body></html>`);
 };
 
-app.get('/admin', adminDashboard);
+app.get('/api/hfb-quotes', (_req, res) => res.json(hfbQuotes));
+
+app.post('/api/hfb-quotes', requireAdmin, (req, res) => {
+	const { quote } = req.body;
+	if (!quote || typeof quote !== 'string') return res.status(400).json({ error: 'quote required' });
+	hfbQuotes.push(quote.trim());
+	fs.writeFileSync(HFB_QUOTES_FILE, JSON.stringify(hfbQuotes, null, '\t'), 'utf8');
+	res.json({ ok: true, count: hfbQuotes.length });
+});
+
+app.delete('/api/hfb-quotes/:index', requireAdmin, (req, res) => {
+	const i = Number(req.params.index);
+	if (!Number.isInteger(i) || i < 0 || i >= hfbQuotes.length) return res.status(400).json({ error: 'invalid index' });
+	hfbQuotes.splice(i, 1);
+	fs.writeFileSync(HFB_QUOTES_FILE, JSON.stringify(hfbQuotes, null, '\t'), 'utf8');
+	res.json({ ok: true, count: hfbQuotes.length });
+});
+
+app.patch('/api/tour-policy/:index', requireAdmin, (req, res) => {
+	let tourData;
+	try { tourData = JSON.parse(fs.readFileSync('./server/data/summer-tour.json', 'utf8')); }
+	catch { return res.status(500).json({ error: 'could not load tour data' }); }
+	const i = Number(req.params.index);
+	if (!Number.isInteger(i) || i < 0 || i >= tourData.shows.length) return res.status(400).json({ error: 'invalid index' });
+	const { water_bottles, poster_tubes, water_station } = req.body;
+	if (!tourData.shows[i].policy) tourData.shows[i].policy = {};
+	if (water_bottles !== undefined) tourData.shows[i].policy.water_bottles = water_bottles;
+	if (poster_tubes !== undefined) tourData.shows[i].policy.poster_tubes = poster_tubes;
+	if (water_station !== undefined) tourData.shows[i].policy.water_station = water_station;
+	fs.writeFileSync('./server/data/summer-tour.json', JSON.stringify(tourData, null, 2), 'utf8');
+	res.json({ ok: true });
+});
+
+app.get('/admin', requireAdmin, adminDashboard);
 app.get('/poster', (req, res) => res.render('poster', { version }));
 
 // shop
