@@ -694,6 +694,9 @@ const renderTourSection = (password) => {
 		const d = new Date(show.date + 'T12:00:00');
 		const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 		const p = show.policy ?? {};
+		const updated = p.last_updated
+			? '<span style="color:#4f4">' + p.last_updated + '</span>'
+			: '<span style="color:#555">—</span>';
 		return '<tr>'
 			+ '<td style="white-space:nowrap;color:#888;font-size:.85em">' + dateStr + '</td>'
 			+ '<td style="font-size:.85em">' + show.venue + '</td>'
@@ -701,13 +704,14 @@ const renderTourSection = (password) => {
 			+ '<td>' + selEl('water_bottles', p.water_bottles ?? 'Check venue website', BOTTLE_OPTIONS, i) + '</td>'
 			+ '<td>' + selEl('poster_tubes', p.poster_tubes ?? 'Check venue website', TUBES_OPTIONS, i) + '</td>'
 			+ '<td>' + selEl('water_station', p.water_station ?? 'Check venue website', WATER_OPTIONS, i) + '</td>'
+			+ '<td style="font-size:.75em;white-space:nowrap">' + updated + '</td>'
 			+ '</tr>';
 	}).join('');
 
 	return `<h2>Tour Policy</h2>
 <div style="overflow-x:auto">
 <table>
-<tr><th>Date</th><th>Venue</th><th>City</th><th>Water Bottles</th><th>Tubes</th><th>Water Station</th></tr>
+<tr><th>Date</th><th>Venue</th><th>City</th><th>Water Bottles</th><th>Tubes</th><th>Water Station</th><th>Updated</th></tr>
 ${rows}
 </table>
 </div>
@@ -814,6 +818,7 @@ app.patch('/api/tour-policy/:index', requireAdmin, (req, res) => {
 	if (water_bottles !== undefined) tourData.shows[i].policy.water_bottles = water_bottles;
 	if (poster_tubes !== undefined) tourData.shows[i].policy.poster_tubes = poster_tubes;
 	if (water_station !== undefined) tourData.shows[i].policy.water_station = water_station;
+	tourData.shows[i].policy.last_updated = new Date().toISOString().slice(0, 10);
 	fs.writeFileSync('./server/data/summer-tour.json', JSON.stringify(tourData, null, 2), 'utf8');
 	res.json({ ok: true });
 });
