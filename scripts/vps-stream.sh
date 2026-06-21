@@ -40,6 +40,7 @@ echo "Streaming: $NAV_URL → YouTube"
 cleanup() {
   echo "Shutting down..."
   kill "$FFMPEG_PID"    2>/dev/null || true
+  pkill -u "$(id -un)" -x ffmpeg 2>/dev/null || true   # kill inner FFmpeg if loop is mid-sleep
   kill "$WATCHDOG_PID"  2>/dev/null || true
   kill "$CHROME_PID"    2>/dev/null || true
   kill "$PULSE_PID"     2>/dev/null || true
@@ -116,31 +117,39 @@ sleep 2
 echo "Sink inputs after click:"
 pactl list sink-inputs short 2>/dev/null || true
 
-# ── 5. FFmpeg → YouTube ───────────────────────────────────────────────────────
+# ── 5. FFmpeg → YouTube (reconnect loop) ─────────────────────────────────────
+# Runs FFmpeg in a loop so a YouTube RTMP disconnect (broken pipe) reconnects
+# in 5s without restarting Xvfb, PulseAudio, or Chromium.
 echo "Starting FFmpeg stream (capturing ${CAPTURE_RES})..."
-ffmpeg \
-  -f x11grab \
-    -framerate 30 \
-    -video_size "${CAPTURE_RES}" \
-    -i "${DISPLAY}.0+0,0" \
-  -f pulse \
-    -i vstream.monitor \
-  -c:v libx264 \
-    -preset ultrafast \
-    -tune zerolatency \
-    -b:v 2000k \
-    -maxrate 2500k \
-    -bufsize 4000k \
-    -pix_fmt yuv420p \
-    -g 60 \
-  -c:a aac \
-    -b:a 128k \
-    -ar 44100 \
-  -f flv \
-  "$YOUTUBE_RTMP" &
+(
+  while true; do
+    ffmpeg \
+      -f x11grab \
+        -framerate 30 \
+        -video_size "${CAPTURE_RES}" \
+        -i "${DISPLAY}.0+0,0" \
+      -f pulse \
+        -i vstream.monitor \
+      -c:v libx264 \
+        -preset ultrafast \
+        -tune zerolatency \
+        -b:v 2000k \
+        -maxrate 2500k \
+        -bufsize 4000k \
+        -pix_fmt yuv420p \
+        -g 60 \
+      -c:a aac \
+        -b:a 128k \
+        -ar 44100 \
+      -f flv \
+      "$YOUTUBE_RTMP" || true
+    echo "FFmpeg disconnected from YouTube — reconnecting in 5s..."
+    sleep 5
+  done
+) &
 FFMPEG_PID=$!
 
-echo "Stream live. FFmpeg PID: $FFMPEG_PID"
+echo "Stream live. FFmpeg loop PID: $FFMPEG_PID"
 
 # ── 6. Audio watchdog ─────────────────────────────────────────────────────────
 # Checks every 60s; if phish.in stops playing, clicks ToggleMedia to restart.
