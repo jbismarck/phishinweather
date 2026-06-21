@@ -130,9 +130,7 @@ echo "Starting FFmpeg stream (capturing ${CAPTURE_RES})..."
         -i "${DISPLAY}.0+0,0" \
       -f pulse \
         -i vstream.monitor \
-      -c:v libx264 \
-        -preset ultrafast \
-        -tune zerolatency \
+      -c:v h264_v4l2m2m \
         -b:v 2000k \
         -maxrate 2500k \
         -bufsize 4000k \
