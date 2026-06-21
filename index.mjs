@@ -824,6 +824,7 @@ app.patch('/api/tour-policy/:index', requireAdmin, (req, res) => {
 });
 
 app.get('/admin', requireAdmin, adminDashboard);
+app.get('/stream', (_req, res) => res.redirect(301, 'https://www.youtube.com/@phishinweather/live'));
 app.get('/poster', (req, res) => res.render('poster', { version }));
 
 // shop
