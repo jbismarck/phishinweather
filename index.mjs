@@ -873,11 +873,11 @@ app.get('/api/phish/on-this-day', phishOnThisDay);
 app.get('/api/phish/summer-tour', phishSummerTour);
 
 if (process.env?.DIST === '1') {
-	// distribution
+	// distribution — long TTL on bundled assets (cache-busted by commit SHA on deploy)
 	app.use('/scripts', express.static('./server/scripts'));
 	app.use('/styles', express.static('./server/styles'));
 	app.use('/geoip', geoip);
-	app.use('/', express.static('./dist'));
+	app.use('/', express.static('./dist', { maxAge: '7d' }));
 } else {
 	// debugging
 	app.get('/index.html', index);
