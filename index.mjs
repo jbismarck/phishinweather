@@ -171,37 +171,48 @@ const SETLIST_CACHE_MS = 10 * 60 * 1000;
 let setlistCache = null;
 let setlistCacheKey = null;
 
-const parsePhishNetSetlist = (html) => {
-	if (!html) return [];
-	const text = html
-		.replace(/<br\s*\/?>/gi, '\n')
-		.replace(/<[^>]+>/g, '')
-		.replace(/&amp;/g, '&')
-		.replace(/&gt;/g, '>')
-		.replace(/&lt;/g, '<')
-		.replace(/&#\d+;/g, '')
-		.trim();
-	const sets = [];
-	for (const line of text.split('\n')) {
-		const trimmed = line.trim();
-		if (!trimmed) continue;
-		const match = trimmed.match(/^(Set\s*\d+|Encore|E\d*):\s*(.+)/i);
-		if (!match) continue;
-		const rawName = match[1].trim();
-		const name = (/^e/i.test(rawName) && !/^set/i.test(rawName)) ? 'ENCORE' : rawName.toUpperCase();
-		sets.push({ name, songs: match[2].trim() });
-	}
-	return sets;
+const SET_LABELS = {
+	1: 'SET 1', 2: 'SET 2', 3: 'SET 3',
+	e: 'ENCORE', e2: 'ENCORE 2', e3: 'ENCORE 3',
 };
 
-const fetchSetlistForDate = async (date, apiKey) => {
+// API returns one row per song — group into sets and build song strings
+const buildSetlistFromRows = (rows) => {
+	const first = rows[0];
+	const setMap = new Map();
+	rows.forEach((row) => {
+		if (!setMap.has(row.set)) setMap.set(row.set, []);
+		setMap.get(row.set).push(row);
+	});
+	const sets = [];
+	for (const [key, songs] of setMap) {
+		const label = SET_LABELS[key] ?? `SET ${key}`.toUpperCase();
+		const songStr = songs.map((s, i) => {
+			const isLast = i === songs.length - 1;
+			return s.song + (isLast ? '' : (s.trans_mark || ', '));
+		}).join('');
+		sets.push({ name: label, songs: songStr });
+	}
+	return {
+		showdate: first.showdate,
+		venue: first.venue,
+		city: first.city,
+		state: first.state,
+		notes: first.setlistnotes?.trim() || '',
+		sets,
+	};
+};
+
+const fetchSetlistRows = async (date, apiKey) => {
 	try {
 		const r = await phishFetch(
-			`https://api.phish.net/v5/shows/showdate/${date}.json?apikey=${apiKey}`,
+			`https://api.phish.net/v5/setlists/showdate/${date}.json?apikey=${apiKey}`,
 		);
 		if (!r.ok) return null;
 		const data = await r.json();
-		return data?.data?.[0] ?? null;
+		// filter artistid=1 (Phish only), each element is one song row
+		const rows = (data?.data ?? []).filter((row) => row.artistid === 1 || row.artistid === '1');
+		return rows.length ? rows : null;
 	} catch {
 		return null;
 	}
@@ -219,33 +230,23 @@ const phishLiveSetlist = async (req, res) => {
 	}
 
 	try {
-		let show = await fetchSetlistForDate(today, apiKey);
+		let rows = await fetchSetlistRows(today, apiKey);
 		let isToday = true;
 
-		if (!show) {
+		if (!rows) {
 			const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-			show = await fetchSetlistForDate(yesterday, apiKey);
+			rows = await fetchSetlistRows(yesterday, apiKey);
 			isToday = false;
 		}
 
-		if (!show) {
+		if (!rows) {
 			const payload = { noShow: true };
 			setlistCache = payload;
 			setlistCacheKey = cacheKey;
 			return res.json(payload);
 		}
 
-		const payload = {
-			isToday,
-			showdate: show.showdate,
-			venue: show.venue,
-			city: show.city,
-			state: show.state,
-			sets: parsePhishNetSetlist(show.setlistdata),
-			notes: show.setlistnotes
-				? show.setlistnotes.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').trim()
-				: '',
-		};
+		const payload = { isToday, ...buildSetlistFromRows(rows) };
 		setlistCache = payload;
 		setlistCacheKey = cacheKey;
 		return res.json(payload);
