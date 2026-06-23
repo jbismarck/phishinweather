@@ -100,6 +100,7 @@ const index = (req, res) => {
 		cssHash: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 8) ?? Date.now(),
 		version,
 		OVERRIDES,
+		cfWaToken: process.env.CF_WEB_ANALYTICS_TOKEN ?? null,
 	});
 };
 
@@ -124,6 +125,9 @@ const PHISH_CACHE_FILE = './server/data/phish-cache.json';
 const HFB_QUOTES_FILE = './server/data/hfb-quotes.json';
 let hfbQuotes = [];
 try { hfbQuotes = JSON.parse(fs.readFileSync(HFB_QUOTES_FILE, 'utf8')); } catch { hfbQuotes = []; }
+const SHOUTOUTS_FILE = './server/data/shoutouts.json';
+let shoutouts = [];
+try { shoutouts = JSON.parse(fs.readFileSync(SHOUTOUTS_FILE, 'utf8')); } catch { shoutouts = []; }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Disk-backed cache: survives process restarts within the same deploy
@@ -159,6 +163,96 @@ const phishFetch = (url) => {
 	const id = setTimeout(() => controller.abort(), PHISH_TIMEOUT_MS);
 	return fetch(url, { headers: { Accept: 'application/json' }, signal: controller.signal })
 		.finally(() => clearTimeout(id));
+};
+
+// ── Live setlist (phish.net) ─────────────────────────────────────────────────
+
+const SETLIST_CACHE_MS = 10 * 60 * 1000;
+let setlistCache = null;
+let setlistCacheKey = null;
+
+const parsePhishNetSetlist = (html) => {
+	if (!html) return [];
+	const text = html
+		.replace(/<br\s*\/?>/gi, '\n')
+		.replace(/<[^>]+>/g, '')
+		.replace(/&amp;/g, '&')
+		.replace(/&gt;/g, '>')
+		.replace(/&lt;/g, '<')
+		.replace(/&#\d+;/g, '')
+		.trim();
+	const sets = [];
+	for (const line of text.split('\n')) {
+		const trimmed = line.trim();
+		if (!trimmed) continue;
+		const match = trimmed.match(/^(Set\s*\d+|Encore|E\d*):\s*(.+)/i);
+		if (!match) continue;
+		const rawName = match[1].trim();
+		const name = (/^e/i.test(rawName) && !/^set/i.test(rawName)) ? 'ENCORE' : rawName.toUpperCase();
+		sets.push({ name, songs: match[2].trim() });
+	}
+	return sets;
+};
+
+const fetchSetlistForDate = async (date, apiKey) => {
+	try {
+		const r = await phishFetch(
+			`https://api.phish.net/v5/setlists/showdate/${date}.json?apikey=${apiKey}`,
+		);
+		if (!r.ok) return null;
+		const data = await r.json();
+		return data?.data?.[0] ?? null;
+	} catch {
+		return null;
+	}
+};
+
+const phishLiveSetlist = async (req, res) => {
+	const apiKey = process.env.PHISHNET_API_KEY;
+	if (!apiKey) return res.status(503).json({ error: 'PHISHNET_API_KEY not configured' });
+
+	const today = new Date().toISOString().slice(0, 10);
+	const cacheKey = `${today}-${Math.floor(Date.now() / SETLIST_CACHE_MS)}`;
+
+	if (setlistCache && setlistCacheKey === cacheKey) {
+		return res.json(setlistCache);
+	}
+
+	try {
+		let show = await fetchSetlistForDate(today, apiKey);
+		let isToday = true;
+
+		if (!show) {
+			const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+			show = await fetchSetlistForDate(yesterday, apiKey);
+			isToday = false;
+		}
+
+		if (!show) {
+			const payload = { noShow: true };
+			setlistCache = payload;
+			setlistCacheKey = cacheKey;
+			return res.json(payload);
+		}
+
+		const payload = {
+			isToday,
+			showdate: show.showdate,
+			venue: show.venue,
+			city: show.city,
+			state: show.state,
+			sets: parsePhishNetSetlist(show.setlistdata),
+			notes: show.setlistnotes
+				? show.setlistnotes.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').trim()
+				: '',
+		};
+		setlistCache = payload;
+		setlistCacheKey = cacheKey;
+		return res.json(payload);
+	} catch (e) {
+		console.error('Live setlist error:', e.message);
+		return res.status(500).json({ error: 'Failed to fetch setlist' });
+	}
 };
 
 const phishOnThisDay = async (req, res) => {
@@ -335,6 +429,7 @@ const phishSummerTour = async (req, res) => {
 		});
 
 		const tracksBySlug = {};
+		const venueHistoryBySlug = {};
 		await Promise.all(uniqueSlugs.map(async (show) => {
 			const { phishin_venue_slug: slug } = show;
 			try {
@@ -343,6 +438,10 @@ const phishSummerTour = async (req, res) => {
 				);
 				const listData = await listR.json();
 				const recentShow = listData.shows?.[0];
+				venueHistoryBySlug[slug] = {
+					show_count: listData.total_entries ?? listData.total_shows ?? 0,
+					recent_date: recentShow?.date ?? null,
+				};
 				if (!recentShow) { tracksBySlug[slug] = []; return; }
 
 				const detailR = await phishFetch(`https://phish.in/api/v2/shows/${recentShow.date}`);
@@ -352,6 +451,7 @@ const phishSummerTour = async (req, res) => {
 					.map((t) => t.mp3);
 			} catch {
 				tracksBySlug[slug] = [];
+				venueHistoryBySlug[slug] = null;
 			}
 		}));
 
@@ -386,6 +486,7 @@ const phishSummerTour = async (req, res) => {
 				}
 			}
 			show.musicTracks = tracksBySlug[show.phishin_venue_slug] ?? [];
+			show.venueHistory = venueHistoryBySlug[show.phishin_venue_slug] ?? null;
 		});
 
 		tourCache = { tour: tourData.tour, shows };
@@ -871,6 +972,46 @@ app.get('/shop/success', async (req, res) => {
 app.use('/api/phish', phishRateLimit);
 app.get('/api/phish/on-this-day', phishOnThisDay);
 app.get('/api/phish/summer-tour', phishSummerTour);
+app.get('/api/phish/live-setlist', phishLiveSetlist);
+
+// Ko-fi shoutout scroller
+app.get('/api/shoutouts', (_req, res) => res.json(shoutouts.slice(0, 10)));
+
+app.post('/api/kofi-webhook', (req, res) => {
+	try {
+		const rawData = req.body.data;
+		if (!rawData) return res.json({ ok: true });
+		const payload = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+
+		const kofiToken = process.env.KOFI_WEBHOOK_TOKEN;
+		if (kofiToken && payload.verification_token !== kofiToken) {
+			return res.status(403).json({ error: 'invalid token' });
+		}
+
+		if (!payload.is_public || !payload.message?.trim()) {
+			return res.json({ ok: true, skipped: 'no public message' });
+		}
+
+		const shoutout = {
+			name: String(payload.from_name || 'Anonymous').slice(0, 40),
+			message: String(payload.message).trim().slice(0, 120),
+			type: payload.type || 'Donation',
+			ts: new Date().toISOString(),
+		};
+
+		shoutouts.unshift(shoutout);
+		if (shoutouts.length > 20) shoutouts.length = 20;
+		try { fs.writeFileSync(SHOUTOUTS_FILE, JSON.stringify(shoutouts, null, 2), 'utf8'); } catch { /* best effort */ }
+
+		return res.json({ ok: true });
+	} catch (e) {
+		console.error('Ko-fi webhook error:', e.message);
+		return res.json({ ok: true }); // always 200 so Ko-fi doesn't retry
+	}
+});
+
+// Social redirects
+app.get('/discord', (_req, res) => res.redirect(301, process.env.DISCORD_INVITE_URL ?? 'https://discord.com'));
 
 if (process.env?.DIST === '1') {
 	// distribution — long TTL on bundled assets (cache-busted by commit SHA on deploy)

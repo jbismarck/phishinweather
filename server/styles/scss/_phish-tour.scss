@@ -5,6 +5,7 @@
 #phish-tour-html.weather-display.bg-forecast  { background-image: url('../images/backgrounds/2.png'); }
 #phish-tour-html.weather-display.bg-eats      { background-image: url('../images/backgrounds/3.png'); }
 #phish-tour-html.weather-display.bg-shakedown { background-image: url('../images/backgrounds/3.png'); }
+#phish-tour-html.weather-display.bg-venue     { background-image: url('../images/backgrounds/2.png'); }
 
 .weather-display .main.phish-tour {
 	font-family: 'Star4000';
@@ -249,6 +250,43 @@
 				word-wrap: break-word;
 				overflow-wrap: break-word;
 			}
+		}
+	}
+
+	// ── Venue History Card ───────────────────────────────────────────────────
+	.card-venue {
+		padding-top: 30px;
+
+		.vh-headline {
+			font-family: 'Star4000 Small';
+			font-size: 13pt;
+			color: c.$column-header-text;
+			letter-spacing: 2px;
+			margin-bottom: 14px;
+		}
+
+		.vh-venue {
+			font-size: 20pt;
+			color: white;
+			line-height: 1.2;
+			margin-bottom: 22px;
+			word-wrap: break-word;
+			overflow-wrap: break-word;
+		}
+
+		.vh-count {
+			font-family: 'Star4000 Large';
+			font-size: 26pt;
+			color: c.$column-header-text;
+			line-height: 1.3;
+			margin-bottom: 14px;
+		}
+
+		.vh-recent {
+			font-size: 14pt;
+			color: rgba(255, 255, 255, 0.8);
+			font-family: 'Star4000 Small';
+			line-height: 1.4;
 		}
 	}
 

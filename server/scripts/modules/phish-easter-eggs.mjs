@@ -6,6 +6,13 @@ import { whenMediaReady, getCurrentTrackUrl } from './media.mjs';
 let HFB = [];
 fetch('/api/hfb-quotes').then((r) => r.json()).then((q) => { HFB = q; }).catch(() => {});
 
+let shoutouts = [];
+const fetchShoutouts = () => {
+	fetch('/api/shoutouts').then((r) => r.json()).then((s) => { shoutouts = s; }).catch(() => {});
+};
+fetchShoutouts();
+setInterval(fetchShoutouts, 5 * 60 * 1000);
+
 let hfbIdx = 0;
 let nowPlayingDate = '';
 let titleByUrl = new Map();
@@ -34,6 +41,14 @@ whenMediaReady(async () => {
 // Inject HFB quotes into the main weather scroll cycle (every ~4 screens)
 addScreen(() => ({ type: 'scroll', text: HFB[hfbIdx++ % HFB.length] }));
 addScreen(() => ({ type: 'scroll', text: HFB[hfbIdx++ % HFB.length] }));
+
+// Ko-fi supporter shoutouts — rotate through list, one per scroller cycle
+let shoutoutIdx = 0;
+addScreen(() => {
+	if (!shoutouts.length) return false;
+	const s = shoutouts[shoutoutIdx++ % shoutouts.length];
+	return { type: 'scroll', text: `♥ ${s.name}: ${s.message}` };
+});
 
 // Now-playing screen: show date + current track title
 addScreen(() => {

@@ -27,8 +27,8 @@ const WMO_ICON = {
 
 const DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const CARDS_PER_SHOW = 4;
-const CARD_SUBTITLES = ['SHOW INFO', 'FORECAST', 'LOT EATS', 'SHAKEDOWN'];
+const CARDS_PER_SHOW = 5;
+const CARD_SUBTITLES = ['SHOW INFO', 'FORECAST', 'LOT EATS', 'SHAKEDOWN', 'VENUE HISTORY'];
 
 const VENUE_SHORT = {
 	'Madison Square Garden': 'MSG',
@@ -138,11 +138,11 @@ class PhishTour extends WeatherDisplay {
 
 		// show only the active card
 		this.elem.querySelectorAll('.card').forEach((c) => c.classList.remove('active'));
-		const cardClasses = ['card-info', 'card-forecast', 'card-eats', 'card-shakedown'];
+		const cardClasses = ['card-info', 'card-forecast', 'card-eats', 'card-shakedown', 'card-venue'];
 		this.elem.querySelector(`.${cardClasses[cardIndex]}`).classList.add('active');
 
 		// swap background per card type
-		const BG_CLASSES = ['bg-info', 'bg-forecast', 'bg-eats', 'bg-shakedown'];
+		const BG_CLASSES = ['bg-info', 'bg-forecast', 'bg-eats', 'bg-shakedown', 'bg-venue'];
 		this.elem.classList.remove(...BG_CLASSES);
 		this.elem.classList.add(BG_CLASSES[cardIndex]);
 
@@ -166,6 +166,7 @@ class PhishTour extends WeatherDisplay {
 			case 1: this.renderForecast(show); break;
 			case 2: this.renderEats(show); break;
 			case 3: this.renderShakedown(show); break;
+			case 4: this.renderVenueHistory(show); break;
 			default: break;
 		}
 
@@ -279,6 +280,24 @@ class PhishTour extends WeatherDisplay {
 		card.querySelector('.sd-location').textContent = sd.location;
 		card.querySelector('.sd-parking').textContent = sd.parking;
 		card.querySelector('.sd-tip').textContent = `>> ${sd.tip}`;
+	}
+
+	renderVenueHistory(show) {
+		const card = this.elem.querySelector('.card-venue');
+		card.querySelector('.vh-venue').textContent = show.venue.toUpperCase();
+
+		const vh = show.venueHistory;
+		const count = vh?.show_count;
+		card.querySelector('.vh-count').textContent = count ? `${count} SHOWS` : '';
+
+		const recent = vh?.recent_date;
+		if (recent) {
+			const d = new Date(`${recent}T12:00:00`);
+			card.querySelector('.vh-recent').textContent =
+				`LAST SHOW  ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+		} else {
+			card.querySelector('.vh-recent').textContent = '';
+		}
 	}
 }
 

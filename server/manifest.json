@@ -1,12 +1,18 @@
 {
 	"name": "Phishin Weather",
+	"short_name": "Phishin Weather",
+	"description": "Retro-style weather forecasts for Phish tour travelers",
 	"icons": [
 		{
 			"src": "/images/logos/logo192.png",
 			"sizes": "192x192",
-			"type": "images/png"
+			"type": "image/png",
+			"purpose": "any maskable"
 		}
 	],
 	"start_url": "/",
-	"display": "standalone"
+	"display": "standalone",
+	"theme_color": "#102080",
+	"background_color": "#001040",
+	"orientation": "portrait"
 }

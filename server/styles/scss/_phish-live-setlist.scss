@@ -1,0 +1,67 @@
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
+
+#phish-live-setlist-html.weather-display {
+	background-image: url('../images/backgrounds/1.png');
+}
+
+@keyframes sl-scroll {
+	from { transform: translateY(0); }
+	to   { transform: translateY(var(--sl-scroll-dist, -400px)); }
+}
+
+.weather-display .main.phish-live-setlist {
+	font-family: 'Star4000';
+	@include u.text-shadow();
+
+	.scroll-container {
+		margin-top: 20px;
+		margin-left: 60px;
+		height: 270px;
+		overflow: hidden;
+		position: relative;
+	}
+
+	.setlist-container {
+		position: relative;
+	}
+
+	.sl-venue {
+		font-size: 17pt;
+		color: c.$column-header-text;
+		padding: 4px 20px 2px;
+		line-height: 1.2;
+	}
+
+	.sl-date {
+		font-size: 11pt;
+		color: white;
+		padding: 0 20px 10px;
+		line-height: 1.3;
+	}
+
+	.sl-set-header {
+		font-size: 13pt;
+		color: c.$column-header-text;
+		padding: 4px 20px 2px;
+		line-height: 1.3;
+	}
+
+	.sl-songs {
+		font-size: 12pt;
+		color: white;
+		padding: 0 20px 10px 34px;
+		line-height: 1.5;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+	}
+
+	.sl-notes {
+		font-size: 10pt;
+		color: rgba(255, 255, 255, 0.55);
+		padding: 4px 20px 8px;
+		line-height: 1.4;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+	}
+}
