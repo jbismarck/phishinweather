@@ -197,7 +197,7 @@ const parsePhishNetSetlist = (html) => {
 const fetchSetlistForDate = async (date, apiKey) => {
 	try {
 		const r = await phishFetch(
-			`https://api.phish.net/v5/setlists/showdate/${date}.json?apikey=${apiKey}`,
+			`https://api.phish.net/v5/shows/showdate/${date}.json?apikey=${apiKey}`,
 		);
 		if (!r.ok) return null;
 		const data = await r.json();
