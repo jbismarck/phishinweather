@@ -199,6 +199,7 @@ const buildSetlistFromRows = (rows) => {
 		city: first.city,
 		state: first.state,
 		notes: first.setlistnotes?.trim() || '',
+		permalink: first.permalink ?? null,
 		sets,
 	};
 };

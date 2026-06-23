@@ -81,6 +81,11 @@ class PhishLiveSetlist extends WeatherDisplay {
 			container.append(notesEl);
 		}
 
+		const attrEl = document.createElement('div');
+		attrEl.className = 'sl-attribution';
+		attrEl.textContent = 'SETLIST DATA: PHISH.NET';
+		container.append(attrEl);
+
 		const contentHeight = container.scrollHeight || 1000;
 		const scrollDist = Math.max(0, contentHeight - VIEW_HEIGHT);
 		const scrollSecs = scrollDist / SCROLL_PX_PER_SEC;
