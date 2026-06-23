@@ -149,11 +149,17 @@ FFMPEG_PID=$!
 
 echo "Stream live. FFmpeg loop PID: $FFMPEG_PID"
 
-# ── 6. Audio watchdog ─────────────────────────────────────────────────────────
-# Checks every 60s; if phish.in stops playing, clicks ToggleMedia to restart.
+# ── 6. Audio + YouTube live watchdog ─────────────────────────────────────────
+# Audio: every 60s — if phish.in stops playing, clicks ToggleMedia to restart.
+# YouTube: every 5min after a 10min grace period — if the channel isn't live,
+#          kills FFmpeg so the reconnect loop forces a fresh RTMP handshake.
+#          A fresh handshake usually triggers YouTube to resume broadcasting.
 (
-  sleep 90  # give phish.in time to fully load before first check
+  sleep 30  # give phish.in time to fully load before first check
+  yt_check_counter=0
+  startup_ts=$(date +%s)
   while kill -0 "$FFMPEG_PID" 2>/dev/null; do
+    # Audio check
     if ! PULSE_SERVER="${PULSE_SERVER}" pactl list sink-inputs short 2>/dev/null | grep -q .; then
       echo "Watchdog: no audio sink input — clicking ToggleMedia to restart..."
       DISPLAY="${DISPLAY}" xdotool mousemove 490 487
@@ -161,6 +167,22 @@ echo "Stream live. FFmpeg loop PID: $FFMPEG_PID"
       DISPLAY="${DISPLAY}" xdotool click 1
       sleep 5  # wait for playback to resume before next check
     fi
+
+    # YouTube live check — every 5 min (5 × 60s ticks), skip first 10 min
+    yt_check_counter=$((yt_check_counter + 1))
+    now_ts=$(date +%s)
+    if [ $((yt_check_counter % 5)) -eq 0 ] && [ $((now_ts - startup_ts)) -gt 600 ]; then
+      final_url=$(curl -sL --max-time 15 -o /dev/null -w "%{url_effective}" \
+        "https://www.youtube.com/@phishinweather/live" 2>/dev/null)
+      if echo "$final_url" | grep -q "watch"; then
+        echo "Watchdog: YouTube live OK"
+      else
+        echo "Watchdog: YouTube not live (resolved: ${final_url}) — restarting FFmpeg..."
+        pkill -u "$(id -un)" -x ffmpeg 2>/dev/null || true
+        sleep 10  # let reconnect loop restart FFmpeg before next check
+      fi
+    fi
+
     sleep 60
   done
 ) &
