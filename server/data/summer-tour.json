@@ -9,6 +9,7 @@
       "lat": 43.0731,
       "lon": -89.4012,
       "phishin_venue_slug": "kohl-center",
+      "phishnet_venue_id": 572,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -50,6 +51,7 @@
       "lat": 43.0731,
       "lon": -89.4012,
       "phishin_venue_slug": "kohl-center",
+      "phishnet_venue_id": 572,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -91,6 +93,7 @@
       "lat": 40.051,
       "lon": -86.016,
       "phishin_venue_slug": "deer-creek-music-center",
+      "phishnet_venue_id": 1497,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -132,6 +135,7 @@
       "lat": 40.051,
       "lon": -86.016,
       "phishin_venue_slug": "deer-creek-music-center",
+      "phishnet_venue_id": 1497,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -173,6 +177,7 @@
       "lat": 40.051,
       "lon": -86.016,
       "phishin_venue_slug": "deer-creek-music-center",
+      "phishnet_venue_id": 1497,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -214,6 +219,7 @@
       "lat": 32.0738,
       "lon": -81.0999,
       "phishin_venue_slug": "enmarket-arena",
+      "phishnet_venue_id": null,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -255,6 +261,7 @@
       "lat": 32.0738,
       "lon": -81.0999,
       "phishin_venue_slug": "enmarket-arena",
+      "phishnet_venue_id": null,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -296,6 +303,7 @@
       "lat": 35.7354,
       "lon": -78.6218,
       "phishin_venue_slug": "walnut-creek-amphitheatre",
+      "phishnet_venue_id": 1436,
       "policy": {
         "water_bottles": "Empty reusable or factory-sealed",
         "poster_tubes": "Permitted",
@@ -337,6 +345,7 @@
       "lat": 39.2178,
       "lon": -76.8631,
       "phishin_venue_slug": "merriweather-post-pavilion",
+      "phishnet_venue_id": 9,
       "policy": {
         "water_bottles": "Empty reusable or factory-sealed",
         "poster_tubes": "Permitted",
@@ -378,6 +387,7 @@
       "lat": 39.2178,
       "lon": -76.8631,
       "phishin_venue_slug": "merriweather-post-pavilion",
+      "phishnet_venue_id": 9,
       "policy": {
         "water_bottles": "Empty reusable or factory-sealed",
         "poster_tubes": "Permitted",
@@ -419,6 +429,7 @@
       "lat": 43.0481,
       "lon": -76.1474,
       "phishin_venue_slug": "amphitheater-at-lakeview",
+      "phishnet_venue_id": 1576,
       "policy": {
         "water_bottles": "Empty reusable or factory-sealed",
         "poster_tubes": "Permitted",
@@ -460,6 +471,7 @@
       "lat": 40.7505,
       "lon": -73.9934,
       "phishin_venue_slug": "madison-square-garden",
+      "phishnet_venue_id": 157,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -501,6 +513,7 @@
       "lat": 40.7505,
       "lon": -73.9934,
       "phishin_venue_slug": "madison-square-garden",
+      "phishnet_venue_id": 157,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -542,6 +555,7 @@
       "lat": 40.7505,
       "lon": -73.9934,
       "phishin_venue_slug": "madison-square-garden",
+      "phishnet_venue_id": 157,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -583,6 +597,7 @@
       "lat": 40.7505,
       "lon": -73.9934,
       "phishin_venue_slug": "madison-square-garden",
+      "phishnet_venue_id": 157,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -624,6 +639,7 @@
       "lat": 40.7505,
       "lon": -73.9934,
       "phishin_venue_slug": "madison-square-garden",
+      "phishnet_venue_id": 157,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -665,6 +681,7 @@
       "lat": 42.3467,
       "lon": -71.0972,
       "phishin_venue_slug": "fenway-park",
+      "phishnet_venue_id": 498,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -706,6 +723,7 @@
       "lat": 42.3467,
       "lon": -71.0972,
       "phishin_venue_slug": "fenway-park",
+      "phishnet_venue_id": 498,
       "policy": {
         "water_bottles": "Factory-sealed only",
         "poster_tubes": "Not permitted",
@@ -747,6 +765,7 @@
       "lat": 39.822,
       "lon": -104.892,
       "phishin_venue_slug": "dicks-sporting-goods-park",
+      "phishnet_venue_id": 961,
       "policy": {
         "water_bottles": "Factory-sealed or empty reusable (1 liter max)",
         "poster_tubes": "Permitted",
@@ -788,6 +807,7 @@
       "lat": 39.822,
       "lon": -104.892,
       "phishin_venue_slug": "dicks-sporting-goods-park",
+      "phishnet_venue_id": 961,
       "policy": {
         "water_bottles": "Factory-sealed or empty reusable (1 liter max)",
         "poster_tubes": "Permitted",
@@ -829,6 +849,7 @@
       "lat": 39.822,
       "lon": -104.892,
       "phishin_venue_slug": "dicks-sporting-goods-park",
+      "phishnet_venue_id": 961,
       "policy": {
         "water_bottles": "Factory-sealed or empty reusable (1 liter max)",
         "poster_tubes": "Permitted",
