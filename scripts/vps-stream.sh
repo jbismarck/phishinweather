@@ -6,11 +6,10 @@ set -e
 
 DISPLAY_NUM=99
 DISPLAY=":${DISPLAY_NUM}"
-# Extra 80px below the 640×480 display area so the nav bar renders in normal
-# document flow and xdotool can click it (kiosk CSS hides nav children when
-# the window is exactly 480px tall).
-SCREEN_RES="640x560"
-CAPTURE_RES="640x480"   # FFmpeg only grabs the top 480px; nav bar stays off-stream
+# Match Xvfb exactly to the WeatherStar display size.
+# --kiosk fills the full display so no black bars are possible.
+SCREEN_RES="640x480"
+CAPTURE_RES="640x480"
 
 # Ensure PulseAudio/PipeWire finds the correct runtime socket (needed under systemd)
 export XDG_RUNTIME_DIR="/tmp/xdg-runtime-stream"
@@ -18,7 +17,7 @@ mkdir -p "$XDG_RUNTIME_DIR"
 chmod 700 "$XDG_RUNTIME_DIR"
 
 YOUTUBE_RTMP="rtmp://a.rtmp.youtube.com/live2//${YOUTUBE_STREAM_KEY}"
-PAGE_LOAD_WAIT=45   # seconds to let the page fully load before clicking / streaming
+PAGE_LOAD_WAIT=45   # seconds to let the page fully load before streaming
 
 # ── Validate env ─────────────────────────────────────────────────────────────
 if [ -z "$YOUTUBE_STREAM_KEY" ] || [ "$YOUTUBE_STREAM_KEY" = "paste-your-key-here" ]; then
@@ -26,24 +25,23 @@ if [ -z "$YOUTUBE_STREAM_KEY" ] || [ "$YOUTUBE_STREAM_KEY" = "paste-your-key-her
   exit 1
 fi
 
-STREAM_URL="${STREAM_URL:-https://phishinweather.com?mode=stream&settings-scanLines-checkbox=true}"
+# settings-mediaPlaying-boolean=true auto-starts audio (no nav bar click needed).
+# --autoplay-policy=no-user-gesture-required lets Chromium honour it.
+STREAM_URL="${STREAM_URL:-https://phishinweather.com?mode=stream&settings-scanLines-checkbox=true&settings-mediaPlaying-boolean=true}"
 
-# Strip kiosk and mediaPlaying params — we click the button ourselves below.
-# Kiosk CSS hides nav children (display:none) so xdotool can't reach them.
+# Strip only the site kiosk CSS param — it hides nav elements we may still need.
 NAV_URL=$(echo "$STREAM_URL" \
   | sed 's/[?&]kiosk=true//g' \
-  | sed 's/[?&]settings-kiosk-checkbox=true//g' \
-  | sed 's/[?&]settings-mediaPlaying-boolean=true//g')
+  | sed 's/[?&]settings-kiosk-checkbox=true//g')
 echo "Streaming: $NAV_URL → YouTube"
 
 # ── Cleanup on exit ───────────────────────────────────────────────────────────
 cleanup() {
   echo "Shutting down..."
   kill "$FFMPEG_PID"    2>/dev/null || true
-  pkill -u "$(id -un)" -x ffmpeg 2>/dev/null || true   # kill inner FFmpeg if loop is mid-sleep
+  pkill -u "$(id -un)" -x ffmpeg 2>/dev/null || true
   kill "$WATCHDOG_PID"  2>/dev/null || true
   kill "$CHROME_PID"    2>/dev/null || true
-  kill "$OPENBOX_PID"   2>/dev/null || true
   kill "$PULSE_PID"     2>/dev/null || true
   kill "$XVFB_PID"      2>/dev/null || true
   rm -f "/tmp/.X${DISPLAY_NUM}-lock" "/tmp/.X11-unix/X${DISPLAY_NUM}" 2>/dev/null || true
@@ -53,45 +51,20 @@ trap cleanup EXIT INT TERM
 # ── 1. Virtual display ────────────────────────────────────────────────────────
 echo "Starting Xvfb ${DISPLAY} (${SCREEN_RES})..."
 pkill -f "Xvfb ${DISPLAY}" 2>/dev/null || true
-pkill -u "$(id -un)" chromium 2>/dev/null || true   # kill stale Chromium windows
+pkill -u "$(id -un)" chromium 2>/dev/null || true
 sleep 1
 rm -f "/tmp/.X${DISPLAY_NUM}-lock" "/tmp/.X11-unix/X${DISPLAY_NUM}" 2>/dev/null || true
 Xvfb "${DISPLAY}" -screen 0 "${SCREEN_RES}x24" -ac +extension GLX +render -noreset &
 XVFB_PID=$!
 sleep 2
 
-# ── 1b. Window manager ────────────────────────────────────────────────────────
-# Openbox enforces --window-size/--window-position. Config strips all
-# decorations (title bar / borders) so the window fills 0,0→640x560 cleanly
-# and the xdotool click lands at the correct nav-bar position.
-cat > /tmp/openbox-rc.xml << 'OBEOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<openbox_config xmlns="http://openbox.org/3.4/rc">
-  <applications>
-    <application class="*">
-      <decor>no</decor>
-      <position force="yes"><x>0</x><y>0</y></position>
-      <width force="yes">640</width>
-      <height force="yes">560</height>
-    </application>
-  </applications>
-</openbox_config>
-OBEOF
-echo "Starting openbox..."
-DISPLAY="${DISPLAY}" openbox --sm-disable --config-file /tmp/openbox-rc.xml &
-OPENBOX_PID=$!
-sleep 1
-
 # ── 2. Virtual audio sink ─────────────────────────────────────────────────────
 echo "Starting audio..."
-# Use a fixed socket path so both pactl and Chromium can find the server
 PULSE_SOCKET="/tmp/pw-stream.socket"
 export PULSE_SERVER="unix:${PULSE_SOCKET}"
 rm -f "${PULSE_SOCKET}"
-# Kill any stale PulseAudio before starting fresh
 pulseaudio --kill 2>/dev/null || pkill -u "$(id -un)" pulseaudio 2>/dev/null || true
 sleep 1
-# -n = no default config; only load null sink + socket at our fixed path
 pulseaudio --daemonize=yes --exit-idle-time=-1 -n \
   --load="module-native-protocol-unix auth-anonymous=1 socket=${PULSE_SOCKET}" \
   --load="module-null-sink sink_name=vstream sink_properties=device.description=VirtualStreamSink"
@@ -103,6 +76,9 @@ PULSE_SERVER="${PULSE_SERVER}" pactl set-default-sink vstream 2>/dev/null || tru
 export PULSE_SINK=vstream
 
 # ── 3. Chromium ───────────────────────────────────────────────────────────────
+# --kiosk fills the full 640x480 Xvfb display with no browser chrome.
+# No WM needed — kiosk mode locks the window to display dimensions.
+# Audio auto-starts via settings-mediaPlaying-boolean=true in the URL.
 echo "Starting Chromium → $NAV_URL"
 DISPLAY="${DISPLAY}" \
 PULSE_SERVER="${PULSE_SERVER}" \
@@ -116,41 +92,21 @@ chromium \
   --disable-extensions \
   --disable-blink-features=AutomationControlled \
   --autoplay-policy=no-user-gesture-required \
-  --window-size=640,560 \
-  --window-position=0,0 \
-  --hide-scrollbars \
   --force-device-scale-factor=1 \
+  --hide-scrollbars \
+  --kiosk \
   --user-data-dir=/tmp/chromium-stream \
-  --app="$NAV_URL" \
+  "$NAV_URL" \
   2>/dev/null &
 CHROME_PID=$!
 
 echo "Waiting ${PAGE_LOAD_WAIT}s for page to load..."
 sleep "$PAGE_LOAD_WAIT"
 
-# Force Chromium window to exact position and size — without a WM on Xvfb,
-# --window-size hints are not always honored; xdotool enforces them.
-echo "Forcing window size to 640x560..."
-DISPLAY="${DISPLAY}" xdotool search --sync --onlyvisible --class "chromium" \
-  windowmove 0 0 windowsize 640 560 2>/dev/null || true
-sleep 1
-
-# ── 4. Click ToggleMedia (volume button) ──────────────────────────────────────
-# Nav bar renders below the 480px display in normal document flow.
-# #divTwcBottomRight is right-aligned; ToggleMedia is its first (leftmost) button.
-# Screenshot-verified position: volume icon at approximately x=490, y=487.
-echo "Clicking ToggleMedia (audio on)..."
-DISPLAY="${DISPLAY}" xdotool mousemove 490 487
-sleep 0.3
-DISPLAY="${DISPLAY}" xdotool click 1
-sleep 2
-
-echo "Sink inputs after click:"
+echo "Sink inputs after load:"
 pactl list sink-inputs short 2>/dev/null || true
 
-# ── 5. FFmpeg → YouTube (reconnect loop) ─────────────────────────────────────
-# Runs FFmpeg in a loop so a YouTube RTMP disconnect (broken pipe) reconnects
-# in 5s without restarting Xvfb, PulseAudio, or Chromium.
+# ── 4. FFmpeg → YouTube (reconnect loop) ─────────────────────────────────────
 echo "Starting FFmpeg stream (capturing ${CAPTURE_RES})..."
 (
   while true; do
@@ -184,26 +140,13 @@ FFMPEG_PID=$!
 
 echo "Stream live. FFmpeg loop PID: $FFMPEG_PID"
 
-# ── 6. Audio + YouTube live watchdog ─────────────────────────────────────────
-# Audio: every 60s — if phish.in stops playing, clicks ToggleMedia to restart.
-# YouTube: every 5min after a 10min grace period — if the channel isn't live,
-#          kills FFmpeg so the reconnect loop forces a fresh RTMP handshake.
-#          A fresh handshake usually triggers YouTube to resume broadcasting.
+# ── 5. YouTube live watchdog ──────────────────────────────────────────────────
+# Every 5min after a 10min grace period — if the channel isn't live,
+# kills FFmpeg so the reconnect loop forces a fresh RTMP handshake.
 (
-  sleep 30  # give phish.in time to fully load before first check
   yt_check_counter=0
   startup_ts=$(date +%s)
   while kill -0 "$FFMPEG_PID" 2>/dev/null; do
-    # Audio check
-    if ! PULSE_SERVER="${PULSE_SERVER}" pactl list sink-inputs short 2>/dev/null | grep -q .; then
-      echo "Watchdog: no audio sink input — clicking ToggleMedia to restart..."
-      DISPLAY="${DISPLAY}" xdotool mousemove 490 487
-      sleep 0.3
-      DISPLAY="${DISPLAY}" xdotool click 1
-      sleep 5  # wait for playback to resume before next check
-    fi
-
-    # YouTube live check — every 5 min (5 × 60s ticks), skip first 10 min
     yt_check_counter=$((yt_check_counter + 1))
     now_ts=$(date +%s)
     if [ $((yt_check_counter % 5)) -eq 0 ] && [ $((now_ts - startup_ts)) -gt 600 ]; then
@@ -214,10 +157,9 @@ echo "Stream live. FFmpeg loop PID: $FFMPEG_PID"
       else
         echo "Watchdog: YouTube not live (resolved: ${final_url}) — restarting FFmpeg..."
         pkill -u "$(id -un)" -x ffmpeg 2>/dev/null || true
-        sleep 10  # let reconnect loop restart FFmpeg before next check
+        sleep 10
       fi
     fi
-
     sleep 60
   done
 ) &
