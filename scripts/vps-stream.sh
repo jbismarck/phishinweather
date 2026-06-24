@@ -26,7 +26,7 @@ if [ -z "$YOUTUBE_STREAM_KEY" ] || [ "$YOUTUBE_STREAM_KEY" = "paste-your-key-her
   exit 1
 fi
 
-STREAM_URL="${STREAM_URL:-https://phishinweather.com?mode=stream}"
+STREAM_URL="${STREAM_URL:-https://phishinweather.com?mode=stream&settings-scanLines-checkbox=true}"
 
 # Strip kiosk and mediaPlaying params — we click the button ourselves below.
 # Kiosk CSS hides nav children (display:none) so xdotool can't reach them.
