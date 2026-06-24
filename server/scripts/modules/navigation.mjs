@@ -204,9 +204,10 @@ const msg = {
 
 // receive navigation messages from displays
 const displayNavMessage = (myMessage) => {
-	// In SSE mode the server drives advancement — suppress client-side auto-advance.
-	// The current display simply holds its last frame until the server fires the next event.
-	if (sseConnected && (schedStream || !browsing)) return;
+	// Site mode + SSE: server drives timing, suppress client auto-advance.
+	// Stream mode: let timer run so displays keep loading their data;
+	// SSE jumpToDisplay() handles the actual switching.
+	if (!schedStream && sseConnected && !browsing) return;
 	if (myMessage.type === msg.response.previous) loadDisplay(-1);
 	if (myMessage.type === msg.response.next) loadDisplay(1);
 };
