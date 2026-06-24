@@ -135,8 +135,10 @@ echo "Starting FFmpeg stream (capturing ${CAPTURE_RES})..."
         -preset ultrafast \
         -tune zerolatency \
         -b:v 2000k \
+        -minrate 2000k \
         -maxrate 2000k \
-        -bufsize 2000k \
+        -bufsize 4000k \
+        -x264-params "nal-hrd=cbr:force-cfr=1" \
         -pix_fmt yuv420p \
         -g 60 \
       -c:a aac \
