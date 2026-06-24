@@ -97,6 +97,7 @@ chromium \
   --window-position=0,0 \
   --hide-scrollbars \
   --force-device-scale-factor=1 \
+  --start-maximized \
   --user-data-dir=/tmp/chromium-stream \
   --app="$NAV_URL" \
   2>/dev/null &
