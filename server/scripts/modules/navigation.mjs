@@ -67,8 +67,6 @@ const init = async () => {
 
 	generateCheckboxes();
 	connectSSE();
-	// Stream mode is always "playing" — no user click needed to start rotation.
-	if (schedStream) setPlaying(true);
 };
 
 const message = (data) => {
@@ -367,6 +365,9 @@ const generateCheckboxes = () => {
 // special registration method for progress display
 const registerProgress = (_progress) => {
 	progress = _progress;
+	// Stream mode auto-starts rotation — no user click needed.
+	// Must run here, not in init(), because setPlaying() requires progress to be set.
+	if (schedStream) setPlaying(true);
 };
 
 const populateWeatherParameters = (params) => {
