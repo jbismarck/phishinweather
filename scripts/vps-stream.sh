@@ -105,6 +105,13 @@ CHROME_PID=$!
 echo "Waiting ${PAGE_LOAD_WAIT}s for page to load..."
 sleep "$PAGE_LOAD_WAIT"
 
+# Force Chromium window to exact position and size — without a WM on Xvfb,
+# --window-size hints are not always honored; xdotool enforces them.
+echo "Forcing window size to 640x560..."
+DISPLAY="${DISPLAY}" xdotool search --sync --onlyvisible --class "chromium" \
+  windowmove 0 0 windowsize 640 560 2>/dev/null || true
+sleep 1
+
 # ── 4. Click ToggleMedia (volume button) ──────────────────────────────────────
 # Nav bar renders below the 480px display in normal document flow.
 # #divTwcBottomRight is right-aligned; ToggleMedia is its first (leftmost) button.
