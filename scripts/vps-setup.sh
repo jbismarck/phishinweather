@@ -37,8 +37,9 @@ if [ ! -f "/etc/${SERVICE_NAME}.env" ]; then
 # YouTube stream key — get it from YouTube Studio → Go Live → Stream
 YOUTUBE_STREAM_KEY=paste-your-key-here
 
-# URL to stream (change to http://localhost:8080 if running phishinweather locally)
-STREAM_URL=https://phishinweather.com
+# URL to stream — mode=stream enables SSE rotation and scanlines
+# Change to http://localhost:8080?mode=stream if running phishinweather locally
+STREAM_URL=https://phishinweather.com?mode=stream&settings-scanLines-checkbox=true&settings-mediaPlaying-boolean=true
 EOF
   echo "    Created. Edit /etc/${SERVICE_NAME}.env and set your YOUTUBE_STREAM_KEY before starting."
 else
