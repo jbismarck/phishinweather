@@ -4,6 +4,8 @@ const json = (url, params) => fetchAsync(url, 'json', params);
 const text = (url, params) => fetchAsync(url, 'text', params);
 const blob = (url, params) => fetchAsync(url, 'blob', params);
 
+const FETCH_TIMEOUT_MS = 10_000;
+
 const fetchAsync = async (_url, responseType, _params = {}) => {
 	// add user agent header to json request at api.weather.gov
 	const headers = {};
@@ -38,8 +40,17 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 		});
 	}
 
-	// make the request
-	const response = await doFetch(url, params);
+	// abort if NWS (or any host) hangs the connection
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+	params.signal = controller.signal;
+
+	let response;
+	try {
+		response = await doFetch(url, params);
+	} finally {
+		clearTimeout(timeoutId);
+	}
 
 	// check for ok response
 	if (!response.ok) throw new Error(`Fetch error ${response.status} ${response.statusText} while fetching ${response.url}`);

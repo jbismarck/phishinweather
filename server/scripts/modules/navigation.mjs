@@ -140,8 +140,9 @@ const updateStatus = (value) => {
 	if (!progress) return;
 	progress.drawCanvas(displays, countLoadedDisplays());
 
-	// first display is hazards and it must load before evaluating the first display
-	if (displays[0].status === STATUS.loading) return;
+	// Site mode: wait for hazards to resolve so it can show first if needed.
+	// Stream mode: SSE drives ordering — don't block on a potentially stalled hazards fetch.
+	if (!schedStream && displays[0].status === STATUS.loading) return;
 
 	// calculate first enabled display
 	const firstDisplayIndex = displays.findIndex((display) => display?.enabled && display?.timing?.totalScreens > 0);
