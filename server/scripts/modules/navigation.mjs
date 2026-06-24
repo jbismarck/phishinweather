@@ -140,9 +140,8 @@ const updateStatus = (value) => {
 	if (!progress) return;
 	progress.drawCanvas(displays, countLoadedDisplays());
 
-	// Site mode: wait for hazards to resolve so it can show first if needed.
-	// Stream mode: SSE drives ordering — don't block on a potentially stalled hazards fetch.
-	if (!schedStream && displays[0].status === STATUS.loading) return;
+	// first display is hazards and it must load before evaluating the first display
+	if (displays[0].status === STATUS.loading) return;
 
 	// calculate first enabled display
 	const firstDisplayIndex = displays.findIndex((display) => display?.enabled && display?.timing?.totalScreens > 0);
@@ -205,10 +204,9 @@ const msg = {
 
 // receive navigation messages from displays
 const displayNavMessage = (myMessage) => {
-	// Site mode + SSE: server drives timing, suppress client auto-advance.
-	// Stream mode: let timer run so displays keep loading their data;
-	// SSE jumpToDisplay() handles the actual switching.
-	if (!schedStream && sseConnected && !browsing) return;
+	// In SSE mode the server drives advancement — suppress client-side auto-advance.
+	// The current display simply holds its last frame until the server fires the next event.
+	if (sseConnected && (schedStream || !browsing)) return;
 	if (myMessage.type === msg.response.previous) loadDisplay(-1);
 	if (myMessage.type === msg.response.next) loadDisplay(1);
 };
@@ -366,9 +364,6 @@ const generateCheckboxes = () => {
 // special registration method for progress display
 const registerProgress = (_progress) => {
 	progress = _progress;
-	// Stream mode auto-starts rotation — no user click needed.
-	// Must run here, not in init(), because setPlaying() requires progress to be set.
-	if (schedStream) setPlaying(true);
 };
 
 const populateWeatherParameters = (params) => {
