@@ -96,8 +96,9 @@ chromium \
   --window-size=640,560 \
   --window-position=0,0 \
   --hide-scrollbars \
+  --kiosk \
   --user-data-dir=/tmp/chromium-stream \
-  --app="$NAV_URL" \
+  "$NAV_URL" \
   2>/dev/null &
 CHROME_PID=$!
 
