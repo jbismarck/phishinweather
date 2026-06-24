@@ -1,0 +1,20 @@
+// Broadcast scheduler UI — BACK TO LIVE button in nav bar
+
+#btnBackToLive {
+	background: none;
+	border: 1px solid rgba(255, 0, 0, 0.6);
+	border-radius: 3px;
+	color: #f55;
+	cursor: pointer;
+	font-family: 'Star4000Small', monospace;
+	font-size: 10pt;
+	letter-spacing: 0.05em;
+	margin-left: 6px;
+	padding: 2px 8px;
+	vertical-align: middle;
+
+	&:hover {
+		background: rgba(255, 0, 0, 0.15);
+		border-color: #f55;
+	}
+}

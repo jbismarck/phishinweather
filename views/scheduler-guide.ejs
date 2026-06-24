@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How to Run the Broadcast — Phishinweather</title>
+<style>
+  body { font-family: monospace; max-width: 720px; margin: 40px auto; padding: 0 24px 60px; background: #0a0a0a; color: #ccc; line-height: 1.7; }
+  h1 { color: #ff0; font-size: 1.4em; }
+  h2 { color: #ff0; margin-top: 2em; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  h3 { color: #aef; margin-top: 1.4em; }
+  p, li { color: #bbb; }
+  li { margin: 0.3em 0; }
+  code { background: #1a1a1a; border: 1px solid #333; padding: 1px 5px; border-radius: 2px; color: #7df; font-size: .95em; }
+  .card { border: 1px solid #333; border-radius: 4px; padding: 14px 18px; margin: 12px 0; }
+  .card.pin  { border-color: #1a4a1a; }
+  .card.push { border-color: #4a1a1a; }
+  .card.queue{ border-color: #1a1a4a; }
+  .label { font-size: .75em; letter-spacing:.08em; color: #888; text-transform: uppercase; }
+  a { color: #6af; }
+  .back { margin-bottom: 2em; display: block; }
+</style>
+</head>
+<body>
+
+<a class="back" href="/admin">← back to admin</a>
+
+<h1>📺 How to Run the Phishinweather Broadcast</h1>
+<p><em>Explain like I'm 10 edition</em></p>
+
+<h2>What is this thing?</h2>
+
+<p>Think of phishinweather.com like a TV station.</p>
+
+<p>There's a <strong>director</strong> sitting in a control room — that's the server. The director decides what's on-air right now. Everyone watching, whether on YouTube or the website, sees the same screen at the same time. Just like a real TV channel.</p>
+
+<p>You don't have to do anything for it to run. It just goes.</p>
+
+<h2>Two channels</h2>
+
+<div class="card">
+  <div class="label">🎬 The Stream (YouTube)</div>
+  <p>This is the broadcast. It runs a tight playlist: weather essentials, then a quick social bump (Instagram, YouTube, Reddit, Ko-fi), then Phish history and tour info, another bump, then countdown and live setlist. Social bumps are 5 seconds — just enough to remind people we exist, then back to content.</p>
+  <p>Nobody can change it from the outside. It just plays.</p>
+</div>
+
+<div class="card">
+  <div class="label">🖥️ The Website (phishinweather.com)</div>
+  <p>When you open the site, you're tuned to the same screen as the stream — synchronized. But you have a remote. Press ◀ ▶ to look around. The <strong>◉ LIVE</strong> button (or pressing Play) snaps you back to what's on-air right now.</p>
+  <p>Social cards play at full length (12 seconds) on the site since you chose to visit.</p>
+</div>
+
+<h2>Override controls</h2>
+
+<p>Sometimes you want to interrupt the schedule. Go to <a href="/admin">/admin</a>, find the Broadcast Scheduler section, pick a screen, and hit one of these:</p>
+
+<div class="card pin">
+  <h3>📌 PIN — Freeze it here</h3>
+  <p><strong>What it does:</strong> Holds that screen on both the stream and site until you click CLEAR. The normal schedule is paused.</p>
+  <p><strong>Use it when:</strong> A show is about to start and you want to hold the "Phish Tour" card up. Or it's a big moment and you want everyone seeing the same thing indefinitely.</p>
+  <p><strong>To release:</strong> Click <code>✕ CLEAR</code>. The schedule resumes where it left off.</p>
+</div>
+
+<div class="card push">
+  <h3>⚡ PUSH — Show this right now</h3>
+  <p><strong>What it does:</strong> Immediately cuts to that screen on both channels. Plays for one full duration, then the schedule automatically resumes. No CLEAR needed.</p>
+  <p><strong>Use it when:</strong> A Ko-fi supporter just donated and you want to show the support card right now. Or you want to highlight something specific mid-broadcast.</p>
+</div>
+
+<div class="card queue">
+  <h3>⏭ QUEUE — Play this next</h3>
+  <p><strong>What it does:</strong> Waits for the current screen to finish naturally, then plays your queued screen once. Then back to normal.</p>
+  <p><strong>Use it when:</strong> Something is almost done and you don't want to interrupt it. "Play the setlist card next." Clean, no jarring cuts.</p>
+</div>
+
+<h2>Step-by-step: how to use overrides</h2>
+<ol>
+  <li>Go to <a href="/admin">/admin</a></li>
+  <li>Find the <strong>Broadcast Scheduler</strong> section at the top</li>
+  <li>See what's currently on stream and site, and how many seconds are left</li>
+  <li>Pick a screen from the dropdown</li>
+  <li>Click PIN, PUSH, or QUEUE</li>
+  <li>Click <strong>✕ CLEAR</strong> when you want to go back to the regular schedule</li>
+</ol>
+
+<h2>What's in each playlist?</h2>
+
+<p><strong>Stream:</strong> Current Weather → Latest Obs → Local Forecast → Extended → Almanac → <em>Instagram bump (5s)</em> → Radar → Phish History → <em>YouTube bump (5s)</em> → Phish Tour → Countdown → Live Setlist → <em>Reddit bump (5s)</em> → <em>Ko-fi bump (5s)</em> → repeat</p>
+
+<p><strong>Site:</strong> Current Weather → Latest Obs → Hourly → Hourly Graph → Local Forecast → Extended → Almanac → Phish History → Tour → Countdown → Live Setlist → Ko-fi → Instagram → YouTube → Reddit → Feature Vote → repeat</p>
+
+<h2>What does "◉ LIVE" mean on the website?</h2>
+
+<p>If you pressed ◀ or ▶ to browse around, you're no longer watching what the stream is showing. The red <strong>◉ LIVE</strong> button appears in the nav bar. Click it (or press Play) to snap back and re-sync with the broadcast.</p>
+
+<hr style="border-color:#222;margin:2em 0">
+<p style="color:#555;font-size:.85em">Phishinweather v<%- version %> · <a href="/admin">admin</a></p>
+
+</body>
+</html>

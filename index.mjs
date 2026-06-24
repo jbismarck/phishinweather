@@ -5,6 +5,13 @@ import Stripe from 'stripe';
 import playlist from './src/playlist.mjs';
 import OVERRIDES from './src/overrides.mjs';
 import rateLimit from 'express-rate-limit';
+import {
+	init as schedulerInit, getState as schedulerGetState,
+	setOverride as schedulerSetOverride, clearOverride as schedulerClearOverride,
+	getOverride as schedulerGetOverride, addClient as schedulerAddClient,
+	removeClient as schedulerRemoveClient,
+	DISPLAY_NAMES, STREAM_PLAYLIST, SITE_PLAYLIST, DURATIONS,
+} from './server/scheduler.mjs';
 
 // ── TASK 2: production guard ─────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production' && process.env.DIST !== '1') {
@@ -12,6 +19,8 @@ if (process.env.NODE_ENV === 'production' && process.env.DIST !== '1') {
 		'Production mode requires DIST=1. Bundled assets are missing — set DIST=1 in Railway environment variables.',
 	);
 }
+
+schedulerInit();
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
@@ -834,6 +843,46 @@ function tourSave(i,field,val){
 </script>`;
 };
 
+const renderSchedulerSection = (password) => {
+	const token = Buffer.from(':' + password).toString('base64');
+	const stream = schedulerGetState('stream');
+	const site = schedulerGetState('site');
+	const ov = schedulerGetOverride();
+	const now = Date.now();
+	const secLeft = (endsAt) => Math.max(0, Math.round((endsAt - now) / 1000));
+	const nameOf = (id) => DISPLAY_NAMES[id] ?? `navId ${id}`;
+	const btnS = 'color:#fff;border:1px solid #444;cursor:pointer;padding:6px 14px;font-family:monospace;font-size:.9em;border-radius:3px;';
+	const navOptions = Object.entries(DISPLAY_NAMES)
+		.map(([id, name]) => `<option value="${id}">${id}: ${name}</option>`).join('');
+	const ovHtml = ov
+		? `<p style="color:#ff0;margin:.5em 0">Override active: <strong>${ov.mode.toUpperCase()}</strong> → ${nameOf(ov.navId)}${ov.mode !== 'pin' ? ` (${secLeft(ov.expiresAt)}s)` : ' (pinned)'}</p>`
+		: '<p style="color:#888;margin:.5em 0">No override active</p>';
+	return `
+<h2>Broadcast Scheduler &nbsp;<a href="/admin/scheduler-guide" target="_blank" style="font-size:.6em;color:#6af">📺 how to run it (ELI10) →</a></h2>
+<p style="margin:.4em 0">Stream: <strong>${nameOf(stream.navId)}</strong> — ${secLeft(stream.endsAt)}s left</p>
+<p style="margin:.4em 0">Site: <strong>${nameOf(site.navId)}</strong> — ${secLeft(site.endsAt)}s left</p>
+${ovHtml}
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0">
+  <select id="sched-id" style="background:#111;color:#fff;border:1px solid #444;padding:5px 8px;font-family:monospace">${navOptions}</select>
+  <button onclick="sched('pin')" style="${btnS}background:#0a2a0a">📌 PIN</button>
+  <button onclick="sched('push')" style="${btnS}background:#2a0a0a">⚡ PUSH</button>
+  <button onclick="sched('queue')" style="${btnS}background:#0a0a2a">⏭ QUEUE</button>
+  <button onclick="schedClear()" style="${btnS}background:#1a1a1a">✕ CLEAR</button>
+</div>
+<script>
+const SCHED_TOK = '${token}';
+async function sched(mode) {
+  const navId = +document.getElementById('sched-id').value;
+  await fetch('/api/override', {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Basic '+SCHED_TOK}, body: JSON.stringify({mode,navId})});
+  location.reload();
+}
+async function schedClear() {
+  await fetch('/api/override', {method:'DELETE', headers:{'Authorization':'Basic '+SCHED_TOK}});
+  location.reload();
+}
+</script>`;
+};
+
 const adminDashboard = async (req, res) => {
 	const password = process.env.ADMIN_PASSWORD;
 
@@ -881,6 +930,8 @@ const adminDashboard = async (req, res) => {
 <tr class="total"><td><strong>Total</strong></td><td><strong>$${totalMonthly.toFixed(2)}/mo ($${totalAnnual.toFixed(0)}/yr)</strong></td></tr>
 </table>
 <p style="color:#888">Break-even: $${totalMonthly.toFixed(2)}/month. Check <a href="https://ko-fi.com/phishinweather" target="_blank">Ko-fi</a> and <a href="https://dashboard.stripe.com" target="_blank">Stripe</a> for revenue.</p>
+
+${renderSchedulerSection(password)}
 
 ${renderCfSection(cfRows)}
 
@@ -1010,6 +1061,51 @@ app.post('/api/kofi-webhook', (req, res) => {
 		console.error('Ko-fi webhook error:', e.message);
 		return res.json({ ok: true }); // always 200 so Ko-fi doesn't retry
 	}
+});
+
+// ── Broadcast scheduler ───────────────────────────────────────────────────────
+
+app.get('/api/sse/:channel', (req, res) => {
+	const { channel } = req.params;
+	if (!['stream', 'site'].includes(channel)) return res.status(400).end();
+
+	res.setHeader('Content-Type', 'text/event-stream');
+	res.setHeader('Cache-Control', 'no-cache');
+	res.setHeader('Connection', 'keep-alive');
+	res.setHeader('X-Accel-Buffering', 'no');
+	res.flushHeaders();
+
+	// send current state immediately so new clients sync without waiting for next tick
+	const state = schedulerGetState(channel);
+	res.write(`data: ${JSON.stringify(state)}\n\n`);
+
+	schedulerAddClient(channel, res);
+	req.on('close', () => schedulerRemoveClient(channel, res));
+});
+
+app.get('/api/scheduler/state', (_req, res) => {
+	res.json({
+		stream: schedulerGetState('stream'),
+		site: schedulerGetState('site'),
+		override: schedulerGetOverride(),
+	});
+});
+
+app.post('/api/override', requireAdmin, (req, res) => {
+	const { mode, navId } = req.body;
+	if (!['pin', 'push', 'queue'].includes(mode)) return res.status(400).json({ error: 'mode must be pin, push, or queue' });
+	if (!Number.isInteger(+navId)) return res.status(400).json({ error: 'navId must be a number' });
+	schedulerSetOverride(mode, +navId);
+	res.json({ ok: true, mode, navId: +navId });
+});
+
+app.delete('/api/override', requireAdmin, (_req, res) => {
+	schedulerClearOverride();
+	res.json({ ok: true });
+});
+
+app.get('/admin/scheduler-guide', requireAdmin, (_req, res) => {
+	res.render('scheduler-guide', { version });
 });
 
 // Social redirects

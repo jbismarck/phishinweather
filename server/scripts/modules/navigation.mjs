@@ -15,12 +15,58 @@ let playing = false;
 let progress;
 const weatherParameters = {};
 
+// ── Broadcast scheduler (SSE) ─────────────────────────────────────────────────
+// Detect channel from URL: ?mode=stream → stream channel, else site
+const schedChannel = new URLSearchParams(window.location.search).get('mode') === 'stream' ? 'stream' : 'site';
+const schedStream = schedChannel === 'stream'; // true = locked to server, no manual browsing
+let sseConnected = false;
+let browsing = false;    // site mode: user has manually navigated away from live
+let serverNavId = null;  // most recent navId the server said to show
+
+const jumpToDisplay = (navId) => {
+	const d = displays[navId];
+	if (!d || d.status !== STATUS.loaded || !(d.timing?.totalScreens > 0)) return false;
+	hideAllCanvases();
+	d.showCanvas(msg.command.firstFrame);
+	return true;
+};
+
+const updateBackToLiveBtn = () => {
+	const btn = document.getElementById('btnBackToLive');
+	if (btn) btn.style.display = (browsing && serverNavId !== null) ? '' : 'none';
+};
+
+const backToLive = () => {
+	browsing = false;
+	updateBackToLiveBtn();
+	if (serverNavId !== null) jumpToDisplay(serverNavId);
+};
+
+const connectSSE = () => {
+	const es = new EventSource(`/api/sse/${schedChannel}`);
+	es.onopen = () => { sseConnected = true; };
+	es.onmessage = (e) => {
+		const { navId } = JSON.parse(e.data);
+		serverNavId = navId;
+		if (schedStream || !browsing) {
+			jumpToDisplay(navId);
+		}
+		updateBackToLiveBtn();
+	};
+	es.onerror = () => {
+		sseConnected = false;
+		es.close();
+		setTimeout(connectSSE, 3000); // reconnect after 3 s
+	};
+};
+
 const init = async () => {
 	// set up resize handler
 	window.addEventListener('resize', resize);
 	resize();
 
 	generateCheckboxes();
+	connectSSE();
 };
 
 const message = (data) => {
@@ -113,9 +159,16 @@ const updateStatus = (value) => {
 		value.status = displays[firstDisplayIndex]?.status;
 	}
 
-	// if this is the first display and we're playing, load it up so it starts playing
-	if (isPlaying() && value.id === firstDisplayIndex && value.status === STATUS.loaded) {
-		navTo(msg.command.firstFrame);
+	// when a display finishes loading: if SSE is active try to jump to what the server wants,
+	// otherwise fall back to the original "start at first display" behaviour
+	if (value.status === STATUS.loaded && !currentDisplay()) {
+		if (sseConnected && !browsing && serverNavId !== null) {
+			if (!jumpToDisplay(serverNavId) && isPlaying() && value.id === firstDisplayIndex) {
+				navTo(msg.command.firstFrame); // server's display not ready yet — start naturally
+			}
+		} else if (isPlaying() && value.id === firstDisplayIndex) {
+			navTo(msg.command.firstFrame);
+		}
 	}
 };
 
@@ -151,6 +204,9 @@ const msg = {
 
 // receive navigation messages from displays
 const displayNavMessage = (myMessage) => {
+	// In SSE mode the server drives advancement — suppress client-side auto-advance.
+	// The current display simply holds its last frame until the server fires the next event.
+	if (sseConnected && (schedStream || !browsing)) return;
 	if (myMessage.type === msg.response.previous) loadDisplay(-1);
 	if (myMessage.type === msg.response.next) loadDisplay(1);
 };
@@ -225,19 +281,30 @@ const setPlaying = (newValue) => {
 const handleNavButton = (button) => {
 	switch (button) {
 		case 'play':
+			browsing = false;
+			updateBackToLiveBtn();
 			setPlaying(true);
+			if (sseConnected && serverNavId !== null) jumpToDisplay(serverNavId);
 			break;
 		case 'playToggle':
+			if (!playing) { browsing = false; updateBackToLiveBtn(); }
 			setPlaying(!playing);
+			if (!playing && sseConnected && serverNavId !== null) jumpToDisplay(serverNavId);
 			break;
 		case 'stop':
 			setPlaying(false);
 			break;
 		case 'next':
+			if (schedStream) break; // stream mode: ignore manual nav
+			browsing = true;
+			updateBackToLiveBtn();
 			setPlaying(false);
 			navTo(msg.command.nextFrame);
 			break;
 		case 'previous':
+			if (schedStream) break; // stream mode: ignore manual nav
+			browsing = true;
+			updateBackToLiveBtn();
 			setPlaying(false);
 			navTo(msg.command.previousFrame);
 			break;
@@ -331,4 +398,5 @@ export {
 	latLonReceived,
 	hideAllCanvases,
 	timeZone,
+	backToLive,
 };
