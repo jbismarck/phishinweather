@@ -2,98 +2,307 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>How to Run the Broadcast — Phishinweather</title>
+<title>Broadcast Playbook — Phishinweather</title>
 <style>
-  body { font-family: monospace; max-width: 720px; margin: 40px auto; padding: 0 24px 60px; background: #0a0a0a; color: #ccc; line-height: 1.7; }
+  body { font-family: monospace; max-width: 780px; margin: 40px auto; padding: 0 24px 80px; background: #0a0a0a; color: #ccc; line-height: 1.7; }
   h1 { color: #ff0; font-size: 1.4em; }
-  h2 { color: #ff0; margin-top: 2em; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  h2 { color: #ff0; margin-top: 2.5em; border-bottom: 1px solid #333; padding-bottom: 4px; }
   h3 { color: #aef; margin-top: 1.4em; }
   p, li { color: #bbb; }
   li { margin: 0.3em 0; }
   code { background: #1a1a1a; border: 1px solid #333; padding: 1px 5px; border-radius: 2px; color: #7df; font-size: .95em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: .9em; }
+  th { color: #ff0; text-align: left; border-bottom: 1px solid #444; padding: 5px 10px 5px 0; }
+  td { color: #bbb; padding: 4px 10px 4px 0; border-bottom: 1px solid #1e1e1e; vertical-align: top; }
+  td:first-child { color: #7df; white-space: nowrap; }
   .card { border: 1px solid #333; border-radius: 4px; padding: 14px 18px; margin: 12px 0; }
-  .card.pin  { border-color: #1a4a1a; }
-  .card.push { border-color: #4a1a1a; }
-  .card.queue{ border-color: #1a1a4a; }
-  .label { font-size: .75em; letter-spacing:.08em; color: #888; text-transform: uppercase; }
+  .card.pin   { border-color: #1a4a1a; }
+  .card.push  { border-color: #4a1a1a; }
+  .card.queue { border-color: #1a1a4a; }
+  .card.gap   { border-color: #4a3a00; background: #0f0c00; }
+  .card.phase { border-color: #333; background: #0d0d0d; }
+  .label { font-size: .75em; letter-spacing:.08em; color: #888; text-transform: uppercase; margin-bottom: .4em; }
+  .phase-tag { display: inline-block; font-size: .7em; letter-spacing:.1em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+  .phase-tag.off      { background: #222; color: #888; }
+  .phase-tag.pre      { background: #1a3a1a; color: #7f7; }
+  .phase-tag.live     { background: #3a1a1a; color: #f77; }
+  .phase-tag.post     { background: #1a1a3a; color: #77f; }
+  .phase-tag.gap-tag  { background: #3a2a00; color: #fa7; }
   a { color: #6af; }
   .back { margin-bottom: 2em; display: block; }
+  .role-box { background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 4px; padding: 12px 18px; margin: 1em 0; }
+  hr { border: none; border-top: 1px solid #222; margin: 2.5em 0; }
+  .toc { background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 4px; padding: 14px 18px; margin: 1.5em 0; }
+  .toc a { color: #888; text-decoration: none; }
+  .toc a:hover { color: #6af; }
+  .toc li { margin: .2em 0; }
 </style>
 </head>
 <body>
 
 <a class="back" href="/admin">← back to admin</a>
 
-<h1>📺 How to Run the Phishinweather Broadcast</h1>
-<p><em>Explain like I'm 10 edition</em></p>
+<h1>📺 Phishinweather Broadcast Playbook</h1>
+<p style="color:#888">Complete programming reference — how the channel runs, what plays when, and what requires your attention.</p>
 
-<h2>What is this thing?</h2>
+<div class="toc">
+  <div class="label">Contents</div>
+  <ol>
+    <li><a href="#concept">The Concept</a></li>
+    <li><a href="#channels">Two Channels</a></li>
+    <li><a href="#phases">The Four Programming Phases</a></li>
+    <li><a href="#off">Off Day — The 24/7 Baseline</a></li>
+    <li><a href="#preshow">Pre-Show Block (T−3hrs)</a></li>
+    <li><a href="#live">Live Block (Showtime → +3.5hrs)</a></li>
+    <li><a href="#postshow">Post-Show Block (+3.5hrs → +5.5hrs)</a></li>
+    <li><a href="#gaps">Known Gaps</a></li>
+    <li><a href="#your-role">Your Daily Role</a></li>
+    <li><a href="#overrides">Override Controls</a></li>
+    <li><a href="#debug">If Something Breaks</a></li>
+  </ol>
+</div>
 
-<p>Think of phishinweather.com like a TV station.</p>
+<hr>
+
+<h2 id="concept">The Concept</h2>
+
+<p>Think of phishinweather.com as a TV station — specifically, a 1990s cable weather channel that also happens to love Phish.</p>
 
 <p>There's a <strong>director</strong> sitting in a control room — that's the server. The director decides what's on-air right now. Everyone watching, whether on YouTube or the website, sees the same screen at the same time. Just like a real TV channel.</p>
 
-<p>You don't have to do anything for it to run. It just goes.</p>
+<p>The channel runs 24/7. On off days it loops weather and Phish content. On show nights it runs three distinct programming blocks — pre-show, live, and post-show — all triggered automatically by the show phase engine. You don't have to be at a computer for the channel to do its job.</p>
 
-<h2>Two channels</h2>
+<p>The bottom scroller is the ticker tape. It runs continuously with weather data and HFB quotes — the channel's "Local on the 8s."</p>
+
+<hr>
+
+<h2 id="channels">Two Channels</h2>
 
 <div class="card">
-  <div class="label">🎬 The Stream (YouTube)</div>
-  <p>This is the broadcast. It runs a tight playlist: weather essentials, then a quick social bump (Instagram, YouTube, Reddit, Ko-fi), then Phish history and tour info, another bump, then countdown and live setlist. Social bumps are 5 seconds — just enough to remind people we exist, then back to content.</p>
-  <p>Nobody can change it from the outside. It just plays.</p>
+  <div class="label">🎬 The Stream — YouTube</div>
+  <p>The broadcast. A tightly programmed playlist running on a Raspberry Pi (Xvfb + Chromium → FFmpeg → YouTube RTMP). Nobody can change it from the outside — it just plays. On show nights it switches playlists automatically based on the phase engine.</p>
+  <p>Social cards run at 5 seconds on the stream — quick billboard, then back to content.</p>
 </div>
 
 <div class="card">
-  <div class="label">🖥️ The Website (phishinweather.com)</div>
-  <p>When you open the site, you're tuned to the same screen as the stream — synchronized. But you have a remote. Press ◀ ▶ to look around. The <strong>◉ LIVE</strong> button (or pressing Play) snaps you back to what's on-air right now.</p>
-  <p>Social cards play at full length (12 seconds) on the site since you chose to visit.</p>
+  <div class="label">🖥️ The Website — phishinweather.com</div>
+  <p>When you open the site you're watching the same sequence as the stream — synchronized. Press ◀ ▶ to browse independently. The <strong>◉ LIVE</strong> button (or Play) snaps you back. Social cards run at full length (12s) on the site since you chose to visit.</p>
 </div>
 
-<h2>Override controls</h2>
+<hr>
 
-<p>Sometimes you want to interrupt the schedule. Go to <a href="/admin">/admin</a>, find the Broadcast Scheduler section, pick a screen, and hit one of these:</p>
+<h2 id="phases">The Four Programming Phases</h2>
+
+<p>The show phase engine (<code>server/show-phase.mjs</code>) reads today's show from the database, calculates where we are relative to showtime, and returns the current phase. The scheduler checks this and switches playlists automatically. Cached for 60 seconds.</p>
+
+<table>
+  <tr><th>Phase</th><th>When</th><th>Playlist</th></tr>
+  <tr><td><span class="phase-tag off">off</span></td><td>No show today, or >3hrs before / >5.5hrs after</td><td>Default rotation</td></tr>
+  <tr><td><span class="phase-tag pre">pre-show</span></td><td>3 hours before showtime through showtime</td><td>PRE_SHOW_STREAM_PLAYLIST</td></tr>
+  <tr><td><span class="phase-tag live">live</span></td><td>Showtime through showtime + 3.5hrs</td><td>LIVE_STREAM_PLAYLIST</td></tr>
+  <tr><td><span class="phase-tag post">post-show</span></td><td>+3.5hrs through +5.5hrs after showtime</td><td>POST_SHOW_STREAM_PLAYLIST</td></tr>
+</table>
+
+<p>Showtime defaults to <strong>8:00 PM local</strong>. Override per show in the admin tour table (<code>showtime_local</code> field). The timezone is inferred from the venue's state automatically.</p>
+
+<p>Check the current phase any time: <a href="/api/phish/show-status" target="_blank"><code>GET /api/phish/show-status</code></a></p>
+
+<hr>
+
+<h2 id="off">Off Day — The 24/7 Baseline</h2>
+
+<span class="phase-tag off">off</span> <strong>No action required.</strong>
+
+<p>The channel runs a looping rotation of weather cards and Phish content. Approximate cycle:</p>
+
+<table>
+  <tr><th>Order</th><th>Card</th><th>Duration</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>Current Weather</td><td>~20s</td><td>Ground the viewer immediately</td></tr>
+  <tr><td>2</td><td>Phish History</td><td>~40s</td><td>Human interest — what happened today in Phish history</td></tr>
+  <tr><td>3</td><td>Hourly Forecast</td><td>~20s</td><td>Utility</td></tr>
+  <tr><td>4</td><td>Phish Tour</td><td>~30s</td><td>Show dates, venues, travel</td></tr>
+  <tr><td>5</td><td>Local Forecast</td><td>~20s</td><td>Weather utility</td></tr>
+  <tr><td>6</td><td>Extended Forecast</td><td>~20s</td><td>Planning</td></tr>
+  <tr><td>7</td><td>Phish Countdown</td><td>~15s</td><td>Builds anticipation even on non-show nights</td></tr>
+  <tr><td>8</td><td>Ko-fi / Social</td><td>~15s</td><td>Commercial equivalent — call to action</td></tr>
+  <tr><td>9</td><td>Almanac</td><td>~20s</td><td>Overnight/slow content, fills gracefully at 2 AM</td></tr>
+</table>
+
+<p><strong>Your role:</strong> Zero. Stream runs. You don't touch it.</p>
+
+<hr>
+
+<h2 id="preshow">Pre-Show Block — T−3 Hours</h2>
+
+<span class="phase-tag pre">pre-show</span> <strong>Phase triggers automatically.</strong> Playlist: <code>[22, 31, 32, 21, 1, 25, 7, 24]</code>
+
+<p>This is your cold open. The moment phase flips, the entire tone of the channel changes. A viewer tuning in for the first time should know immediately: <em>there's a show tonight.</em></p>
+
+<div class="card phase">
+  <div class="label">Cycle walkthrough (~2.5 min loop, runs 72× before showtime)</div>
+
+  <p><strong>0:00 — Phish Countdown (navId 22)</strong><br>
+  Big number. "TONIGHT AT MSG — 2H 47M UNTIL DOORS." The cold open. Stark and immediate. ~15s.</p>
+
+  <p><strong>0:15 — Venue Guide (navId 31)</strong><br>
+  Utility segment. Shakedown location, parking tip, venue policy (water bottles, poster tubes). Someone in their car 30 minutes out is watching on their phone and this is genuinely useful to them. ~20s with scroll animation. Returns <code>noData</code> silently if no show data available — cycle tightens automatically.</p>
+
+  <p><strong>0:35 — Tonight's Poster (navId 32)</strong><br>
+  Full-bleed image. No narration, no data — just the art. 15 seconds of pure visual. Your B-roll bumper. If no <code>poster_url</code> is set, card silently skips — no harm done. This is why you set the poster URL the morning of the show.</p>
+
+  <p><strong>0:50 — Phish Tour (navId 21)</strong><br>
+  Full schedule, tonight's show highlighted. Someone who just tuned in gets context — where are they playing, what's the run, what city is next. ~30s.</p>
+
+  <p><strong>1:20 — Current Weather (navId 1)</strong><br>
+  What's it actually like at the venue right now? Is it raining at MSG? This is where the weather product earns its place on a show night. "Will I need a jacket" is a real question. ~20s.</p>
+
+  <p><strong>1:40 — Instagram (navId 25)</strong><br>
+  Social pull. "Come find us." Commercial slot equivalent — call to action before the next informational segment. ~5s on stream.</p>
+
+  <p><strong>1:45 — Local Forecast (navId 7)</strong><br>
+  Tonight through tomorrow. Post-show weather. If it's raining at 1 AM, people need to know before they leave the venue. ~20s.</p>
+
+  <p><strong>2:05 — Ko-fi (navId 24)</strong><br>
+  Closing commercial. Clean call to action. ~15s. Cycle restarts.</p>
+</div>
+
+<p>This block runs for <strong>three hours</strong>. The Countdown card is ticking in real time — a viewer who checks in at T−2hrs sees a different number than one who checked in at T−30min. That's the product working.</p>
+
+<p><strong>Your role:</strong> The morning of the show, set the poster URL in the <a href="/admin">admin tour table</a> and commit. Everything else is automatic.</p>
+
+<hr>
+
+<h2 id="live">Live Block — Showtime Through ~11:30 PM</h2>
+
+<span class="phase-tag live">live</span> <strong>Phase triggers at showtimeUtc.</strong> Playlist: <code>[30, 1, 30, 7, 20, 26]</code>
+
+<p>The Countdown card was showing "0 MINUTES TO SHOWTIME." Phase flips. Countdown returns <code>noData</code> and drops from rotation automatically. Venue Guide and Tonight's Poster do the same — pre-show content clears itself.</p>
+
+<p>Live Setlist (navId 30) takes the anchor position — it appears <strong>twice</strong> in the playlist. Every cycle, you come back to setlist twice before seeing anything else. This is the right editorial call: the setlist is the story.</p>
+
+<table>
+  <tr><th>Order</th><th>Card</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>Live Setlist</td><td>Lead story — what are they playing right now</td></tr>
+  <tr><td>2</td><td>Current Weather</td><td>Real conditions at the venue — outdoor shows, this matters</td></tr>
+  <tr><td>3</td><td>Live Setlist</td><td>Anchor again — viewer who tuned in during weather sees setlist immediately</td></tr>
+  <tr><td>4</td><td>Local Forecast</td><td>Tonight's weather — the walk to the car after the encore</td></tr>
+  <tr><td>5</td><td>Phish History</td><td>Context and lore while the music plays</td></tr>
+  <tr><td>6</td><td>YouTube</td><td>"WATCH LIVE" — drives traffic to the stream itself</td></tr>
+</table>
+
+<p><strong>Set break (9:15–9:45 PM):</strong> The live playlist runs straight through — Set 1 is complete on the setlist card, Set 2 hasn't started yet. This is a known gap (see below). During set break the setlist card shows a completed set, which is still valid and useful content.</p>
+
+<p><strong>Your role:</strong> Nothing required. Watch the show.</p>
+
+<hr>
+
+<h2 id="postshow">Post-Show Block — ~11:30 PM Through ~1:30 AM</h2>
+
+<span class="phase-tag post">post-show</span> <strong>Phase triggers at showtimeUtc + 3.5hrs.</strong> Playlist: <code>[30, 20, 9, 1, 21, 24]</code>
+
+<p>The show just ended. Setlist is complete. This is the recap block. The energy is slower — it should feel like 1 AM.</p>
+
+<table>
+  <tr><th>Order</th><th>Card</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>Live Setlist</td><td>Complete show — both sets, encore, every song. The post-game show.</td></tr>
+  <tr><td>2</td><td>Phish History</td><td>Context: "on this date in 1994 they played Tweezer at this same venue"</td></tr>
+  <tr><td>3</td><td>Almanac</td><td>Overnight utility — moon phase, sunrise, fills gracefully at 1 AM</td></tr>
+  <tr><td>4</td><td>Current Weather</td><td>Real conditions for the walk to the car / drive home</td></tr>
+  <tr><td>5</td><td>Phish Tour</td><td>What's next — where does the tour go from here</td></tr>
+  <tr><td>6</td><td>Ko-fi</td><td>Closing call to action</td></tr>
+</table>
+
+<p>~2 hours after show end, phase flips back to <code>off</code>. Normal rotation resumes. Setlist data stays cached; the Live Setlist card continues showing the completed show.</p>
+
+<p><strong>Your role:</strong> Nothing required. Go to sleep.</p>
+
+<hr>
+
+<h2 id="gaps">Known Gaps</h2>
+
+<p>This is what's not built yet, in priority order:</p>
+
+<div class="card gap">
+  <span class="phase-tag gap-tag">gap</span> <strong>Set break awareness</strong>
+  <p>The live block runs as a monolith for 3.5 hours. A real Phish show has Set 1 (~75 min), set break (~30 min), Set 2 (~105 min), encore. During set break the editorial tone should shift — surface History and Tour more prominently, give people something to do in the intermission. The phase engine currently doesn't know about set break at all. This is the biggest structural gap in the live block.</p>
+</div>
+
+<div class="card gap">
+  <span class="phase-tag gap-tag">gap</span> <strong>Show-specific scroller content</strong>
+  <p>During pre-show, the scroller should be running show-specific content: "DOORS AT 6PM · SHOWTIME 8PM · SHAKEDOWN ON 33RD STREET." During post-show it should surface setlist highlights: "SET 2 OPENED WITH GHOST · 23-MINUTE TWEEZER · ENCORE: FIRST TUBE." Right now the scroller pulls generic weather data and HFB quotes in all phases — it doesn't know what phase we're in.</p>
+</div>
+
+<div class="card gap">
+  <span class="phase-tag gap-tag">gap</span> <strong>Off-day baseline not explicitly defined</strong>
+  <p>The STREAM_PLAYLIST constant in <code>scheduler.mjs</code> is the fallback for off days. It should be deliberately programmed as a specific editorial sequence, not just whatever the default is. Low effort — just define the array intentionally.</p>
+</div>
+
+<div class="card gap">
+  <span class="phase-tag gap-tag">gap</span> <strong>xdotool click uses pixel coordinates</strong>
+  <p>The Pi stream audio start is triggered by a hardcoded click at <code>490, 487</code>. If the layout shifts at all, audio never starts. Should be replaced with a keyboard shortcut or named element click. Until fixed, layout changes to the main display risk breaking stream audio.</p>
+</div>
+
+<hr>
+
+<h2 id="your-role">Your Daily Role as Show Manager</h2>
+
+<div class="role-box">
+<table>
+  <tr><th>Day type</th><th>What you do</th></tr>
+  <tr><td>Off day</td><td>Nothing. Stream runs.</td></tr>
+  <tr><td>Show day, no poster</td><td>Nothing. Pre-show kicks in at T−3hrs automatically. Poster card silently skips.</td></tr>
+  <tr><td>Show day, with poster</td><td>Find poster image URL → paste into admin tour table → commit <code>summer-tour.json</code> → push. Railway deploys in ~60s.</td></tr>
+  <tr><td>Non-standard showtime</td><td>Set <code>showtime_local</code> in admin tour table → commit → push.</td></tr>
+  <tr><td>Something broke</td><td>Check <a href="/api/phish/show-status" target="_blank"><code>/api/phish/show-status</code></a> first. See "If Something Breaks" below.</td></tr>
+</table>
+</div>
+
+<p>The target state: you spend 5 minutes setting a poster URL the morning of the show, then watch the show. The channel handles the rest.</p>
+
+<hr>
+
+<h2 id="overrides">Override Controls</h2>
+
+<p>For when you want to interrupt the schedule manually. All controls are in the <strong>Broadcast Scheduler</strong> section at the top of <a href="/admin">/admin</a>.</p>
 
 <div class="card pin">
   <h3>📌 PIN — Freeze it here</h3>
-  <p><strong>What it does:</strong> Holds that screen on both the stream and site until you click CLEAR. The normal schedule is paused.</p>
-  <p><strong>Use it when:</strong> A show is about to start and you want to hold the "Phish Tour" card up. Or it's a big moment and you want everyone seeing the same thing indefinitely.</p>
-  <p><strong>To release:</strong> Click <code>✕ CLEAR</code>. The schedule resumes where it left off.</p>
+  <p><strong>What it does:</strong> Holds that screen on both channels until you click CLEAR. Normal schedule is paused.</p>
+  <p><strong>Use it when:</strong> A big moment is happening and you want everyone seeing the same thing indefinitely. Holding the Tour card before a surprise show announcement.</p>
+  <p><strong>To release:</strong> Click <code>✕ CLEAR</code>. Schedule resumes.</p>
 </div>
 
 <div class="card push">
   <h3>⚡ PUSH — Show this right now</h3>
-  <p><strong>What it does:</strong> Immediately cuts to that screen on both channels. Plays for one full duration, then the schedule automatically resumes. No CLEAR needed.</p>
-  <p><strong>Use it when:</strong> A Ko-fi supporter just donated and you want to show the support card right now. Or you want to highlight something specific mid-broadcast.</p>
+  <p><strong>What it does:</strong> Immediately cuts to that screen on both channels. Plays for one full duration, then schedule automatically resumes. No CLEAR needed.</p>
+  <p><strong>Use it when:</strong> A Ko-fi supporter just donated and you want the support card on-air right now. Clean one-time interrupt.</p>
 </div>
 
 <div class="card queue">
   <h3>⏭ QUEUE — Play this next</h3>
-  <p><strong>What it does:</strong> Waits for the current screen to finish naturally, then plays your queued screen once. Then back to normal.</p>
-  <p><strong>Use it when:</strong> Something is almost done and you don't want to interrupt it. "Play the setlist card next." Clean, no jarring cuts.</p>
+  <p><strong>What it does:</strong> Waits for the current screen to finish naturally, then plays your queued screen once. Back to normal after.</p>
+  <p><strong>Use it when:</strong> Something is almost done and you don't want to cut it. "Play the setlist card next, after this weather finishes."</p>
 </div>
 
-<h2>Step-by-step: how to use overrides</h2>
-<ol>
-  <li>Go to <a href="/admin">/admin</a></li>
-  <li>Find the <strong>Broadcast Scheduler</strong> section at the top</li>
-  <li>See what's currently on stream and site, and how many seconds are left</li>
-  <li>Pick a screen from the dropdown</li>
-  <li>Click PIN, PUSH, or QUEUE</li>
-  <li>Click <strong>✕ CLEAR</strong> when you want to go back to the regular schedule</li>
-</ol>
+<hr>
 
-<h2>What's in each playlist?</h2>
+<h2 id="debug">If Something Breaks</h2>
 
-<p><strong>Stream:</strong> Current Weather → Latest Obs → Local Forecast → Extended → Almanac → <em>Instagram bump (5s)</em> → Radar → Phish History → <em>YouTube bump (5s)</em> → Phish Tour → Countdown → Live Setlist → <em>Reddit bump (5s)</em> → <em>Ko-fi bump (5s)</em> → repeat</p>
+<p><strong>Check phase status first:</strong> <a href="/api/phish/show-status" target="_blank"><code>/api/phish/show-status</code></a> — tells you exactly what phase the server thinks we're in, show date, venue, minutes until show.</p>
 
-<p><strong>Site:</strong> Current Weather → Latest Obs → Hourly → Hourly Graph → Local Forecast → Extended → Almanac → Phish History → Tour → Countdown → Live Setlist → Ko-fi → Instagram → YouTube → Reddit → Feature Vote → repeat</p>
+<table>
+  <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+  <tr><td>Phase stuck on <code>off</code> when it should be <code>pre-show</code></td><td>Show date or state wrong in DB, or timezone lookup failed</td><td>Check <code>/api/phish/show-status</code>. Verify date + state in admin tour table.</td></tr>
+  <tr><td>Venue Guide / Poster not showing in pre-show</td><td>Card returning <code>noData</code> — show-status API unreachable from client, or phase isn't pre-show</td><td>Check browser console. Verify phase via API endpoint above.</td></tr>
+  <tr><td>Live Setlist card shows "FAILED"</td><td><code>PHISHNET_API_KEY</code> missing or phish.net slow</td><td>Check Railway env vars. Card shows <code>noData</code> if no show today — "FAILED" means API error.</td></tr>
+  <tr><td>Stream audio died</td><td>PulseAudio sink dropped or xdotool click missed</td><td>SSH to Pi → <code>journalctl -u phishinweather-stream -f</code>. Watchdog retries every 60s. If stuck: <code>sudo systemctl restart phishinweather-stream</code>.</td></tr>
+  <tr><td>Stream went offline</td><td>FFmpeg RTMP disconnect</td><td>FFmpeg reconnect loop retries every 5s automatically. If offline >3 min: restart service. YouTube live watchdog also kills/restarts FFmpeg every 5 min if stream is down.</td></tr>
+  <tr><td>Poster URL set but poster card not showing</td><td>summer-tour.json not committed after DB write</td><td>Commit <code>server/data/summer-tour.json</code> and push. DB writes are ephemeral on Railway — only git is permanent.</td></tr>
+  <tr><td>Production broken after Railway variable change</td><td><code>DIST=1</code> or <code>NODE_ENV=production</code> silently dropped</td><td>Open Railway dashboard → verify both vars still present. The startup assertion will throw immediately if missing — check deploy logs.</td></tr>
+</table>
 
-<h2>What does "◉ LIVE" mean on the website?</h2>
-
-<p>If you pressed ◀ or ▶ to browse around, you're no longer watching what the stream is showing. The red <strong>◉ LIVE</strong> button appears in the nav bar. Click it (or press Play) to snap back and re-sync with the broadcast.</p>
-
-<hr style="border-color:#222;margin:2em 0">
-<p style="color:#555;font-size:.85em">Phishinweather v<%- version %> · <a href="/admin">admin</a></p>
+<hr>
+<p style="color:#555;font-size:.85em">Phishinweather v<%- version %> · <a href="/admin">admin</a> · <a href="/api/phish/show-status">show status</a></p>
 
 </body>
 </html>
