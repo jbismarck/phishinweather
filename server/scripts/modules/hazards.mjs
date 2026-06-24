@@ -23,8 +23,9 @@ class Hazards extends WeatherDisplay {
 		this.showOnProgress = false;
 		this.okToDrawCurrentConditions = false;
 
-		// force a 1-minute refresh time for the most up-to-date hazards
-		this.refreshTime = 60_000;
+		// 5-minute refresh — 60s was causing a periodic NWS fetch+DOM update that coincided
+		// with the scroller loop restart and contributed to audio glitches.
+		this.refreshTime = 300_000;
 
 		// 0 screens skips this during "play"
 		this.timing.totalScreens = 0;

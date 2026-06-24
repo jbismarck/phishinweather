@@ -26,7 +26,7 @@ class PhishHistory extends WeatherDisplay {
 		}
 
 		if (!data?.shows?.length) {
-			this.setStatus(STATUS.failed);
+			this.setStatus(STATUS.noData);
 			return;
 		}
 

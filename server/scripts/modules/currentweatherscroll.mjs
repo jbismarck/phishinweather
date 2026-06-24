@@ -136,24 +136,23 @@ const runLoop = async () => {
 	const animate = () => {
 		if (!loopActive || currentLoopId !== loopId) return;
 
-		// instant reset to start position (no transition)
-		elemForEach('.weather-display .scroll .fixed .scroll-area', (el) => {
-			el.style.transition = 'none';
-			el.style.left = '0px';
-		});
-
-		// force reflow so the reset is applied before the transition is added
-		// eslint-disable-next-line no-unused-expressions
-		firstFixed.offsetHeight;
-
-		requestAnimationFrame(() => requestAnimationFrame(() => {
+		// Reset in rAF1, animate in rAF2 — avoids a synchronous forced reflow
+		// that would stall the main thread and cause audio glitches every loop.
+		requestAnimationFrame(() => {
 			if (!loopActive || currentLoopId !== loopId) return;
 			elemForEach('.weather-display .scroll .fixed .scroll-area', (el) => {
-				el.style.transition = `left linear ${duration.toFixed(1)}s`;
-				el.style.left = `-${oneCopyWidth}px`;
+				el.style.transition = 'none';
+				el.style.left = '0px';
 			});
-			firstArea.addEventListener('transitionend', animate, { once: true });
-		}));
+			requestAnimationFrame(() => {
+				if (!loopActive || currentLoopId !== loopId) return;
+				elemForEach('.weather-display .scroll .fixed .scroll-area', (el) => {
+					el.style.transition = `left linear ${duration.toFixed(1)}s`;
+					el.style.left = `-${oneCopyWidth}px`;
+				});
+				firstArea.addEventListener('transitionend', animate, { once: true });
+			});
+		});
 	};
 
 	animate();

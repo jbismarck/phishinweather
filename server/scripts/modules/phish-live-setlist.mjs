@@ -34,7 +34,7 @@ class PhishLiveSetlist extends WeatherDisplay {
 		}
 
 		if (!data || data.error || data.noShow) {
-			this.setStatus(STATUS.failed);
+			this.setStatus(STATUS.noData);
 			return;
 		}
 
