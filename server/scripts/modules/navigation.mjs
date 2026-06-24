@@ -67,6 +67,8 @@ const init = async () => {
 
 	generateCheckboxes();
 	connectSSE();
+	// Stream mode is always "playing" — no user click needed to start rotation.
+	if (schedStream) setPlaying(true);
 };
 
 const message = (data) => {
