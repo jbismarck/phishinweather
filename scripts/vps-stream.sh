@@ -43,6 +43,7 @@ cleanup() {
   pkill -u "$(id -un)" -x ffmpeg 2>/dev/null || true   # kill inner FFmpeg if loop is mid-sleep
   kill "$WATCHDOG_PID"  2>/dev/null || true
   kill "$CHROME_PID"    2>/dev/null || true
+  kill "$OPENBOX_PID"   2>/dev/null || true
   kill "$PULSE_PID"     2>/dev/null || true
   kill "$XVFB_PID"      2>/dev/null || true
   rm -f "/tmp/.X${DISPLAY_NUM}-lock" "/tmp/.X11-unix/X${DISPLAY_NUM}" 2>/dev/null || true
@@ -58,6 +59,14 @@ rm -f "/tmp/.X${DISPLAY_NUM}-lock" "/tmp/.X11-unix/X${DISPLAY_NUM}" 2>/dev/null 
 Xvfb "${DISPLAY}" -screen 0 "${SCREEN_RES}x24" -ac +extension GLX +render -noreset &
 XVFB_PID=$!
 sleep 2
+
+# ── 1b. Window manager ────────────────────────────────────────────────────────
+# Openbox makes --window-size/--window-position hints work; without a WM,
+# Xvfb ignores them and Chromium renders at an unpredictable size.
+echo "Starting openbox..."
+DISPLAY="${DISPLAY}" openbox --sm-disable &
+OPENBOX_PID=$!
+sleep 1
 
 # ── 2. Virtual audio sink ─────────────────────────────────────────────────────
 echo "Starting audio..."
