@@ -1,0 +1,56 @@
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
+
+#venue-guide-html.weather-display {
+	background-image: url('../images/backgrounds/5.png');
+}
+
+@keyframes vg-scroll {
+	from { transform: translateY(0); }
+	to   { transform: translateY(var(--vg-scroll-dist, -400px)); }
+}
+
+.weather-display .main.venue-guide {
+	font-family: 'Star4000';
+	@include u.text-shadow();
+
+	.scroll-container {
+		margin-top: 20px;
+		margin-left: 40px;
+		margin-right: 20px;
+		height: 270px;
+		overflow: hidden;
+		position: relative;
+	}
+
+	.vg-container {
+		position: relative;
+	}
+
+	.vg-section {
+		font-size: 13pt;
+		color: c.$column-header-text;
+		margin-top: 10px;
+		margin-bottom: 4px;
+		line-height: 1.2;
+
+		&:first-child {
+			margin-top: 4px;
+		}
+	}
+
+	.vg-label {
+		font-size: 11pt;
+		color: c.$column-header-text;
+		line-height: 1.2;
+		margin-top: 6px;
+	}
+
+	.vg-value {
+		font-size: 12pt;
+		color: white;
+		padding-left: 14px;
+		line-height: 1.3;
+		margin-bottom: 2px;
+	}
+}

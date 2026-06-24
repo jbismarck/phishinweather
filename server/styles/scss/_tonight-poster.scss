@@ -1,0 +1,35 @@
+@use 'shared/_utils' as u;
+
+#tonight-poster-html.weather-display {
+	background-image: none;
+	background-color: #000;
+}
+
+.weather-display .main.tonight-poster {
+	position: relative;
+	width: 640px;
+	height: 390px; // below 60px header
+	overflow: hidden;
+
+	.tp-poster {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		object-position: center top;
+	}
+
+	.tp-caption {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		padding: 4px 10px;
+		background: rgba(0, 0, 0, 0.65);
+		font-family: 'Star4000';
+		font-size: 11pt;
+		color: #ffff00;
+		text-align: center;
+		@include u.text-shadow();
+	}
+}

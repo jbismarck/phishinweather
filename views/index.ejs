@@ -56,6 +56,8 @@
 	<script type="module" src="scripts/modules/media.mjs"></script>
 	<script type="module" src="scripts/modules/phish-history.mjs"></script>
 	<script type="module" src="scripts/modules/phish-live-setlist.mjs"></script>
+	<script type="module" src="scripts/modules/venue-guide.mjs"></script>
+	<script type="module" src="scripts/modules/tonight-poster.mjs"></script>
 	<script type="module" src="scripts/modules/phish-tour.mjs"></script>
 	<script type="module" src="scripts/modules/phish-countdown.mjs"></script>
 	<script type="module" src="scripts/modules/gamehendge-weather.mjs"></script>
@@ -142,6 +144,12 @@
       </div>
       <div id="phish-tour-html" class="weather-display">
         <%- include('partials/phish-tour.ejs') %>
+      </div>
+      <div id="venue-guide-html" class="weather-display">
+        <%- include('partials/venue-guide.ejs') %>
+      </div>
+      <div id="tonight-poster-html" class="weather-display">
+        <%- include('partials/tonight-poster.ejs') %>
       </div>
       <div id="phish-countdown-html" class="weather-display">
         <%- include('partials/phish-countdown.ejs') %>

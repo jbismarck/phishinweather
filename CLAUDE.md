@@ -129,8 +129,12 @@ gulpfile.mjs           ← build pipeline
 | 26 | YouTube |
 | 27 | Reddit |
 | 28 | OnlyFans (easter egg) |
+| 29 | Feature Vote |
+| 30 | Phish Live Setlist |
+| 31 | Venue Guide (pre-show) |
+| 32 | Tonight's Poster (pre-show) |
 
-Use 29+ for new cards.
+Use 33+ for new cards.
 
 ### Adding a new display card
 

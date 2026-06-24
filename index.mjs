@@ -12,6 +12,7 @@ import {
 	removeClient as schedulerRemoveClient,
 	DISPLAY_NAMES, STREAM_PLAYLIST, SITE_PLAYLIST, DURATIONS,
 } from './server/scheduler.mjs';
+import { getShowPhase } from './server/show-phase.mjs';
 
 // ── TASK 2: production guard ─────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production' && process.env.DIST !== '1') {
@@ -1026,6 +1027,23 @@ app.use('/api/phish', phishRateLimit);
 app.get('/api/phish/on-this-day', phishOnThisDay);
 app.get('/api/phish/summer-tour', phishSummerTour);
 app.get('/api/phish/live-setlist', phishLiveSetlist);
+app.get('/api/phish/show-status', (_req, res) => {
+	const { phase, show, showtimeUtc, minutesUntilShow } = getShowPhase();
+	if (!show) return res.json({ phase: 'off' });
+	res.json({
+		phase,
+		showDate: show.date,
+		venue: show.venue,
+		city: show.city,
+		state: show.state,
+		showtimeUtc,
+		minutesUntilShow,
+		shakedown: show.shakedown ?? null,
+		policy: show.policy ?? null,
+		food: show.food ?? [],
+		poster_url: show.poster_url ?? null,
+	});
+});
 
 // Ko-fi shoutout scroller
 app.get('/api/shoutouts', (_req, res) => res.json(shoutouts.slice(0, 10)));
