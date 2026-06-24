@@ -61,10 +61,24 @@ XVFB_PID=$!
 sleep 2
 
 # ── 1b. Window manager ────────────────────────────────────────────────────────
-# Openbox makes --window-size/--window-position hints work; without a WM,
-# Xvfb ignores them and Chromium renders at an unpredictable size.
+# Openbox enforces --window-size/--window-position. Config strips all
+# decorations (title bar / borders) so the window fills 0,0→640x560 cleanly
+# and the xdotool click lands at the correct nav-bar position.
+cat > /tmp/openbox-rc.xml << 'OBEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_config xmlns="http://openbox.org/3.4/rc">
+  <applications>
+    <application class="*">
+      <decor>no</decor>
+      <position force="yes"><x>0</x><y>0</y></position>
+      <width force="yes">640</width>
+      <height force="yes">560</height>
+    </application>
+  </applications>
+</openbox_config>
+OBEOF
 echo "Starting openbox..."
-DISPLAY="${DISPLAY}" openbox --sm-disable &
+DISPLAY="${DISPLAY}" openbox --sm-disable --config-file /tmp/openbox-rc.xml &
 OPENBOX_PID=$!
 sleep 1
 
