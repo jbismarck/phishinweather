@@ -1,8 +1,4 @@
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { getShowByDate } from './db.mjs';
 
 // US state → IANA timezone (covers all Phish tour states)
 const STATE_TZ = {
@@ -58,17 +54,8 @@ const getShowPhase = () => {
 	const now = Date.now();
 	if (cache && now - cacheTs < CACHE_MS) return cache;
 
-	let tourData;
-	try {
-		tourData = JSON.parse(fs.readFileSync(join(__dirname, 'data/summer-tour.json'), 'utf8'));
-	} catch {
-		cache = { phase: 'off', show: null };
-		cacheTs = now;
-		return cache;
-	}
-
 	const today = new Date().toISOString().slice(0, 10);
-	const show = tourData.shows.find((s) => s.date === today);
+	const show = getShowByDate(today);
 
 	if (!show) {
 		cache = { phase: 'off', show: null };

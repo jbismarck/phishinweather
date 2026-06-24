@@ -13,6 +13,10 @@ import {
 	DISPLAY_NAMES, STREAM_PLAYLIST, SITE_PLAYLIST, DURATIONS,
 } from './server/scheduler.mjs';
 import { getShowPhase } from './server/show-phase.mjs';
+import {
+	initDb, getShowByDate, getAllShows,
+	updateShow, updateVenuePolicy,
+} from './server/db.mjs';
 
 // ── TASK 2: production guard ─────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production' && process.env.DIST !== '1') {
@@ -21,6 +25,7 @@ if (process.env.NODE_ENV === 'production' && process.env.DIST !== '1') {
 	);
 }
 
+initDb();
 schedulerInit();
 
 const app = express();
@@ -391,8 +396,7 @@ const phishSummerTour = async (req, res) => {
 	}
 
 	try {
-		const tourData = JSON.parse(fs.readFileSync('./server/data/summer-tour.json'));
-		const { shows: allShows } = tourData;
+		const allShows = getAllShows();
 
 		// Filter to current + next venue only
 		const todayStr = new Date().toISOString().slice(0, 10);
@@ -501,7 +505,7 @@ const phishSummerTour = async (req, res) => {
 			show.venueHistory = venueHistoryBySlug[show.phishin_venue_slug] ?? null;
 		});
 
-		tourCache = { tour: tourData.tour, shows };
+		tourCache = { tour: 'Summer 2026', shows };
 		tourCacheHour = hourKey;
 		return res.json(tourCache);
 	} catch (err) {
@@ -791,54 +795,66 @@ const renderQuotesSection = (password) => {
 
 const renderTourSection = (password) => {
 	const token = Buffer.from(':' + password).toString('base64');
-	let tourData;
-	try { tourData = JSON.parse(fs.readFileSync('./server/data/summer-tour.json', 'utf8')); }
-	catch { return '<h2>Tour Policy</h2><p style="color:#f88">Could not load summer-tour.json</p>'; }
+	const shows = getAllShows();
 
-	const selEl = (field, current, options, showIdx) => {
+	const selEl = (field, current, options, date) => {
 		const allOpts = options.includes(current) ? options : [...options, current];
-		return '<select id="ts-' + showIdx + '-' + field + '" onchange="tourSave(' + showIdx + ',\'' + field + '\',this.value)" '
+		return '<select id="ts-' + date + '-' + field + '" onchange="policySave(\'' + date + '\',\'' + field + '\',this.value)" '
 			+ 'style="background:#111;border:1px solid #333;color:#ccc;font-family:monospace;font-size:.75em;width:100%">'
 			+ allOpts.map((o) => '<option' + (o === current ? ' selected' : '') + '>' + o.replace(/</g, '&lt;') + '</option>').join('')
 			+ '</select>';
 	};
 
-	const rows = tourData.shows.map((show, i) => {
+	const rows = shows.map((show) => {
 		const d = new Date(show.date + 'T12:00:00');
 		const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 		const p = show.policy ?? {};
 		const updated = p.last_updated
 			? '<span style="color:#4f4">' + p.last_updated + '</span>'
 			: '<span style="color:#555">—</span>';
+		const posterVal = (show.poster_url ?? '').replace(/"/g, '&quot;');
 		return '<tr>'
 			+ '<td style="white-space:nowrap;color:#888;font-size:.85em">' + dateStr + '</td>'
 			+ '<td style="font-size:.85em">' + show.venue + '</td>'
 			+ '<td style="white-space:nowrap;color:#888;font-size:.85em">' + show.city + ', ' + show.state + '</td>'
-			+ '<td>' + selEl('water_bottles', p.water_bottles ?? 'Check venue website', BOTTLE_OPTIONS, i) + '</td>'
-			+ '<td>' + selEl('poster_tubes', p.poster_tubes ?? 'Check venue website', TUBES_OPTIONS, i) + '</td>'
-			+ '<td>' + selEl('water_station', p.water_station ?? 'Check venue website', WATER_OPTIONS, i) + '</td>'
+			+ '<td>' + selEl('water_bottles', p.water_bottles ?? 'Check venue website', BOTTLE_OPTIONS, show.date) + '</td>'
+			+ '<td>' + selEl('poster_tubes',  p.poster_tubes  ?? 'Check venue website', TUBES_OPTIONS,  show.date) + '</td>'
+			+ '<td>' + selEl('water_station', p.water_station ?? 'Check venue website', WATER_OPTIONS,  show.date) + '</td>'
+			+ '<td><input id="tp-' + show.date + '" type="text" value="' + posterVal + '" placeholder="https://..." '
+			+ 'onchange="posterSave(\'' + show.date + '\',this.value)" '
+			+ 'style="background:#111;border:1px solid #333;color:#ccc;font-family:monospace;font-size:.75em;width:180px"/></td>'
 			+ '<td style="font-size:.75em;white-space:nowrap">' + updated + '</td>'
 			+ '</tr>';
 	}).join('');
 
-	return `<h2>Tour Policy</h2>
+	return `<h2>Tour</h2>
 <div style="overflow-x:auto">
 <table>
-<tr><th>Date</th><th>Venue</th><th>City</th><th>Water Bottles</th><th>Tubes</th><th>Water Station</th><th>Updated</th></tr>
+<tr><th>Date</th><th>Venue</th><th>City</th><th>Water Bottles</th><th>Tubes</th><th>Water Station</th><th>Poster URL</th><th>Updated</th></tr>
 ${rows}
 </table>
 </div>
-<p class="q-note">Auto-saves on change. Changes persist until next deploy. To make permanent: commit <code>server/data/summer-tour.json</code>.</p>
+<p class="q-note">Auto-saves on change. Writes to DB and flushes to summer-tour.json.</p>
 <script>
-function tourSave(i,field,val){
+function policySave(date,field,val){
   var body={};body[field]=val;
-  var sel=document.getElementById('ts-'+i+'-'+field);
-  fetch('/api/tour-policy/'+i,{method:'PATCH',
+  var sel=document.getElementById('ts-'+date+'-'+field);
+  fetch('/api/shows/'+date+'/policy',{method:'PATCH',
     headers:{'Content-Type':'application/json',Authorization:'Basic ${token}'},
     body:JSON.stringify(body)
   }).then(function(r){
     if(r.ok){sel.style.borderColor='#4f4';setTimeout(function(){sel.style.borderColor='';},1200);}
     else{sel.style.borderColor='#f44';}
+  });
+}
+function posterSave(date,val){
+  var inp=document.getElementById('tp-'+date);
+  fetch('/api/shows/'+date,{method:'PATCH',
+    headers:{'Content-Type':'application/json',Authorization:'Basic ${token}'},
+    body:JSON.stringify({poster_url:val||null})
+  }).then(function(r){
+    if(r.ok){inp.style.borderColor='#4f4';setTimeout(function(){inp.style.borderColor='';},1200);}
+    else{inp.style.borderColor='#f44';}
   });
 }
 </script>`;
@@ -962,19 +978,21 @@ app.delete('/api/hfb-quotes/:index', requireAdmin, (req, res) => {
 	res.json({ ok: true, count: hfbQuotes.length });
 });
 
-app.patch('/api/tour-policy/:index', requireAdmin, (req, res) => {
-	let tourData;
-	try { tourData = JSON.parse(fs.readFileSync('./server/data/summer-tour.json', 'utf8')); }
-	catch { return res.status(500).json({ error: 'could not load tour data' }); }
-	const i = Number(req.params.index);
-	if (!Number.isInteger(i) || i < 0 || i >= tourData.shows.length) return res.status(400).json({ error: 'invalid index' });
+// Update show-specific fields (poster_url, showtime_local)
+app.patch('/api/shows/:date', requireAdmin, (req, res) => {
+	const show = getShowByDate(req.params.date);
+	if (!show) return res.status(404).json({ error: 'show not found' });
+	const { poster_url, showtime_local } = req.body;
+	updateShow(req.params.date, { poster_url, showtime_local });
+	res.json({ ok: true });
+});
+
+// Update venue policy (water, tubes, station) — applies to all shows at this venue
+app.patch('/api/shows/:date/policy', requireAdmin, (req, res) => {
+	const show = getShowByDate(req.params.date);
+	if (!show) return res.status(404).json({ error: 'show not found' });
 	const { water_bottles, poster_tubes, water_station } = req.body;
-	if (!tourData.shows[i].policy) tourData.shows[i].policy = {};
-	if (water_bottles !== undefined) tourData.shows[i].policy.water_bottles = water_bottles;
-	if (poster_tubes !== undefined) tourData.shows[i].policy.poster_tubes = poster_tubes;
-	if (water_station !== undefined) tourData.shows[i].policy.water_station = water_station;
-	tourData.shows[i].policy.last_updated = new Date().toISOString().slice(0, 10);
-	fs.writeFileSync('./server/data/summer-tour.json', JSON.stringify(tourData, null, 2), 'utf8');
+	updateVenuePolicy(show.phishin_venue_slug, { water_bottles, poster_tubes, water_station });
 	res.json({ ok: true });
 });
 
@@ -1150,16 +1168,16 @@ const server = app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
 
 	try {
-		const tourData = JSON.parse(fs.readFileSync('./server/data/summer-tour.json', 'utf8'));
-		const lastShow = tourData.shows?.at(-1);
+		const shows = getAllShows();
+		const lastShow = shows.at(-1);
 		if (lastShow) {
 			const daysSince = Math.floor((Date.now() - new Date(lastShow.date)) / 86_400_000);
 			if (daysSince > 30) {
-				console.warn(`WARNING: summer-tour.json last show was ${daysSince} days ago (${lastShow.date}) — update for next tour`);
+				console.warn(`WARNING: last show was ${daysSince} days ago (${lastShow.date}) — update DB for next tour`);
 			}
 		}
-	} catch {
-		console.warn('WARNING: summer-tour.json missing or unreadable');
+	} catch (e) {
+		console.warn('WARNING: could not read shows from DB', e.message);
 	}
 });
 
