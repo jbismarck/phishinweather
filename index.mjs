@@ -834,7 +834,7 @@ const renderTourSection = (password) => {
 ${rows}
 </table>
 </div>
-<p class="q-note">Auto-saves on change. Writes to DB and flushes to summer-tour.json.</p>
+<p class="q-note">Auto-saves on change. Writes to DB and flushes to summer-tour.json. <strong style="color:#ff0">After setting a poster URL, commit to survive the next deploy:</strong> <code>git add server/data/summer-tour.json &amp;&amp; git commit -m "Add poster for [date]" &amp;&amp; git push</code></p>
 <script>
 function policySave(date,field,val){
   var body={};body[field]=val;
