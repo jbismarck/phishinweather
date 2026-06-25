@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Signing Off — Phishinweather</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; color: #fff; font-family: monospace; overflow: hidden; width: 640px; height: 480px; }
+
+/* Phases */
+.phase { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; opacity: 0; transition: opacity 1.5s ease; pointer-events: none; }
+.phase.active { opacity: 1; }
+
+/* Phase 1 — sign-off card */
+.sign-off-box { border: 3px solid #666; padding: 40px 60px; text-align: center; }
+.sign-off-top { font-size: .85em; letter-spacing: .3em; color: #888; margin-bottom: 14px; }
+.sign-off-main { font-size: 1.6em; letter-spacing: .12em; color: #fff; line-height: 1.5; }
+.sign-off-station { font-size: .75em; letter-spacing: .3em; color: #ff0; margin-top: 18px; }
+
+/* Phase 2 — flag */
+.flag-scene { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.flag-wrap {
+  width: 400px; height: 210px; position: relative; overflow: hidden;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.7);
+  animation: flag-wave 3s ease-in-out infinite;
+  transform-origin: left center;
+}
+@keyframes flag-wave {
+  0%   { transform: skewY(0deg); }
+  20%  { transform: skewY(0.8deg) scaleX(1.01); }
+  40%  { transform: skewY(0deg); }
+  60%  { transform: skewY(-0.8deg) scaleX(0.99); }
+  80%  { transform: skewY(0deg); }
+  100% { transform: skewY(0deg); }
+}
+.flag-stripes {
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    #B22234 0%, #B22234 7.6923%,
+    #fff    7.6923%, #fff    15.3846%,
+    #B22234 15.3846%, #B22234 23.077%,
+    #fff    23.077%, #fff    30.769%,
+    #B22234 30.769%, #B22234 38.462%,
+    #fff    38.462%, #fff    46.154%,
+    #B22234 46.154%, #B22234 53.846%,
+    #fff    53.846%, #fff    61.538%,
+    #B22234 61.538%, #B22234 69.231%,
+    #fff    69.231%, #fff    76.923%,
+    #B22234 76.923%, #B22234 84.615%,
+    #fff    84.615%, #fff    92.308%,
+    #B22234 92.308%, #B22234 100%
+  );
+}
+.canton {
+  position: absolute; top: 0; left: 0;
+  width: 160px; height: 113px;
+  background: #3C3B6E;
+  display: grid; grid-template-columns: repeat(11, 1fr); align-content: space-around;
+  padding: 5px 4px; gap: 2px;
+}
+.star { color: #fff; font-size: 7px; text-align: center; line-height: 1; user-select: none; }
+.flag-caption { font-size: .75em; letter-spacing: .2em; color: #888; text-align: center; }
+
+/* Phase 3 — SMPTE bars (reuse maintenance style) */
+.bars { display: flex; width: 640px; height: 360px; }
+.bar { flex: 1; }
+.bar-white   { background: #c0c0c0; }
+.bar-yellow  { background: #c0c000; }
+.bar-cyan    { background: #00c0c0; }
+.bar-green   { background: #00c000; }
+.bar-magenta { background: #c000c0; }
+.bar-red     { background: #c00000; }
+.bar-blue    { background: #0000c0; }
+.bars-info { width: 640px; height: 120px; background: #111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border-top: 2px solid #333; }
+.bars-station { font-size: 1.1em; letter-spacing: .2em; color: #ff0; }
+.bars-sub { font-size: .75em; letter-spacing: .1em; color: #555; }
+</style>
+</head>
+<body>
+
+<!-- Phase 1: Sign-off message -->
+<div class="phase active" id="phase1">
+  <div class="sign-off-box">
+    <div class="sign-off-top">THIS CONCLUDES TODAY'S BROADCAST</div>
+    <div class="sign-off-main">PHISHINWEATHER<br>SIGNING OFF</div>
+    <div class="sign-off-station">PHISHINWEATHER.COM</div>
+  </div>
+</div>
+
+<!-- Phase 2: Flag + anthem -->
+<div class="phase" id="phase2">
+  <div class="flag-scene">
+    <div class="flag-wrap">
+      <div class="flag-stripes"></div>
+      <div class="canton" id="canton"></div>
+    </div>
+    <div class="flag-caption" id="anthem-caption">THE STAR-SPANGLED BANNER</div>
+  </div>
+  <audio id="anthem" autoplay></audio>
+</div>
+
+<!-- Phase 3: Test bars -->
+<div class="phase" id="phase3">
+  <div class="bars">
+    <div class="bar bar-white"></div>
+    <div class="bar bar-yellow"></div>
+    <div class="bar bar-cyan"></div>
+    <div class="bar bar-green"></div>
+    <div class="bar bar-magenta"></div>
+    <div class="bar bar-red"></div>
+    <div class="bar bar-blue"></div>
+  </div>
+  <div class="bars-info">
+    <div class="bars-station">PHISHINWEATHER</div>
+    <div class="bars-sub">BACK TOMORROW · PHISHINWEATHER.COM</div>
+  </div>
+</div>
+
+<script>
+// Build 50 stars in the canton (alternating rows of 6 and 5)
+const canton = document.getElementById('canton');
+canton.style.gridTemplateColumns = 'repeat(11, 1fr)';
+for (let i = 0; i < 110; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  // Odd columns in even rows and even columns in odd rows are spacers
+  const col = (i % 11) + 1;
+  const row = Math.floor(i / 11) + 1;
+  const isStar = (row % 2 === 1 && col % 2 === 1) || (row % 2 === 0 && col % 2 === 0);
+  s.textContent = isStar ? '★' : '';
+  canton.appendChild(s);
+}
+
+const show = (id) => {
+  document.querySelectorAll('.phase').forEach((el) => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+};
+
+const params    = new URLSearchParams(window.location.search);
+const anthemUrl = params.get('anthem') || '';
+const audio     = document.getElementById('anthem');
+
+// Phase sequence
+setTimeout(() => {
+  show('phase2');
+  if (anthemUrl) {
+    audio.src = anthemUrl;
+    audio.play().catch(() => {});
+    audio.addEventListener('ended', () => setTimeout(() => show('phase3'), 2000), { once: true });
+    // Fallback: if audio fails or no ended event after 4 min, advance anyway
+    setTimeout(() => { if (document.getElementById('phase2').classList.contains('active')) show('phase3'); }, 4 * 60 * 1000);
+  } else {
+    // No anthem — wave the flag for 90 seconds then go to bars
+    setTimeout(() => show('phase3'), 90_000);
+  }
+}, 8000); // sign-off card shows for 8 seconds
+
+// Poll — if admin clears override, go back to air
+setInterval(async () => {
+  try {
+    const r = await fetch('/api/stream-page');
+    const { url } = await r.json();
+    if (url === null) window.location.href = '/?mode=stream';
+    else if (url && url !== window.location.pathname + window.location.search) window.location.href = url;
+  } catch {}
+}, 5000);
+</script>
+</body>
+</html>

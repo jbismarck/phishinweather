@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Technical Maintenance — Phishinweather</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; color: #fff; font-family: monospace; overflow: hidden; width: 640px; height: 480px; }
+
+/* SMPTE 75% color bars */
+.bars { display: flex; width: 640px; height: 360px; }
+.bar { flex: 1; }
+.bar-white   { background: #c0c0c0; }
+.bar-yellow  { background: #c0c000; }
+.bar-cyan    { background: #00c0c0; }
+.bar-green   { background: #00c000; }
+.bar-magenta { background: #c000c0; }
+.bar-red     { background: #c00000; }
+.bar-blue    { background: #0000c0; }
+
+/* Bottom info strip */
+.info { width: 640px; height: 120px; background: #111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; border-top: 2px solid #333; }
+.station { font-size: 1.3em; letter-spacing: .2em; color: #ff0; text-transform: uppercase; }
+.status-text { font-size: .85em; color: #888; letter-spacing: .1em; }
+.countdown-wrap { display: flex; align-items: center; gap: 10px; }
+.countdown { font-size: 2em; color: #fff; letter-spacing: .05em; font-variant-numeric: tabular-nums; }
+.countdown-label { font-size: .75em; color: #666; letter-spacing: .08em; }
+</style>
+</head>
+<body>
+
+<div class="bars">
+  <div class="bar bar-white"></div>
+  <div class="bar bar-yellow"></div>
+  <div class="bar bar-cyan"></div>
+  <div class="bar bar-green"></div>
+  <div class="bar bar-magenta"></div>
+  <div class="bar bar-red"></div>
+  <div class="bar bar-blue"></div>
+</div>
+
+<div class="info">
+  <div class="station">PHISHINWEATHER</div>
+  <div class="status-text">TECHNICAL MAINTENANCE — PLEASE STAND BY</div>
+  <div class="countdown-wrap">
+    <div class="countdown" id="timer">—</div>
+    <div class="countdown-label">UNTIL RETURN</div>
+  </div>
+</div>
+
+<script>
+const params  = new URLSearchParams(window.location.search);
+const minutes = parseInt(params.get('minutes') || '0', 10);
+let endsAt    = minutes > 0 ? Date.now() + minutes * 60 * 1000 : null;
+const timer   = document.getElementById('timer');
+
+const fmt = (ms) => {
+  if (ms <= 0) return '0:00';
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};
+
+const tick = () => {
+  if (endsAt) {
+    const left = endsAt - Date.now();
+    timer.textContent = fmt(left);
+    if (left <= 0) { window.location.href = '/?mode=stream'; return; }
+  } else {
+    timer.textContent = '—';
+  }
+};
+
+tick();
+setInterval(tick, 500);
+
+// Poll server — returns to air if override cleared or server restarts
+setInterval(async () => {
+  try {
+    const r = await fetch('/api/stream-page');
+    const { url } = await r.json();
+    if (url === null) window.location.href = '/?mode=stream';
+    else if (url && url !== window.location.pathname + window.location.search) window.location.href = url;
+  } catch {}
+}, 5000);
+</script>
+</body>
+</html>

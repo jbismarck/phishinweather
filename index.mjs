@@ -10,6 +10,8 @@ import {
 	setOverride as schedulerSetOverride, clearOverride as schedulerClearOverride,
 	getOverride as schedulerGetOverride, addClient as schedulerAddClient,
 	removeClient as schedulerRemoveClient,
+	setStreamPage as schedulerSetStreamPage, clearStreamPage as schedulerClearStreamPage,
+	getStreamPage as schedulerGetStreamPage,
 	DISPLAY_NAMES, STREAM_PLAYLIST, SITE_PLAYLIST, DURATIONS,
 } from './server/scheduler.mjs';
 import { getShowPhase } from './server/show-phase.mjs';
@@ -898,6 +900,33 @@ async function schedClear() {
   await fetch('/api/override', {method:'DELETE', headers:{'Authorization':'Basic '+SCHED_TOK}});
   location.reload();
 }
+</script>
+
+<h2>Emergency Stream Controls</h2>
+<p style="color:#888;font-size:.85em;margin-bottom:12px">Takes the Pi's Chromium to a special page. Stream returns to air automatically when cleared or timer expires.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+  <button onclick="streamTo('/sign-off')" style="${btnS}background:#1a1a00;border-color:#666">📺 Sign Off</button>
+  <button onclick="streamTo('/maintenance?minutes=10', 10)" style="${btnS}background:#0a1a2a;border-color:#446">🔧 Maintenance (10 min)</button>
+  <button onclick="streamTo('/technical-difficulties')" style="${btnS}background:#2a0a0a;border-color:#644">⚠️ Technical Difficulties</button>
+  <button onclick="streamPageClear()" style="${btnS}background:#0a2a0a;border-color:#464">🟢 Return to Air</button>
+</div>
+<div style="margin-bottom:6px;font-size:.85em;color:#888">
+  Anthem URL (optional — paste phish.in mp3 for sign-off):
+  <input id="anthem-url" type="url" placeholder="https://phish.in/audio/..." style="background:#111;color:#ccc;border:1px solid #444;padding:4px 8px;font-family:monospace;font-size:.85em;width:340px;margin-left:8px">
+  <span style="color:#555;font-size:.8em;display:block;margin-top:4px;padding-left:0">Find it: phish.in → 2017-08-05 (Baker's Dozen) → Track 1 → right-click mp3 link → Copy URL</span>
+</div>
+<script>
+async function streamTo(url, durationMinutes = 0) {
+  const anthem = document.getElementById('anthem-url').value.trim();
+  let finalUrl = url;
+  if (anthem && url.startsWith('/sign-off')) finalUrl = '/sign-off?anthem=' + encodeURIComponent(anthem);
+  await fetch('/api/stream-page', {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Basic '+SCHED_TOK}, body: JSON.stringify({url: finalUrl, durationMinutes})});
+  location.reload();
+}
+async function streamPageClear() {
+  await fetch('/api/stream-page', {method:'DELETE', headers:{'Authorization':'Basic '+SCHED_TOK}});
+  location.reload();
+}
 </script>`;
 };
 
@@ -1000,6 +1029,24 @@ app.patch('/api/shows/:date/policy', requireAdmin, (req, res) => {
 app.get('/admin', requireAdmin, adminDashboard);
 app.get('/stream', (_req, res) => res.redirect(301, 'https://www.youtube.com/@phishinweather/live'));
 app.get('/poster', (req, res) => res.render('poster', { version }));
+app.get('/maintenance', (_req, res) => res.render('maintenance'));
+app.get('/technical-difficulties', (_req, res) => res.render('technical-difficulties'));
+app.get('/sign-off', (_req, res) => res.render('sign-off'));
+
+app.get('/api/stream-page', (_req, res) => {
+	const sp = schedulerGetStreamPage();
+	res.json(sp ?? { url: null });
+});
+app.post('/api/stream-page', requireAdmin, (req, res) => {
+	const { url, durationMinutes = 0 } = req.body;
+	if (!url) return res.status(400).json({ error: 'url required' });
+	schedulerSetStreamPage(url, durationMinutes * 60 * 1000);
+	res.json({ ok: true });
+});
+app.delete('/api/stream-page', requireAdmin, (_req, res) => {
+	schedulerClearStreamPage();
+	res.json({ ok: true });
+});
 
 // shop
 app.get('/shop', (_req, res) => {

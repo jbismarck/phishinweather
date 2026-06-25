@@ -70,6 +70,9 @@ const ch = {
 // Single override slot — one at a time, applies to both channels
 let override = null; // { mode: 'pin'|'push'|'queue', navId, expiresAt }
 
+// Stream page override — navigates Pi's Chromium to a special URL
+let streamPageOverride = null; // { url, expiresAt: number|null }
+
 // SSE client response sets
 const clients = { stream: new Set(), site: new Set() };
 
@@ -118,8 +121,10 @@ const advance = (channel, forceNavId) => {
 	return { navId, startedAt: now, endsAt: now + duration };
 };
 
-const broadcast = (channel, payload) => {
-	const msg = `data: ${JSON.stringify(payload)}\n\n`;
+const broadcast = (channel, payload, eventName = null) => {
+	const msg = eventName
+		? `event: ${eventName}\ndata: ${JSON.stringify(payload)}\n\n`
+		: `data: ${JSON.stringify(payload)}\n\n`;
 	for (const res of clients[channel]) {
 		try { res.write(msg); }
 		catch { clients[channel].delete(res); }
@@ -128,9 +133,12 @@ const broadcast = (channel, payload) => {
 
 const tick = () => {
 	const now = Date.now();
-	// expire push/queue overrides past their window
 	if (override?.mode !== 'pin' && override?.expiresAt && now > override.expiresAt) {
 		override = null;
+	}
+	if (streamPageOverride?.expiresAt && now > streamPageOverride.expiresAt) {
+		streamPageOverride = null;
+		broadcast('stream', { url: null }, 'stream-page');
 	}
 	for (const channel of ['stream', 'site']) {
 		if (now >= ch[channel].endsAt) {
@@ -165,10 +173,22 @@ const setOverride = (mode, navId) => {
 
 const clearOverride = () => { override = null; };
 const getOverride = () => (override ? { ...override } : null);
+
+const setStreamPage = (url, durationMs = 0) => {
+	streamPageOverride = { url, expiresAt: durationMs > 0 ? Date.now() + durationMs : null };
+	broadcast('stream', { url }, 'stream-page');
+};
+const clearStreamPage = () => {
+	streamPageOverride = null;
+	broadcast('stream', { url: null }, 'stream-page');
+};
+const getStreamPage = () => (streamPageOverride ? { ...streamPageOverride } : null);
+
 const addClient = (channel, res) => clients[channel].add(res);
 const removeClient = (channel, res) => clients[channel].delete(res);
 
 export {
 	init, getState, setOverride, clearOverride, getOverride,
+	setStreamPage, clearStreamPage, getStreamPage,
 	addClient, removeClient, DURATIONS,
 };

@@ -60,6 +60,19 @@ const connectSSE = () => {
 	};
 };
 
+const pollStreamPage = () => {
+	if (!schedStream) return;
+	setInterval(async () => {
+		try {
+			const r = await fetch('/api/stream-page');
+			const { url } = await r.json();
+			if (url && url !== window.location.pathname + window.location.search) {
+				window.location.href = url;
+			}
+		} catch {}
+	}, 5000);
+};
+
 const init = async () => {
 	// set up resize handler
 	window.addEventListener('resize', resize);
@@ -67,6 +80,7 @@ const init = async () => {
 
 	generateCheckboxes();
 	connectSSE();
+	pollStreamPage();
 };
 
 const message = (data) => {
