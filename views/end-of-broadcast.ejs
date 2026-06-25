@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>End of Broadcast — Phishinweather</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; color: #fff; font-family: monospace; overflow: hidden; width: 640px; height: 480px; }
+
+.bars { display: flex; width: 640px; height: 340px; }
+.bar { flex: 1; }
+.bar-white   { background: #c0c0c0; }
+.bar-yellow  { background: #c0c000; }
+.bar-cyan    { background: #00c0c0; }
+.bar-green   { background: #00c000; }
+.bar-magenta { background: #c000c0; }
+.bar-red     { background: #c00000; }
+.bar-blue    { background: #0000c0; }
+
+.info {
+  width: 640px; height: 140px; background: #000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; border-top: 3px solid #333;
+}
+.station  { font-size: 1.4em; letter-spacing: .25em; color: #ff0; }
+.signed   { font-size: .78em; letter-spacing: .18em; color: #888; }
+.clock    { font-size: 1.6em; letter-spacing: .1em; color: #fff; font-variant-numeric: tabular-nums; }
+.date-str { font-size: .7em; letter-spacing: .12em; color: #555; }
+</style>
+</head>
+<body>
+
+<div class="bars">
+  <div class="bar bar-white"></div>
+  <div class="bar bar-yellow"></div>
+  <div class="bar bar-cyan"></div>
+  <div class="bar bar-green"></div>
+  <div class="bar bar-magenta"></div>
+  <div class="bar bar-red"></div>
+  <div class="bar bar-blue"></div>
+</div>
+
+<div class="info">
+  <div class="station">PHISHINWEATHER</div>
+  <div class="signed">THIS CONCLUDES TODAY'S BROADCAST</div>
+  <div class="clock" id="clock">—</div>
+  <div class="date-str" id="date-str">—</div>
+</div>
+
+<script>
+const clock   = document.getElementById('clock');
+const dateStr = document.getElementById('date-str');
+
+const tick = () => {
+  const now = new Date();
+  const h   = String(now.getHours()).padStart(2, '0');
+  const m   = String(now.getMinutes()).padStart(2, '0');
+  const s   = String(now.getSeconds()).padStart(2, '0');
+  clock.textContent = `${h}:${m}:${s}`;
+  dateStr.textContent = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase();
+};
+tick();
+setInterval(tick, 1000);
+
+// Return to air when admin clears override; stay if still on /sign-off or /end-of-broadcast
+setInterval(async () => {
+  try {
+    const r = await fetch('/api/stream-page');
+    const { url } = await r.json();
+    if (url === null) {
+      window.location.href = '/?mode=stream';
+    } else if (url && !url.startsWith('/sign-off') && url !== '/end-of-broadcast') {
+      window.location.href = url;
+    }
+  } catch {}
+}, 5000);
+</script>
+</body>
+</html>

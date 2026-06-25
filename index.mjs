@@ -906,6 +906,7 @@ async function schedClear() {
 <p style="color:#888;font-size:.85em;margin-bottom:12px">Takes the Pi's Chromium to a special page. Stream returns to air automatically when cleared or timer expires.</p>
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
   <button onclick="streamTo('/sign-off')" style="${btnS}background:#1a1a00;border-color:#666">📺 Sign Off</button>
+  <button onclick="streamTo('/end-of-broadcast')" style="${btnS}background:#111;border-color:#555">📡 End of Broadcast</button>
   <button onclick="streamTo('/maintenance?minutes=10', 10)" style="${btnS}background:#0a1a2a;border-color:#446">🔧 Maintenance (10 min)</button>
   <button onclick="streamTo('/technical-difficulties')" style="${btnS}background:#2a0a0a;border-color:#644">⚠️ Technical Difficulties</button>
   <button onclick="streamPageClear()" style="${btnS}background:#0a2a0a;border-color:#464">🟢 Return to Air</button>
@@ -1032,6 +1033,7 @@ app.get('/poster', (req, res) => res.render('poster', { version }));
 app.get('/maintenance', (_req, res) => res.render('maintenance'));
 app.get('/technical-difficulties', (_req, res) => res.render('technical-difficulties'));
 app.get('/sign-off', (_req, res) => res.render('sign-off'));
+app.get('/end-of-broadcast', (_req, res) => res.render('end-of-broadcast'));
 
 app.get('/api/stream-page', (_req, res) => {
 	const sp = schedulerGetStreamPage();

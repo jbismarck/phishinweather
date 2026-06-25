@@ -147,14 +147,21 @@ setTimeout(() => {
   if (anthemUrl) {
     audio.src = anthemUrl;
     audio.play().catch(() => {});
-    audio.addEventListener('ended', () => setTimeout(() => show('phase3'), 2000), { once: true });
+    audio.addEventListener('ended', () => setTimeout(() => window.location.href = '/end-of-broadcast', 2000), { once: true });
     // Fallback: if audio fails or no ended event after 4 min, advance anyway
-    setTimeout(() => { if (document.getElementById('phase2').classList.contains('active')) show('phase3'); }, 4 * 60 * 1000);
+    setTimeout(() => { if (document.getElementById('phase2').classList.contains('active')) window.location.href = '/end-of-broadcast'; }, 4 * 60 * 1000);
   } else {
-    // No anthem — wave the flag for 90 seconds then go to bars
-    setTimeout(() => show('phase3'), 90_000);
+    // No anthem — wave the flag for 90 seconds then go to end of broadcast
+    setTimeout(() => window.location.href = '/end-of-broadcast', 90_000);
   }
 }, 8000); // sign-off card shows for 8 seconds
+
+// phase3 is a brief crossfade transition before navigating away
+document.getElementById('phase3').addEventListener('transitionend', () => {
+  if (document.getElementById('phase3').classList.contains('active')) {
+    setTimeout(() => { window.location.href = '/end-of-broadcast'; }, 3000);
+  }
+}, { once: true });
 
 // Poll — if admin clears override, go back to air
 setInterval(async () => {
