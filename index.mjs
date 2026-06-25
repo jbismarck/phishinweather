@@ -913,7 +913,7 @@ async function schedClear() {
 <div style="margin-bottom:6px;font-size:.85em;color:#888">
   Anthem URL (optional — paste phish.in mp3 for sign-off):
   <input id="anthem-url" type="url" placeholder="https://phish.in/audio/..." style="background:#111;color:#ccc;border:1px solid #444;padding:4px 8px;font-family:monospace;font-size:.85em;width:340px;margin-left:8px">
-  <span style="color:#555;font-size:.8em;display:block;margin-top:4px;padding-left:0">Find it: phish.in → 2017-08-05 (Baker's Dozen) → Track 1 → right-click mp3 link → Copy URL</span>
+  <span style="color:#555;font-size:.8em;display:block;margin-top:4px;padding-left:0">Find it: search phish.net/setlists for "Star Spangled Banner" → note the date → go to phish.in/[date] → right-click mp3 → Copy URL</span>
 </div>
 <script>
 async function streamTo(url, durationMinutes = 0) {
