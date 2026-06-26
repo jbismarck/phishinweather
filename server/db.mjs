@@ -12,6 +12,9 @@ let db;
 const getDb = () => db;
 
 const initDb = () => {
+	const dbDir = dirname(DB_PATH);
+	if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
+	console.log(`show db: opening ${DB_PATH}`);
 	db = new Database(DB_PATH);
 	db.pragma('journal_mode = WAL');
 	db.pragma('foreign_keys = ON');
