@@ -19,6 +19,7 @@ const weatherParameters = {};
 // Detect channel from URL: ?mode=stream → stream channel, else site
 const schedChannel = new URLSearchParams(window.location.search).get('mode') === 'stream' ? 'stream' : 'site';
 const schedStream = schedChannel === 'stream'; // true = locked to server, no manual browsing
+if (schedStream) document.body.classList.add('stream-mode');
 let sseConnected = false;
 let browsing = false;    // site mode: user has manually navigated away from live
 let serverNavId = null;  // most recent navId the server said to show
