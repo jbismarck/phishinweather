@@ -135,7 +135,7 @@ echo "Starting FFmpeg stream (capturing ${CAPTURE_RES})..."
         -tune zerolatency \
         -b:v 2000k \
         -maxrate 2000k \
-        -bufsize 2000k \
+        -bufsize 4000k \
         -pix_fmt yuv420p \
         -g 60 \
       -c:a aac \
@@ -170,18 +170,28 @@ echo "Stream live. FFmpeg loop PID: $FFMPEG_PID"
       sleep 5  # wait for playback to resume before next check
     fi
 
-    # YouTube live check — every 5 min (5 × 60s ticks), skip first 10 min
+    # YouTube live check — every 30 min (30 × 60s ticks), skip first 15 min
+    # Checks @phishinweather/live redirect; only restarts FFmpeg if confident
+    # the stream is genuinely down (not a CDN/cache false positive).
     yt_check_counter=$((yt_check_counter + 1))
     now_ts=$(date +%s)
-    if [ $((yt_check_counter % 5)) -eq 0 ] && [ $((now_ts - startup_ts)) -gt 600 ]; then
+    if [ $((yt_check_counter % 30)) -eq 0 ] && [ $((now_ts - startup_ts)) -gt 900 ]; then
       final_url=$(curl -sL --max-time 15 -o /dev/null -w "%{url_effective}" \
         "https://www.youtube.com/@phishinweather/live" 2>/dev/null)
-      if echo "$final_url" | grep -q "watch"; then
-        echo "Watchdog: YouTube live OK"
+      # Confirm twice before acting — one CDN miss shouldn't kill the stream
+      if ! echo "$final_url" | grep -q "watch"; then
+        sleep 30
+        final_url2=$(curl -sL --max-time 15 -o /dev/null -w "%{url_effective}" \
+          "https://www.youtube.com/@phishinweather/live" 2>/dev/null)
+        if ! echo "$final_url2" | grep -q "watch"; then
+          echo "Watchdog: YouTube not live (confirmed twice: ${final_url2}) — restarting FFmpeg..."
+          pkill -u "$(id -un)" -x ffmpeg 2>/dev/null || true
+          sleep 10
+        else
+          echo "Watchdog: YouTube live OK on second check (first was false positive)"
+        fi
       else
-        echo "Watchdog: YouTube not live (resolved: ${final_url}) — restarting FFmpeg..."
-        pkill -u "$(id -un)" -x ffmpeg 2>/dev/null || true
-        sleep 10  # let reconnect loop restart FFmpeg before next check
+        echo "Watchdog: YouTube live OK"
       fi
     fi
 
