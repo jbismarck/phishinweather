@@ -33,7 +33,7 @@
 
 ### New features
 - **Traffic reports card (navId 33)** — drive-time conditions for the route to the venue. API options: Google Maps Routes API (most accurate, paid), HERE Traffic API (free tier), or TomTom Traffic Flow API (free tier 2500 req/day). Show current travel time from user's location to venue, incident alerts, and a simple congestion indicator. Cache aggressively (5-min TTL). Only show when a show is within 24h. `TRAFFIC_API_KEY` Railway env var.
-- **Tour expense builder** — pre-show planning card or `/budget` route. User inputs: # of nights, driving miles, # of people splitting. Outputs: estimated gas, hotel, ticket resale range (from phish.net or static), food budget, total per-person cost. Could live as a standalone page (`/budget`) or as a display card (navId 34). No API needed for v1 — static rate tables (avg gas price, avg hotel rate by city). Could pull GasBuddy or AAA gas price API later.
+- **Tour expense builder** — standalone page at `/budget` (site only, not stream). User inputs: # of nights, driving miles, # of people splitting, ticket cost. Outputs: estimated gas, hotel, food, total per-person. Submissions stored server-side (anonymized). Feeds a display card (navId 34) — **"AVG COST OF TOUR"** — that shows crowd-sourced averages across all submissions (avg total, avg per-person, avg miles driven). No API needed for v1 — static rate tables for gas/hotel. Stretch: pull avg gas price by region from GasBuddy or EIA API.
 
 ### Open bugs
 - **Phish displays unreachable via prev/next** — suspected: display stays STATUS.loading if NWS times out before getData; debug at localhost:8080 with real browser devtools (NWS blocks headless)
