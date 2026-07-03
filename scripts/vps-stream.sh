@@ -125,19 +125,18 @@ echo "Starting FFmpeg stream (capturing ${CAPTURE_RES})..."
   while true; do
     ffmpeg \
       -f x11grab \
-        -framerate 30 \
+        -framerate 15 \
         -video_size "${CAPTURE_RES}" \
         -i "${DISPLAY}.0+0,0" \
       -f pulse \
         -i vstream.monitor \
       -c:v libx264 \
         -preset ultrafast \
-        -tune zerolatency \
         -b:v 2000k \
         -maxrate 2000k \
         -bufsize 4000k \
         -pix_fmt yuv420p \
-        -g 60 \
+        -g 30 \
       -c:a aac \
         -b:a 128k \
         -ar 44100 \
