@@ -12,7 +12,6 @@
 | `CLOUDFLARE_API_TOKEN` | Cloudflare → My Profile → API Tokens (Analytics:Read) | CF analytics table on `/admin` |
 
 ### Stream ops — tech debt
-- **`displayNavMessage` suppression** — `navigation.mjs` ~line 209: `if (sseConnected && (schedStream || !browsing)) return;` — low-risk fix: remove early-return so timer chain always runs; SSE still overrides per-frame via `jumpToDisplay()` anyway
 - **YouTube streams default to Private** — fix in YouTube Studio → Settings → Channel → Advanced → Default broadcast privacy → Public
 
 ### Content / UX
