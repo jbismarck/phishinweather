@@ -48,6 +48,14 @@ const webpackOptions = {
 				extractComments: false,
 				terserOptions: {
 					// sourceMap: true,
+					compress: {
+						// `inline` can hoist a const/let reference above its
+						// declaration in the bundled output, producing a runtime
+						// "Cannot access 'x' before initialization" TDZ crash that
+						// halts app init (seen in production 2026-07). Disabling the
+						// inlining optimization avoids it at a small size cost.
+						inline: false,
+					},
 					format: {
 						comments: false,
 					},
