@@ -286,17 +286,64 @@ class PhishTour extends WeatherDisplay {
 		const card = this.elem.querySelector('.card-venue');
 		card.querySelector('.vh-venue').textContent = show.venue.toUpperCase();
 
-		const vh = show.venueHistory;
-		const count = vh?.show_count;
-		card.querySelector('.vh-count').textContent = count ? `${count} SHOWS` : '';
+		// Prefer the precomputed venue-stats (correct phish.in slugs, song-level
+		// detail); fall back to the live venueHistory for count/recent only.
+		const stats = show.venueStats ?? null;
+		const vh = show.venueHistory ?? null;
+		const count = stats?.show_count ?? vh?.show_count ?? 0;
+		const songs = stats?.total_songs ?? 0;
 
-		const recent = vh?.recent_date;
+		// "91 SHOWS · 365 SONGS · LAST DEC 2025"
+		const countBits = [];
+		if (count) countBits.push(`${count} SHOW${count !== 1 ? 'S' : ''}`);
+		if (songs) countBits.push(`${songs} SONGS`);
+		const recent = stats?.recent_date ?? vh?.recent_date;
 		if (recent) {
-			const d = new Date(`${recent}T12:00:00`);
-			card.querySelector('.vh-recent').textContent =
-				`LAST SHOW  ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+			const rd = new Date(`${recent}T12:00:00`);
+			countBits.push(`LAST ${MONTH_NAMES[rd.getMonth()]} ${rd.getFullYear()}`);
+		}
+		card.querySelector('.vh-count').textContent = countBits.join('  ·  ');
+
+		// Most played here — top rows with dot-leader + count
+		const mpSection = card.querySelector('.vh-most-played');
+		const mpList = card.querySelector('.vh-mp-list');
+		mpList.innerHTML = '';
+		const mostPlayed = stats?.most_played ?? [];
+		if (mostPlayed.length) {
+			mostPlayed.forEach((song) => {
+				const row = this.fillTemplate('mp-row', {
+					'mp-name': song.title.toUpperCase(),
+					'mp-count': song.count,
+				});
+				mpList.append(row);
+			});
+			mpSection.style.display = '';
 		} else {
-			card.querySelector('.vh-recent').textContent = '';
+			mpSection.style.display = 'none';
+		}
+
+		// Rarest bustout ever played here — "SNEAKIN' SALLY · 1997 · 925-SHOW GAP"
+		const boSection = card.querySelector('.vh-bustout');
+		const bustout = stats?.bustout ?? null;
+		if (bustout?.title) {
+			const year = bustout.date?.slice(0, 4) ?? '';
+			const gap = bustout.gap ? `${bustout.gap}-SHOW GAP` : '';
+			boSection.querySelector('.vh-bustout-line').textContent =
+				[bustout.title.toUpperCase(), year, gap].filter(Boolean).join('  ·  ');
+			boSection.style.display = '';
+		} else {
+			boSection.style.display = 'none';
+		}
+
+		// Core songs never played at this venue (only meaningful for smaller venues)
+		const odSection = card.querySelector('.vh-overdue');
+		const overdue = stats?.overdue ?? [];
+		if (overdue.length) {
+			odSection.querySelector('.vh-overdue-line').textContent =
+				overdue.map((t) => t.toUpperCase()).join('  ·  ');
+			odSection.style.display = '';
+		} else {
+			odSection.style.display = 'none';
 		}
 	}
 }

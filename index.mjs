@@ -19,6 +19,7 @@ import {
 	initDb, getShowByDate, getAllShows,
 	updateShow, updateVenuePolicy,
 } from './server/db.mjs';
+import { phishinSlug } from './server/phishin-slugs.mjs';
 
 // ── TASK 2: production guard ─────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production' && process.env.DIST !== '1') {
@@ -146,6 +147,12 @@ try { hfbQuotes = JSON.parse(fs.readFileSync(HFB_QUOTES_FILE, 'utf8')); } catch 
 const SHOUTOUTS_FILE = './server/data/shoutouts.json';
 let shoutouts = [];
 try { shoutouts = JSON.parse(fs.readFileSync(SHOUTOUTS_FILE, 'utf8')); } catch { shoutouts = []; }
+
+// Precomputed per-venue song stats (datagenerators/venue-stats.mjs), keyed by
+// our venue slug. Static — regenerate + commit after a tour leg.
+const VENUE_STATS_FILE = './server/data/venue-stats.json';
+let venueStats = {};
+try { venueStats = JSON.parse(fs.readFileSync(VENUE_STATS_FILE, 'utf8')); } catch { venueStats = {}; }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Disk-backed cache: survives process restarts within the same deploy
@@ -453,7 +460,7 @@ const phishSummerTour = async (req, res) => {
 			const { phishin_venue_slug: slug } = show;
 			try {
 				const listR = await phishFetch(
-					`https://phish.in/api/v2/shows?venue_slug=${encodeURIComponent(slug)}&sort_attr=date&sort_dir=desc&per_page=1`,
+					`https://phish.in/api/v2/shows?venue_slug=${encodeURIComponent(phishinSlug(slug))}&sort_attr=date&sort_dir=desc&per_page=1`,
 				);
 				const listData = await listR.json();
 				const recentShow = listData.shows?.[0];
@@ -506,6 +513,7 @@ const phishSummerTour = async (req, res) => {
 			}
 			show.musicTracks = tracksBySlug[show.phishin_venue_slug] ?? [];
 			show.venueHistory = venueHistoryBySlug[show.phishin_venue_slug] ?? null;
+			show.venueStats = venueStats[show.phishin_venue_slug] ?? null;
 		});
 
 		tourCache = { tour: 'Summer 2026', shows };

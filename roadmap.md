@@ -22,7 +22,6 @@
 - **Venue-specific backgrounds** — MSG and Dick's first; user working in GIMP/Aseprite
 - **Venue page layout redesign** — waiting on screenshot mockup from user; Claude will rework venue card SCSS + EJS to match
 - **New weather icon animations** — user exploring Aseprite; reference icons in `server/images/icons/current-conditions/`
-- **Venue stats on Tour card** — songs never played / most played at venue (phish.in `/api/v2/venues/:slug`); add as new HISTORY/SETLIST STATS card type in CARDS_PER_SHOW rotation
 - **Policy panel centering** — improved (flexbox `space-around`) but not pixel-perfect; needs final devtools tuning
 - **Policy sprites — tubes** — `policy-tubes-clear.png` in sprites folder, not yet wired in JS; waiting on philm (phish.in) for authoritative venue tube policy data before updating `summer-tour.json`
 - **Policy sprites — remaining** — no-water-station, tubes-none, tubes-soft, tubes-all sprites still needed
@@ -45,6 +44,12 @@
 ---
 
 ## Completed
+
+### 2026-07-20 — venue song stats + slug bug fix
+- Venue History card (tour card 4) enriched with song-level stats: **most-played here (top 5)** with dot-leader counts, **rarest bustout** (biggest previous-performance gap ever played here), **never-played-here** (core-repertoire songs missing at this venue). Show/song counts + last-show folded into one subtitle line.
+- Precomputed via `datagenerators/venue-stats.mjs` → committed `server/data/venue-stats.json` (keyed by venue slug). Build-time, not runtime — aggregating MSG alone is ~91 setlist fetches. Re-run after each tour leg: `node datagenerators/venue-stats.mjs` then commit.
+- Merged into `/api/phish/summer-tour` server-side (`show.venueStats`); rendered by `phish-tour.mjs renderVenueHistory`.
+- **Fixed pre-existing slug bug**: `phishin_venue_slug` mismatched phish.in for 4 renamed venues (Deer Creek, Dick's, Walnut Creek, Lakeview) — the live venue-history + venue-music-track fetches had been silently returning 0 shows / no tracks for them. New `server/phishin-slugs.mjs` translates our stable DB slug → phish.in slug only at the API boundary (no DB re-key / prod migration needed).
 
 ### 2026-06-24 — stream rotation debugging
 - libx264 CBR encoder (replaced h264_v4l2m2m, eliminates YouTube quality switching)
