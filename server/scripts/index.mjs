@@ -97,12 +97,16 @@ const init = () => {
 	const query = parsedParameters.latLonQuery ?? localStorage.getItem('latLonQuery');
 	const latLon = parsedParameters.latLon ?? localStorage.getItem('latLon');
 	const fromGPS = localStorage.getItem('latLonFromGPS') && !loadFromParsed;
-	if (query && latLon && !fromGPS) {
+	if (parsedParameters.mode === 'stream' && !loadFromParsed) {
+		// Unattended YouTube stream: auto-track the tour instead of trusting
+		// stale localStorage (which stayed pinned to a past show's city). An
+		// explicit ?latLon= in the URL still wins as a manual override.
+		loadStreamTourLocation();
+	} else if (query && latLon && !fromGPS) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 		txtAddress.value = query;
 		loadData(JSON.parse(latLon));
-	}
-	if (fromGPS) {
+	} else if (fromGPS) {
 		btnGetGpsClick();
 	}
 
@@ -234,6 +238,34 @@ const exitFullScreenVisibilityChanges = () => {
 const btnNavigateMenuClick = () => {
 	postMessage('navButton', 'menu');
 	return false;
+};
+
+// Stream mode: pick the location the tour is currently at and load its
+// weather. "Current" = the next show today-or-later; once the tour is over we
+// fall back to the most recent show. Overrides stale localStorage so the
+// unattended stream always follows the tour without a manual reset.
+const loadStreamTourLocation = async () => {
+	try {
+		const data = await json('/api/phish/summer-tour');
+		const shows = (data?.shows ?? []).filter((s) => s.lat && s.lon);
+		if (!shows.length) return;
+
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const toDate = (s) => new Date(`${s.date}T12:00:00`);
+		const sorted = shows.slice().sort((a, b) => toDate(a) - toDate(b));
+		const show = sorted.find((s) => toDate(s) >= today) ?? sorted[sorted.length - 1];
+
+		const streamLatLon = { lat: show.lat, lon: show.lon };
+		const streamQuery = `${show.city}, ${show.state}`;
+		document.querySelector(TXT_ADDRESS_SELECTOR).value = streamQuery;
+		localStorage.setItem('latLon', JSON.stringify(streamLatLon));
+		localStorage.setItem('latLonQuery', streamQuery);
+		localStorage.removeItem('latLonFromGPS');
+		loadData(streamLatLon);
+	} catch (e) {
+		console.error('Stream tour location failed:', e);
+	}
 };
 
 const loadData = (_latLon, haveDataCallback) => {
