@@ -1,0 +1,44 @@
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
+
+// ── Stream "Technical Difficulties" card ────────────────────────────────────
+// Shown by index.mjs on the unattended stream when a location can't be
+// determined (tour API down / empty). Full-screen, above every weather display.
+
+@keyframes td-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+#stream-tech-difficulties {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 100001;
+	background: #000822 url('../images/backgrounds/3.png') center/cover no-repeat;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	text-align: center;
+
+	&.active {
+		display: flex;
+		animation: td-in 0.4s ease;
+	}
+
+	.td-title {
+		font-family: 'Star4000 Large';
+		font-size: 60pt;
+		line-height: 1.05;
+		color: c.$title-color;
+		@include u.text-shadow();
+	}
+
+	.td-sub {
+		font-family: 'Star4000';
+		font-size: 22pt;
+		color: white;
+		margin-top: 26px;
+		@include u.text-shadow();
+	}
+}

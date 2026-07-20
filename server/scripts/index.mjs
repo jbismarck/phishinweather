@@ -240,15 +240,39 @@ const btnNavigateMenuClick = () => {
 	return false;
 };
 
+// Full-screen "please stand by" card for the unattended stream. Shown when we
+// can't determine a location (tour API down / empty) so the broadcast never
+// silently sits on a blank loading screen. Sits above every weather display.
+const TECH_DIFFICULTIES_ID = 'stream-tech-difficulties';
+const STREAM_RETRY_MS = 60000;
+
+const showTechnicalDifficulties = () => {
+	let el = document.getElementById(TECH_DIFFICULTIES_ID);
+	if (!el) {
+		el = document.createElement('div');
+		el.id = TECH_DIFFICULTIES_ID;
+		el.innerHTML = '<div class="td-title">TECHNICAL<br>DIFFICULTIES</div>'
+			+ '<div class="td-sub">&#9654;&#9654; PLEASE STAND BY &#9664;&#9664;</div>';
+		document.body.append(el);
+	}
+	el.classList.add('active');
+};
+
+const hideTechnicalDifficulties = () => {
+	document.getElementById(TECH_DIFFICULTIES_ID)?.classList.remove('active');
+};
+
 // Stream mode: pick the location the tour is currently at and load its
 // weather. "Current" = the next show today-or-later; once the tour is over we
 // fall back to the most recent show. Overrides stale localStorage so the
-// unattended stream always follows the tour without a manual reset.
+// unattended stream always follows the tour without a manual reset. If the
+// tour API fails or returns nothing usable, show the technical-difficulties
+// card and keep retrying so the stream self-heals when the API recovers.
 const loadStreamTourLocation = async () => {
 	try {
 		const data = await json('/api/phish/summer-tour');
 		const shows = (data?.shows ?? []).filter((s) => s.lat && s.lon);
-		if (!shows.length) return;
+		if (!shows.length) throw new Error('tour data has no shows with coordinates');
 
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
@@ -262,9 +286,12 @@ const loadStreamTourLocation = async () => {
 		localStorage.setItem('latLon', JSON.stringify(streamLatLon));
 		localStorage.setItem('latLonQuery', streamQuery);
 		localStorage.removeItem('latLonFromGPS');
+		hideTechnicalDifficulties();
 		loadData(streamLatLon);
 	} catch (e) {
-		console.error('Stream tour location failed:', e);
+		console.error('Stream tour location failed, showing technical difficulties:', e);
+		showTechnicalDifficulties();
+		setTimeout(loadStreamTourLocation, STREAM_RETRY_MS);
 	}
 };
 
