@@ -126,6 +126,10 @@ const copyCss = () => src(cssSources)
 
 const htmlSources = [
 	'views/*.ejs',
+	// widget.ejs is rendered at runtime with per-request data (date + live
+	// weather) via res.render, so it must not be statically pre-rendered here
+	// (no `data` in this build-time context → ReferenceError).
+	'!views/widget.ejs',
 ];
 const compressHtml = async () => {
 	const packageJson = await readFile('package.json');
