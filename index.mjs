@@ -105,6 +105,28 @@ const hasQsVars = Object.entries(qsVars).length > 0;
 const defaultSearchParams = (new URLSearchParams(qsVars)).toString();
 
 const index = (req, res) => {
+	// Date-based deep link: /?d=YYYY-MM-DD → redirect to that show's venue weather.
+	// Lets external apps (e.g. iTour) link straight to a show's forecast by date,
+	// mirroring phish.net's ?d= setlist URLs. Unknown/off dates fall through to the
+	// normal app (geo default) — NWS/Open-Meteo forecasts are only meaningful for
+	// shows inside the forecast window, which is exactly what the tour data holds.
+	if (typeof req.query.d === 'string') {
+		const date = req.query.d.trim();
+		let show = null;
+		if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+			try { show = getShowByDate(date); } catch { show = null; }
+		}
+		// Preserve any other params (e.g. mode=stream, kiosk) alongside the location.
+		const params = new URLSearchParams(req.query);
+		params.delete('d');
+		if (show?.lat && show?.lon) {
+			params.set('latLon', JSON.stringify({ lat: show.lat, lon: show.lon }));
+			params.set('latLonQuery', `${show.city}, ${show.state}`);
+		}
+		const qs = params.toString();
+		res.redirect(307, qs ? `/?${qs}` : '/');
+		return;
+	}
 	// test for no query string in request and if environment query string values were provided
 	if (hasQsVars && Object.keys(req.query).length === 0) {
 		// redirect the user to the query-string appended url
