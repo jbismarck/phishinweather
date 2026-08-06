@@ -20,6 +20,7 @@ import {
 	updateShow, updateVenuePolicy,
 } from './server/db.mjs';
 import { phishinSlug } from './server/phishin-slugs.mjs';
+import { widgetView } from './server/widget.mjs';
 
 // ── TASK 2: production guard ─────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production' && process.env.DIST !== '1') {
@@ -37,8 +38,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // ── TASK 5: security headers ─────────────────────────────────────────────────
+// Origins allowed to embed the /widget mini weather sticker in an iframe.
+// Space-separated list set in Railway (e.g. "https://itour.example.com").
+// Defaults to 'self' so only phishinweather.com can frame it until an external
+// embedder's origin is added. Every other route stays locked to frame-ancestors 'none'.
+const WIDGET_FRAME_ORIGINS = process.env.WIDGET_FRAME_ORIGINS?.trim() || "'self'";
+
 app.use((req, res, next) => {
-	res.set('X-Frame-Options', 'DENY');
+	// Only /widget is embeddable. X-Frame-Options can't express an allow-list, so
+	// we omit it there and rely on CSP frame-ancestors; everything else gets DENY.
+	const isWidget = req.path === '/widget';
+	if (!isWidget) res.set('X-Frame-Options', 'DENY');
 	// script-src includes 'unsafe-inline' because the OVERRIDES global is inlined
 	// in views/index.ejs at render time and cannot be externalized without a nonce refactor.
 	res.set(
@@ -52,7 +62,7 @@ app.use((req, res, next) => {
 			"media-src 'self' https://phish.in",
 			"worker-src 'self'",
 			"font-src 'self'",
-			"frame-ancestors 'none'",
+			`frame-ancestors ${isWidget ? WIDGET_FRAME_ORIGINS : "'none'"}`,
 			"frame-src 'none'",
 		].join('; '),
 	);
@@ -1060,6 +1070,7 @@ app.patch('/api/shows/:date/policy', requireAdmin, (req, res) => {
 app.get('/admin', requireAdmin, adminDashboard);
 app.get('/stream', (_req, res) => res.redirect(301, 'https://www.youtube.com/@phishinweather/live'));
 app.get('/poster', (req, res) => res.render('poster', { version }));
+app.get('/widget', widgetView);
 app.get('/maintenance', (_req, res) => res.render('maintenance'));
 app.get('/technical-difficulties', (_req, res) => res.render('technical-difficulties'));
 app.get('/sign-off', (_req, res) => res.render('sign-off'));
