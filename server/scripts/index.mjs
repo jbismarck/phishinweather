@@ -56,6 +56,7 @@ const init = () => {
 		document.querySelector('#divLocationSet').style.display = 'none';
 		hideAllCanvases();
 		document.querySelector('#loading').style.display = 'flex';
+		document.querySelector('#divTwc').classList.add('pre-location');
 		document.querySelector(TXT_ADDRESS_SELECTOR).focus();
 		localStorage.removeItem('latLonFromGPS');
 		document.querySelector(BNT_GET_GPS_SELECTOR).classList.remove('active');

@@ -134,6 +134,8 @@ const getWeather = async (latLon, haveDataCallback) => {
 	// draw the progress canvas and hide others
 	hideAllCanvases();
 	document.querySelector('#loading').style.display = 'none';
+	// Location acquired — reveal the nav bar / display chrome.
+	document.querySelector('#divTwc').classList.remove('pre-location');
 	const locationSet = document.querySelector('#divLocationSet');
 	if (locationSet) {
 		const { city, state } = weatherParameters;
@@ -393,6 +395,7 @@ const latLonReceived = (data, haveDataCallback) => {
 	getWeather(data, haveDataCallback).catch((err) => {
 		console.error('Failed to load weather data:', err);
 		document.querySelector('#loading').style.display = 'flex';
+		document.querySelector('#divTwc').classList.add('pre-location');
 	});
 };
 

@@ -178,6 +178,13 @@ body {
 	&.wide {
 		max-width: 854px;
 	}
+
+	/* Before a location is chosen, show only the prompt — hide the nav bar so
+	   the first screen isn't cluttered with playback controls. Toggled via the
+	   `pre-location` class (added when #loading is shown, removed on load). */
+	&.pre-location #divTwcBottom {
+		display: none;
+	}
 }
 
 .kiosk #divTwc {
@@ -374,6 +381,16 @@ body {
 	align-items: center;
 	text-align: center;
 	justify-content: center;
+
+	/* Overlay the display so the always-enabled cards (Ko-fi/socials) that
+	   auto-play before a location is chosen stay hidden behind the prompt. The
+	   app sets display:none here once a location loads (navigation.mjs). */
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 20;
+	background-image: url(../images/backgrounds/1.png);
+	background-size: cover;
 
 	.title {
 		font-family: Star4000 Large;
