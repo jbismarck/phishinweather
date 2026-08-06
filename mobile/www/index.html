@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Phishin Weather</title>
+  <style>
+    html, body { margin: 0; height: 100%; }
+    body {
+      background: linear-gradient(#102080, #001040);
+      color: #fff;
+      font-family: -apple-system, system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      -webkit-user-select: none;
+    }
+    img { width: 120px; height: auto; image-rendering: pixelated; margin-bottom: 20px; }
+    h1 { font-size: 18px; letter-spacing: 1px; margin: 0 0 8px; color: #ffff00; }
+    p { font-size: 14px; opacity: 0.8; margin: 4px 0; max-width: 280px; line-height: 1.4; }
+    button {
+      margin-top: 22px;
+      font: inherit;
+      font-size: 15px;
+      color: #001040;
+      background: #ffff00;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 22px;
+      font-weight: 600;
+    }
+    .spinner {
+      margin-top: 18px;
+      width: 26px; height: 26px;
+      border: 3px solid rgba(255,255,255,0.25);
+      border-top-color: #ffff00;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <img src="logo192.png" alt="Phishin Weather" />
+  <h1>PHISHIN' WEATHER</h1>
+
+  <div id="loading">
+    <p>Loading your tour weather channel…</p>
+    <div class="spinner"></div>
+  </div>
+
+  <div id="offline" class="hidden">
+    <p>Can't reach the weather channel right now.</p>
+    <p>Check your connection and try again.</p>
+    <button id="retry">Retry</button>
+  </div>
+
+  <script>
+    // This bundled page is the fallback the native shell shows before the live
+    // app at phishinweather.com loads, or when the device is offline. The native
+    // layer (Capacitor Network plugin) redirects to the live server once online.
+    const online = () => (navigator.onLine !== false);
+    const render = () => {
+      document.getElementById('loading').classList.toggle('hidden', !online());
+      document.getElementById('offline').classList.toggle('hidden', online());
+    };
+    document.getElementById('retry').addEventListener('click', () => location.reload());
+    window.addEventListener('online', render);
+    window.addEventListener('offline', render);
+    render();
+  </script>
+</body>
+</html>

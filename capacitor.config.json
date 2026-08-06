@@ -1,0 +1,14 @@
+{
+  "appId": "com.phishinweather.app",
+  "appName": "Phishin Weather",
+  "webDir": "mobile/www",
+  "backgroundColor": "#001040",
+  "server": {
+    "url": "https://phishinweather.com",
+    "cleartext": false
+  },
+  "ios": {
+    "backgroundColor": "#001040",
+    "contentInset": "always"
+  }
+}
