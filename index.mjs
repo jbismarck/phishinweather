@@ -1243,7 +1243,18 @@ if (process.env?.DIST === '1') {
 	app.use('/scripts', express.static('./server/scripts'));
 	app.use('/styles', express.static('./server/styles'));
 	app.use('/geoip', geoip);
-	app.use('/', express.static('./dist', { maxAge: '7d' }));
+	app.use('/', express.static('./dist', {
+		maxAge: '7d',
+		setHeaders: (res, filePath) => {
+			// The entry HTML must revalidate every load, otherwise a cached copy
+			// keeps referencing the previous deploy's asset SHAs and clients
+			// (incl. the iOS WebView) never pick up a deploy until the 7d TTL
+			// expires. The bundles it points to stay long-cached (SHA-busted).
+			if (filePath.endsWith('.html')) {
+				res.setHeader('Cache-Control', 'no-cache');
+			}
+		},
+	}));
 } else {
 	// debugging
 	app.get('/index.html', index);
