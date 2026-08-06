@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishinweather — <%= data.city ? data.city + ', ' + data.state : 'Venue Weather' %></title>
+  <style>
+    @font-face { font-family: "Star4000"; src: url("/fonts/Star4000.woff") format("woff"); font-display: swap; }
+    @font-face { font-family: "Star4000 Extended"; src: url("/fonts/Star4000 Extended.woff") format("woff"); font-display: swap; }
+    @font-face { font-family: "Star4000 Small"; src: url("/fonts/Star4000 Small.woff") format("woff"); font-display: swap; }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+    body {
+      font-family: "Star4000", monospace;
+      -webkit-font-smoothing: none;
+      image-rendering: pixelated;
+      /* Gradient + scanlines fill the whole iframe, whatever its size */
+      background: linear-gradient(#102080, #001040);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    body::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0,
+        rgba(0, 0, 0, 0) 2px,
+        rgba(0, 0, 0, 0.18) 3px
+      );
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* The card is content-sized and centered — never stretches or spreads */
+    .wx {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 12px;
+    }
+
+    .wx-head {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+      padding-bottom: 7px;
+    }
+    .wx-logo { height: 30px; width: auto; display: block; }
+    .wx-loc { line-height: 1.15; min-width: 0; }
+    .wx-city {
+      font-family: "Star4000 Extended", "Star4000", monospace;
+      font-size: 15px;
+      color: #ffff00;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .wx-venue {
+      font-family: "Star4000 Small", "Star4000", monospace;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.8);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .wx-body { display: flex; align-items: center; gap: 12px; }
+
+    .wx-now { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+    .wx-now img { height: 46px; width: 46px; }
+    .wx-now-txt { line-height: 1; }
+    .wx-temp { font-size: 30px; }
+    .wx-temp sup { font-size: 15px; vertical-align: super; }
+    .wx-cond { font-family: "Star4000 Small", "Star4000", monospace; font-size: 10px; margin-top: 3px; max-width: 84px; }
+
+    .wx-days { display: flex; gap: 3px; margin-left: auto; }
+    .wx-day {
+      background: #26235a;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 2px 4px 3px;
+      text-align: center;
+      line-height: 1.1;
+    }
+    .wx-day-name { font-size: 10px; color: #ffff00; }
+    .wx-day img { height: 22px; width: 22px; margin: 1px 0; display: block; }
+    .wx-day-hi { font-size: 10px; }
+    .wx-day-lo { font-size: 10px; color: #7fdbff; }
+
+    .wx-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: "Star4000 Small", "Star4000", monospace;
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.55);
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 6px;
+    }
+    .wx-foot a { color: rgba(255, 255, 255, 0.7); text-decoration: none; }
+    .wx-foot .wx-date { color: #ffff00; }
+
+    .wx-error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.75);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wx">
+    <div class="wx-head">
+      <img class="wx-logo" src="/images/logos/logo-corner.png" alt="Phishinweather" />
+      <div class="wx-loc">
+        <% if (data.city) { %>
+          <div class="wx-city"><%= data.city.toUpperCase() %>, <%= data.state %></div>
+          <div class="wx-venue"><%= data.venue %></div>
+        <% } else { %>
+          <div class="wx-city">PHISHIN' WEATHER</div>
+          <div class="wx-venue">TOUR VENUE FORECAST</div>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (data.current) { %>
+      <div class="wx-body">
+        <div class="wx-now">
+          <img src="/<%= data.current.icon %>" alt="<%= data.current.desc %>" />
+          <div class="wx-now-txt">
+            <div class="wx-temp"><%= data.current.temp %><sup>&deg;</sup></div>
+            <div class="wx-cond"><%= data.current.desc %></div>
+          </div>
+        </div>
+        <div class="wx-days">
+          <% data.days.forEach((d) => { %>
+            <div class="wx-day">
+              <div class="wx-day-name"><%= d.name %></div>
+              <img src="/<%= d.icon %>" alt="" />
+              <div class="wx-day-hi"><%= d.hi %>&deg;</div>
+              <div class="wx-day-lo"><%= d.lo %>&deg;</div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="wx-error"><%= data.error %></div>
+    <% } %>
+
+    <div class="wx-foot">
+      <a href="https://phishinweather.com<%= data.iso ? '/?d=' + data.iso : '' %>" target="_blank" rel="noopener">phishinweather.com</a>
+      <% if (data.date) { %><span class="wx-date"><%= data.date %></span><% } %>
+    </div>
+  </div>
+</body>
+</html>
