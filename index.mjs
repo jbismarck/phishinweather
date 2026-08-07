@@ -21,6 +21,7 @@ import {
 } from './server/db.mjs';
 import { phishinSlug } from './server/phishin-slugs.mjs';
 import { widgetView } from './server/widget.mjs';
+import { purgeCloudflare } from './scripts/purge-cloudflare.mjs';
 
 // ── TASK 2: production guard ─────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production' && process.env.DIST !== '1') {
@@ -1273,6 +1274,15 @@ if (process.env?.DIST === '1') {
 
 const server = app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
+
+	// On a production deploy (Railway restarts the server → one purge per deploy),
+	// purge the Cloudflare edge so updated assets go live immediately instead of
+	// waiting out the 7-day cache. Delayed slightly so Railway has switched traffic
+	// to this new container before the edge re-fills from origin. No-ops without
+	// the CLOUDFLARE_PURGE_TOKEN/ZONE_ID env vars.
+	if (process.env.DIST === '1') {
+		setTimeout(() => { purgeCloudflare(); }, 15_000);
+	}
 
 	try {
 		const shows = getAllShows();

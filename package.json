@@ -14,7 +14,8 @@
 		"build": "npm run build:css && gulp buildDist",
 		"lint": "eslint ./server/scripts/**/*.mjs",
 		"lint:fix": "eslint --fix ./server/scripts/**/*.mjs",
-		"smoke": "bash scripts/smoke.sh"
+		"smoke": "bash scripts/smoke.sh",
+		"purge": "node scripts/purge-cloudflare.mjs"
 	},
 	"repository": {
 		"type": "git",
