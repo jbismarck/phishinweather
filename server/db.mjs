@@ -223,9 +223,35 @@ const updateVenuePolicy = (slug, { water_bottles, poster_tubes, water_station } 
 	flushToJson();
 };
 
+// Insert new shows (and their venues) from the phish.net tour-sync. Skips any
+// date/venue that already exists — never overwrites curated data (policy, food,
+// shakedown, poster). Those are left null for the admin to fill later. Returns
+// the number of shows actually added, and flushes to JSON so git is the source
+// of truth.
+const addShows = (incoming) => {
+	const upsertVenue = db.prepare(`
+		INSERT INTO venues (slug, name, city, state, lat, lon, phishnet_venue_id)
+		VALUES (?,?,?,?,?,?,?)
+		ON CONFLICT(slug) DO NOTHING
+	`);
+	const insertShow = db.prepare(`
+		INSERT INTO shows (date, venue_slug, showtime_local, poster_url) VALUES (?,?,'20:00',NULL)
+		ON CONFLICT(date) DO NOTHING
+	`);
+	let added = 0;
+	db.transaction(() => {
+		for (const s of incoming) {
+			upsertVenue.run(s.slug, s.venue, s.city, s.state, s.lat ?? null, s.lon ?? null, s.phishnet_venue_id ?? null);
+			added += insertShow.run(s.date, s.slug).changes;
+		}
+	})();
+	if (added) flushToJson();
+	return added;
+};
+
 export {
 	initDb, getDb,
 	getShowByDate, getAllShows,
-	updateShow, updateVenuePolicy,
+	updateShow, updateVenuePolicy, addShows,
 	flushToJson,
 };
