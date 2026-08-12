@@ -255,7 +255,13 @@
 
 	// ── Venue History Card ───────────────────────────────────────────────────
 	.card-venue {
-		padding-top: 12px;
+		// Social-card page feel: fill the display and center the block
+		// vertically instead of the old cramped top-left layout.
+		&.active { display: flex; }
+		flex-direction: column;
+		justify-content: center;
+		height: 100%;
+		padding: 0 20px 10px;
 
 		// header bar already reads "VENUE HISTORY" — in-card headline is redundant
 		.vh-headline { display: none; }
@@ -263,10 +269,10 @@
 		.vh-recent { display: none; }
 
 		.vh-venue {
-			font-size: 16pt;
+			font-size: 18pt;
 			color: white;
 			line-height: 1.05;
-			margin-bottom: 2px;
+			margin-bottom: 4px;
 			word-wrap: break-word;
 			overflow-wrap: break-word;
 		}
@@ -276,18 +282,18 @@
 			font-size: 12pt;
 			color: c.$column-header-text;
 			line-height: 1.2;
-			margin-bottom: 4px;
+			margin-bottom: 12px;
 		}
 
 		.vh-section {
-			margin-top: 6px;
+			margin-top: 16px;
 
 			.vh-section-title {
 				font-family: 'Star4000 Small';
-				font-size: 9pt;
+				font-size: 10pt;
 				color: c.$column-header-text;
 				letter-spacing: 1px;
-				margin-bottom: 1px;
+				margin-bottom: 4px;
 			}
 		}
 
@@ -296,7 +302,11 @@
 			align-items: baseline;
 			font-size: 13pt;
 			color: white;
-			line-height: 1.28;
+			line-height: 1.4;
+			// Halve the name→number gap: cap the row width so the dotted
+			// leader can't stretch the count out to the far edge.
+			max-width: 60%;
+			margin-bottom: 3px;
 
 			.mp-name {
 				white-space: nowrap;
