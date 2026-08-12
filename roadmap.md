@@ -24,11 +24,11 @@
 - **Social card backgrounds** — currently `1.png`; need venue-specific PNGs in GIMP
 - **Venue-specific backgrounds** — MSG and Dick's first; user working in GIMP/Aseprite
 - **Venue page layout redesign** — initial restyle shipped 2026-08-11 (halved gap, `1.png` social-card background, vertical centering, 4ch shift); any further mockup-based rework still open
-- **Merge `feature/phishnet-tour-sync`** — auto-populates announced *shows* into `summer-tour.json`/DB (the tour card), complementing today's fall countdown. Needs `PHISHNET_API_KEY` + one `sync-tour` run; would light up the fall shows in the tour rotation.
-- **Wire the countdown to synced tour data** — the Countdown card reads the manual `phish-events.json`, so each tour announcement needs a hand-edit. Consider deriving countdown dates from the synced show data so it self-updates.
+- **Wire the countdown to synced tour data** — the Countdown card reads the manual `phish-events.json`, so each tour announcement needs a hand-edit. Consider deriving countdown dates from the synced show data (now that each show has a `leg` tag) so it self-updates.
+- **Display the `leg` tag on the tour card** — e.g. a "FALL TOUR" / "SUMMER TOUR" header, or grouping in a full-schedule view. The data's there (added 2026-08-11); nothing surfaces it yet.
 - **New weather icon animations** — user exploring Aseprite; reference icons in `server/images/icons/current-conditions/`
 - **Policy panel centering** — improved (flexbox `space-around`) but not pixel-perfect; needs final devtools tuning
-- **Policy sprites — tubes** — `policy-tubes-clear.png` in sprites folder, not yet wired in JS; waiting on philm (phish.in) for authoritative venue tube policy data before updating `summer-tour.json`
+- **Policy sprites — tubes + venue policy data** — `policy-tubes-clear.png` in sprites folder, not yet wired in JS. **philm (phish.in) dependency dropped 2026-08-11** (unresponsive) — source policy ourselves from venue sites/phish.net/Reddit + crowdsource via the admin panel. Researched 2026-08-11 for Dick's + all 4 fall venues: water-bottle rules, water stations, and re-entry (all **no re-entry**) were found; **poster-tube policy is unstated at every venue** (none address tubes explicitly; Allianz/Dick's lean no), so treat "tubes" as *call-ahead / uncertain* rather than a hard sprite. See per-venue data in session notes / [[project-phishinweather]].
 - **Policy sprites — remaining** — no-water-station, tubes-none, tubes-soft, tubes-all sprites still needed
 - **Contact method for shop** — `hello@phishinweather.com` doesn't exist; currently "DM on Instagram or Reddit"
 - **Discord server** — create server, get permanent invite link, set `DISCORD_INVITE_URL` Railway var; update feature-vote card to mention Discord
@@ -57,6 +57,10 @@
 - **Fall Tour 2026 countdown** (commit 4f76f44) — set real announced dates in `phish-events.json` (**Oct 2–11**: Boardwalk Hall AC, Allianz Richmond, VyStar Jacksonville, Orion Huntsville). Was stuck on "DATES NOT YET ANNOUNCED". Note: the countdown reads `phish-events.json` (manual), separate from `tour-sync.mjs` (show data).
 - **Venue song stats restyle** (`_phish-tour.scss`, commits 698cacc→fba03f3) — halved the name→number gap (`.mp-row` max-width 60%), switched to the social-card background `1.png`, roomier vertically-centered layout, shifted the assembly `4ch` right.
 - **Logo dropdown menu** (commit 65af17e, merged e29e30a) — the corner logo is now a button that opens a centered dropdown holding Selected Displays / Settings / Sharing / Forecast Info; disabled in stream mode (`body.stream-mode .logo { pointer-events: none }`).
+- **Merged `feature/phishnet-tour-sync` + added the 8 fall shows** (18142ef, 491281e) — ran the tool to pull announced shows from phish.net; applied only the new fall shows surgically (the tool's full DB flush would have reverted 12 curated shakedown tips). Fall run now in the tour card.
+- **Fixed persistent-DB seed** (f2c66fc) — `seedFromJson` was gated on `count===0`, so shows committed to the JSON never reached the persistent prod DB. Now runs idempotently every boot (adds only new shows, never overwrites curated data).
+- **Fixed 7-day cache on `/data/*.json`** (40850bb) — dynamic tour data was long-cached with no SHA buster, so updates were invisible for up to a week (the fall countdown appeared to "roll back"). Now `no-cache` + ETag revalidation.
+- **Renamed `summer-tour` → `tour` + per-show `leg`** (842c191) — `tour.json`, `/api/phish/tour` (with `/summer-tour` legacy alias); each show tagged `summer-2026`/`fall-2026` (single file, aligned with `phish-events.json` types); `leg` column + ALTER migration on the persistent DB.
 
 ### 2026-07-20 — venue song stats + slug bug fix
 - Venue History card (tour card 4) enriched with song-level stats: **most-played here (top 5)** with dot-leader counts, **rarest bustout** (biggest previous-performance gap ever played here), **never-played-here** (core-repertoire songs missing at this venue). Show/song counts + last-show folded into one subtitle line.
