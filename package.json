@@ -1,7 +1,7 @@
 {
 	"name": "phishinweather",
 	"version": "1.0.0",
-	"description": "Phishin Weather — retro-style weather forecasts for Phish fans!",
+	"description": "Phishin Weather \u2014 retro-style weather forecasts for Phish fans!",
 	"main": "index.mjs",
 	"type": "module",
 	"engines": {
@@ -15,7 +15,8 @@
 		"lint": "eslint ./server/scripts/**/*.mjs",
 		"lint:fix": "eslint --fix ./server/scripts/**/*.mjs",
 		"smoke": "bash scripts/smoke.sh",
-		"purge": "node scripts/purge-cloudflare.mjs"
+		"purge": "node scripts/purge-cloudflare.mjs",
+		"sync-tour": "node server/tour-sync.mjs"
 	},
 	"repository": {
 		"type": "git",
