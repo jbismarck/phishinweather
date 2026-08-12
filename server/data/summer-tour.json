@@ -882,6 +882,86 @@
         "parking": "Lot F closest to the action",
         "tip": "Labor Day Night 3! Tour closer at Dick's — bring warm layers, Colorado nights drop fast after dark"
       }
+    },
+    {
+      "date": "2026-10-02",
+      "venue": "Jim Whelan Boardwalk Hall",
+      "city": "Atlantic City",
+      "state": "NJ",
+      "lat": 39.3541,
+      "lon": -74.4379,
+      "phishin_venue_slug": "jim-whelan-boardwalk-hall",
+      "phishnet_venue_id": 1692
+    },
+    {
+      "date": "2026-10-03",
+      "venue": "Jim Whelan Boardwalk Hall",
+      "city": "Atlantic City",
+      "state": "NJ",
+      "lat": 39.3541,
+      "lon": -74.4379,
+      "phishin_venue_slug": "jim-whelan-boardwalk-hall",
+      "phishnet_venue_id": 1692
+    },
+    {
+      "date": "2026-10-04",
+      "venue": "Jim Whelan Boardwalk Hall",
+      "city": "Atlantic City",
+      "state": "NJ",
+      "lat": 39.3541,
+      "lon": -74.4379,
+      "phishin_venue_slug": "jim-whelan-boardwalk-hall",
+      "phishnet_venue_id": 1692
+    },
+    {
+      "date": "2026-10-06",
+      "venue": "Allianz Amphitheater at Riverfront",
+      "city": "Richmond",
+      "state": "VA",
+      "lat": 37.5408,
+      "lon": -77.4339,
+      "phishin_venue_slug": "allianz-amphitheater-at-riverfront",
+      "phishnet_venue_id": 1689
+    },
+    {
+      "date": "2026-10-07",
+      "venue": "Allianz Amphitheater at Riverfront",
+      "city": "Richmond",
+      "state": "VA",
+      "lat": 37.5408,
+      "lon": -77.4339,
+      "phishin_venue_slug": "allianz-amphitheater-at-riverfront",
+      "phishnet_venue_id": 1689
+    },
+    {
+      "date": "2026-10-09",
+      "venue": "VyStar Veterans Memorial Arena",
+      "city": "Jacksonville",
+      "state": "FL",
+      "lat": 30.3258,
+      "lon": -81.6442,
+      "phishin_venue_slug": "vystar-veterans-memorial-arena",
+      "phishnet_venue_id": 1690
+    },
+    {
+      "date": "2026-10-10",
+      "venue": "Orion Amphitheater",
+      "city": "Huntsville",
+      "state": "AL",
+      "lat": 34.7295,
+      "lon": -86.5853,
+      "phishin_venue_slug": "orion-amphitheater",
+      "phishnet_venue_id": 1573
+    },
+    {
+      "date": "2026-10-11",
+      "venue": "Orion Amphitheater",
+      "city": "Huntsville",
+      "state": "AL",
+      "lat": 34.7295,
+      "lon": -86.5853,
+      "phishin_venue_slug": "orion-amphitheater",
+      "phishnet_venue_id": 1573
     }
   ]
 }
