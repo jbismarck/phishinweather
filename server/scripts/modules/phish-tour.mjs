@@ -80,7 +80,7 @@ class PhishTour extends WeatherDisplay {
 
 		let data;
 		try {
-			data = await json(`/api/phish/summer-tour${this.mockWeather ? '?mock=1' : ''}`);
+			data = await json(`/api/phish/tour${this.mockWeather ? '?mock=1' : ''}`);
 		} catch (e) {
 			console.error('PhishTour fetch failed:', e);
 			this.setStatus(STATUS.failed);
@@ -358,7 +358,7 @@ document.addEventListener('keydown', async (e) => {
 		phishTour.mockWeather = !phishTour.mockWeather;
 		console.log(`[PhishTour] Mock weather: ${phishTour.mockWeather ? 'ON ✓' : 'OFF'}`);
 		try {
-			const data = await json(`/api/phish/summer-tour${phishTour.mockWeather ? '?mock=1' : ''}`);
+			const data = await json(`/api/phish/tour${phishTour.mockWeather ? '?mock=1' : ''}`);
 			if (data?.shows?.length) {
 				phishTour.data = data;
 				// stay on current show's forecast card (cardIndex=1) to see the result immediately

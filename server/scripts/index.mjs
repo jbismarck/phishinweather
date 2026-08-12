@@ -288,7 +288,7 @@ const hideTechnicalDifficulties = () => {
 // card and keep retrying so the stream self-heals when the API recovers.
 const loadStreamTourLocation = async () => {
 	try {
-		const data = await json('/api/phish/summer-tour');
+		const data = await json('/api/phish/tour');
 		const shows = (data?.shows ?? []).filter((s) => s.lat && s.lon);
 		if (!shows.length) throw new Error('tour data has no shows with coordinates');
 

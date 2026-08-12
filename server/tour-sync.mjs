@@ -8,12 +8,12 @@
 // left blank for the admin to curate later (never overwritten).
 //
 // Meant to run LOCALLY as a CLI, because the schedule's source of truth is the
-// git-committed summer-tour.json:
+// git-committed tour.json:
 //   PHISHNET_API_KEY=xxx node server/tour-sync.mjs --dry-run   # preview only
 //   PHISHNET_API_KEY=xxx node server/tour-sync.mjs             # write + flush JSON
-// then review the summer-tour.json diff, commit, and push (deploy re-seeds).
+// then review the tour.json diff, commit, and push (deploy re-seeds).
 
-import { initDb, getShowByDate, addShows } from './db.mjs';
+import { initDb, getShowByDate, addShows, legForDate } from './db.mjs';
 
 const PHISHNET = 'https://api.phish.net/v5';
 const ARCGIS = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates';
@@ -95,6 +95,7 @@ export const syncTour = async ({ dryRun = false } = {}) => {
 			lat,
 			lon,
 			phishnet_venue_id: Number(s.venueid) || null,
+			leg: legForDate(s.showdate),
 		});
 		await sleep(150); // be gentle on the geocoder
 	}
@@ -119,7 +120,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 			r.shows.forEach((line) => console.log('  ' + line));
 			console.log(dryRun
 				? `\nDRY RUN — nothing written. Re-run without --dry-run to add ${r.new} show(s).`
-				: `\n✓ Added ${r.added} show(s) and flushed to summer-tour.json. Review the diff, commit, and push.`);
+				: `\n✓ Added ${r.added} show(s) and flushed to tour.json. Review the diff, commit, and push.`);
 			process.exit(0);
 		})
 		.catch((e) => { console.error('Tour sync failed:', e.message); process.exit(1); });

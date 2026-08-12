@@ -1,5 +1,4 @@
 {
-  "tour": "Summer 2026",
   "shows": [
     {
       "date": "2026-07-07",
@@ -41,7 +40,8 @@
         "location": "Outside Kohl Center on Dayton St",
         "parking": "Ramps on Frances St and Randall Ave",
         "tip": "Indoor arena on the UW campus. Madison is a great college town — explore State Street before the show"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-08",
@@ -83,7 +83,8 @@
         "location": "Outside Kohl Center on Dayton St",
         "parking": "Ramps on Frances St and Randall Ave",
         "tip": "Night 2 in Madison. Phish's first Kohl Center run — history in the making"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-10",
@@ -125,7 +126,8 @@
         "location": "Lot along Boden Road",
         "parking": "Multiple lots off SR-32 and Boden Rd",
         "tip": "Formerly Deer Creek — site of legendary 1995 Phish shows. History in the air"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-11",
@@ -167,7 +169,8 @@
         "location": "Lot along Boden Road",
         "parking": "Multiple lots off SR-32 and Boden Rd",
         "tip": "Night 2 at Deer Creek. Summer is in full swing in Indiana"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-12",
@@ -209,7 +212,8 @@
         "location": "Lot along Boden Road",
         "parking": "Multiple lots off SR-32 and Boden Rd",
         "tip": "Night 3 closes out the Deer Creek run. Expect something special on the last night"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-14",
@@ -251,7 +255,8 @@
         "location": "Outside arena on Arena Pl",
         "parking": "Arena lots off Louisville Rd",
         "tip": "Phish in the Deep South. Savannah's historic squares are stunning — arrive early and explore"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-15",
@@ -293,7 +298,8 @@
         "location": "Outside arena on Arena Pl",
         "parking": "Arena lots off Louisville Rd",
         "tip": "Night 2 in Savannah. Hot and humid — stay hydrated. The city comes alive at night"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-17",
@@ -335,7 +341,8 @@
         "location": "Lawn entrance area off Sunstone Dr",
         "parking": "Lots A–C off Rock Quarry Rd",
         "tip": "Walnut Creek is a beloved outdoor amp. Lawn is huge — great sight lines anywhere"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-18",
@@ -377,7 +384,8 @@
         "location": "Lawn area near the main entrance",
         "parking": "Lots 1 and 2 off Little Patuxent Pkwy",
         "tip": "Legendary Mid-Atlantic outdoor venue. Mix of pavilion and lawn — lawn is a Phish rite of passage"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-19",
@@ -419,7 +427,8 @@
         "location": "Lawn area near the main entrance",
         "parking": "Lots 1 and 2 off Little Patuxent Pkwy",
         "tip": "Night 2 at Merriweather. Historic DC-area venue with great energy on the lawn"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-21",
@@ -461,7 +470,8 @@
         "location": "Main entrance plaza area",
         "parking": "NYS Fairgrounds lots off State Fair Blvd",
         "tip": "Right on the NYS Fairgrounds. Great outdoor amphitheater with a dedicated Phish fanbase in CNY"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-22",
@@ -503,7 +513,8 @@
         "location": "7th Avenue and 33rd St sidewalk scene",
         "parking": "Take the subway — Penn Station is right below the Garden",
         "tip": "MSG Night 1 of 5. The Garden is Phish's home. Take the subway — Penn Station is right downstairs"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-24",
@@ -545,7 +556,8 @@
         "location": "7th Avenue and 33rd St sidewalk scene",
         "parking": "Take the subway — Penn Station is right below the Garden",
         "tip": "MSG Night 2 of 5. The city that never sleeps — after-show options are endless"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-25",
@@ -587,7 +599,8 @@
         "location": "7th Avenue and 33rd St sidewalk scene",
         "parking": "Take the subway — Penn Station is right below the Garden",
         "tip": "MSG Night 3 of 5. Mid-run energy peaks here — expect the band to stretch out"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-27",
@@ -629,7 +642,8 @@
         "location": "7th Avenue and 33rd St sidewalk scene",
         "parking": "Take the subway — Penn Station is right below the Garden",
         "tip": "MSG Night 4 of 5. Sunday at the Garden — the crowd knows something special is brewing"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-29",
@@ -671,7 +685,8 @@
         "location": "7th Avenue and 33rd St sidewalk scene",
         "parking": "Take the subway — Penn Station is right below the Garden",
         "tip": "MSG Night 5 — the finale. Madison Square Garden closers are legendary. Bring it all"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-07-31",
@@ -713,7 +728,8 @@
         "location": "Lansdowne St behind the Green Monster",
         "parking": "Take the Green Line to Kenmore — easiest option",
         "tip": "Phish at Fenway! Green Monster in view. One of the most iconic stages in rock history"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-08-01",
@@ -755,7 +771,8 @@
         "location": "Lansdowne St behind the Green Monster",
         "parking": "Take the Green Line to Kenmore — easiest option",
         "tip": "Fenway Night 2. The last night before the long break to Dick's — go out swinging"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-09-04",
@@ -797,7 +814,8 @@
         "location": "South Lot near Gate 4",
         "parking": "Lot F closest to the action",
         "tip": "Dick's Night 1 of 3. Elevation 5,280 ft. Drink water and pace yourself"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-09-05",
@@ -839,7 +857,8 @@
         "location": "South Lot near Gate 4",
         "parking": "Lot F closest to the action",
         "tip": "Dick's Night 2. Watch for Tweezerpalooza or secret language signals"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-09-06",
@@ -881,7 +900,8 @@
         "location": "South Lot near Gate 4",
         "parking": "Lot F closest to the action",
         "tip": "Labor Day Night 3! Tour closer at Dick's — bring warm layers, Colorado nights drop fast after dark"
-      }
+      },
+      "leg": "summer-2026"
     },
     {
       "date": "2026-10-02",
@@ -891,7 +911,8 @@
       "lat": 39.3541,
       "lon": -74.4379,
       "phishin_venue_slug": "jim-whelan-boardwalk-hall",
-      "phishnet_venue_id": 1692
+      "phishnet_venue_id": 1692,
+      "leg": "fall-2026"
     },
     {
       "date": "2026-10-03",
@@ -901,7 +922,8 @@
       "lat": 39.3541,
       "lon": -74.4379,
       "phishin_venue_slug": "jim-whelan-boardwalk-hall",
-      "phishnet_venue_id": 1692
+      "phishnet_venue_id": 1692,
+      "leg": "fall-2026"
     },
     {
       "date": "2026-10-04",
@@ -911,7 +933,8 @@
       "lat": 39.3541,
       "lon": -74.4379,
       "phishin_venue_slug": "jim-whelan-boardwalk-hall",
-      "phishnet_venue_id": 1692
+      "phishnet_venue_id": 1692,
+      "leg": "fall-2026"
     },
     {
       "date": "2026-10-06",
@@ -921,7 +944,8 @@
       "lat": 37.5408,
       "lon": -77.4339,
       "phishin_venue_slug": "allianz-amphitheater-at-riverfront",
-      "phishnet_venue_id": 1689
+      "phishnet_venue_id": 1689,
+      "leg": "fall-2026"
     },
     {
       "date": "2026-10-07",
@@ -931,7 +955,8 @@
       "lat": 37.5408,
       "lon": -77.4339,
       "phishin_venue_slug": "allianz-amphitheater-at-riverfront",
-      "phishnet_venue_id": 1689
+      "phishnet_venue_id": 1689,
+      "leg": "fall-2026"
     },
     {
       "date": "2026-10-09",
@@ -941,7 +966,8 @@
       "lat": 30.3258,
       "lon": -81.6442,
       "phishin_venue_slug": "vystar-veterans-memorial-arena",
-      "phishnet_venue_id": 1690
+      "phishnet_venue_id": 1690,
+      "leg": "fall-2026"
     },
     {
       "date": "2026-10-10",
@@ -951,7 +977,8 @@
       "lat": 34.7295,
       "lon": -86.5853,
       "phishin_venue_slug": "orion-amphitheater",
-      "phishnet_venue_id": 1573
+      "phishnet_venue_id": 1573,
+      "leg": "fall-2026"
     },
     {
       "date": "2026-10-11",
@@ -961,7 +988,8 @@
       "lat": 34.7295,
       "lon": -86.5853,
       "phishin_venue_slug": "orion-amphitheater",
-      "phishnet_venue_id": 1573
+      "phishnet_venue_id": 1573,
+      "leg": "fall-2026"
     }
   ]
 }

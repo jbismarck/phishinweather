@@ -11,7 +11,7 @@
 // This is intentionally a build-time generator, not a runtime fetch: venue song
 // history is effectively static (it only moves when Phish plays the venue again),
 // and aggregating MSG alone is ~90 setlist fetches — far too heavy for the live
-// /api/phish/summer-tour response. Re-run manually after a tour leg:
+// /api/phish/tour response. Re-run manually after a tour leg:
 //
 //   node datagenerators/venue-stats.mjs
 //   git add server/data/venue-stats.json && git commit && git push
@@ -24,7 +24,7 @@ import { phishinSlug } from '../server/phishin-slugs.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = join(__dirname, '..', 'server', 'data', 'venue-stats.json');
-const TOUR = join(__dirname, '..', 'server', 'data', 'summer-tour.json');
+const TOUR = join(__dirname, '..', 'server', 'data', 'tour.json');
 
 const API = 'https://phish.in/api/v2';
 const OVERDUE_POOL_SIZE = 40; // top-N most-played songs all-time = "core repertoire"

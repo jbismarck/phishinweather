@@ -169,7 +169,7 @@ Runs a continuous loop: gathers all active screen texts, joins them with `   •
 | Route | Source | Caching |
 |---|---|---|
 | `/api/phish/on-this-day` | phish.in | daily disk cache |
-| `/api/phish/summer-tour` | phish.in | weekly disk cache |
+| `/api/phish/tour` | phish.in | weekly disk cache |
 
 Rate limiting: serial fetches with 150ms delay between requests. Cache stored in `server/data/phish-cache.json` (gitignored).
 

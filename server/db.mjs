@@ -5,7 +5,21 @@ import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH  = process.env.DB_PATH  ?? join(__dirname, 'data/phishinweather.db');
-const JSON_PATH = join(__dirname, 'data/summer-tour.json');
+const JSON_PATH = join(__dirname, 'data/tour.json');
+
+// Derive a tour leg id (e.g. "fall-2026") from a show date. Aligns with the
+// event types in phish-events.json (summer/fall/yemsg/mexico/spring). Sphere
+// residencies and one-off festivals aren't date-derivable — tag those by hand.
+const legForDate = (dateStr) => {
+	const [y, m, d] = dateStr.split('-').map(Number);
+	let type;
+	if (m === 12 && d >= 27) type = 'yemsg';                 // New Year's run (Dec 27-31)
+	else if (m <= 2) type = 'mexico';                        // Riviera Maya (Jan-Feb)
+	else if (m <= 5) type = 'spring';                        // Spring tour (Mar-May)
+	else if (m < 9 || (m === 9 && d <= 15)) type = 'summer'; // Summer (Jun - mid-Sep, incl. Dick's)
+	else type = 'fall';                                      // Fall (mid-Sep - Nov)
+	return `${type}-${y}`;
+};
 
 let db;
 
@@ -50,13 +64,19 @@ const initDb = () => {
 			date           TEXT PRIMARY KEY,
 			venue_slug     TEXT NOT NULL REFERENCES venues(slug),
 			showtime_local TEXT NOT NULL DEFAULT '20:00',
-			poster_url     TEXT
+			poster_url     TEXT,
+			leg            TEXT
 		);
 	`);
 
+	// Persistent DBs created before the leg column need it added — CREATE TABLE
+	// IF NOT EXISTS won't alter an existing table.
+	const hasLeg = db.prepare('PRAGMA table_info(shows)').all().some((c) => c.name === 'leg');
+	if (!hasLeg) db.exec('ALTER TABLE shows ADD COLUMN leg TEXT');
+
 	// Idempotent seed on every boot: every insert is ON CONFLICT DO NOTHING and
 	// food is skipped when the venue already has rows, so this only ADDS shows
-	// newly committed to summer-tour.json — curated DB data (admin edits) is
+	// newly committed to tour.json — curated DB data (admin edits) is
 	// never overwritten. Previously gated on count===0, which meant new shows
 	// (e.g. a fall-tour announcement) never reached the persistent prod DB after
 	// the initial seed, so they were invisible despite being in the JSON.
@@ -66,7 +86,7 @@ const initDb = () => {
 const seedFromJson = () => {
 	let tourData;
 	try { tourData = JSON.parse(fs.readFileSync(JSON_PATH, 'utf8')); }
-	catch { console.warn('show db: could not read summer-tour.json for seeding'); return; }
+	catch { console.warn('show db: could not read tour.json for seeding'); return; }
 
 	const upsertVenue = db.prepare(`
 		INSERT INTO venues (slug, name, city, state, lat, lon, phishnet_venue_id,
@@ -80,8 +100,8 @@ const seedFromJson = () => {
 		ON CONFLICT DO NOTHING
 	`);
 	const insertShow = db.prepare(`
-		INSERT INTO shows (date, venue_slug, showtime_local, poster_url) VALUES (?,?,?,?)
-		ON CONFLICT(date) DO NOTHING
+		INSERT INTO shows (date, venue_slug, showtime_local, poster_url, leg) VALUES (?,?,?,?,?)
+		ON CONFLICT(date) DO UPDATE SET leg = excluded.leg WHERE shows.leg IS NULL
 	`);
 
 	db.transaction(() => {
@@ -103,17 +123,17 @@ const seedFromJson = () => {
 			if (existing === 0) {
 				(show.food ?? []).forEach((f, i) => insertFood.run(slug, f.name, f.type ?? null, f.note ?? null, i));
 			}
-			insertShow.run(show.date, slug, show.showtime_local ?? '20:00', show.poster_url ?? null);
+			insertShow.run(show.date, slug, show.showtime_local ?? '20:00', show.poster_url ?? null, show.leg ?? legForDate(show.date));
 		}
 	})();
 
-	console.log(`show db: seeded ${tourData.shows.length} shows from summer-tour.json`);
+	console.log(`show db: seeded ${tourData.shows.length} shows from tour.json`);
 };
 
-// Write current DB state back to summer-tour.json so git stays current.
+// Write current DB state back to tour.json so git stays current.
 const flushToJson = () => {
 	const rows = db.prepare(`
-		SELECT s.date, s.showtime_local, s.poster_url,
+		SELECT s.date, s.showtime_local, s.poster_url, s.leg,
 		       v.slug AS phishin_venue_slug, v.phishnet_venue_id,
 		       v.name AS venue, v.city, v.state, v.lat, v.lon,
 		       v.shakedown_location, v.shakedown_parking, v.shakedown_tip,
@@ -133,6 +153,7 @@ const flushToJson = () => {
 			lat: s.lat, lon: s.lon,
 			phishin_venue_slug: s.phishin_venue_slug,
 			phishnet_venue_id: s.phishnet_venue_id,
+			leg: s.leg ?? null,
 		};
 		if (s.showtime_local && s.showtime_local !== '20:00') out.showtime_local = s.showtime_local;
 		if (s.poster_url) out.poster_url = s.poster_url;
@@ -153,14 +174,13 @@ const flushToJson = () => {
 		return out;
 	});
 
-	const existing = (() => { try { return JSON.parse(fs.readFileSync(JSON_PATH, 'utf8')); } catch { return {}; } })();
-	fs.writeFileSync(JSON_PATH, JSON.stringify({ tour: existing.tour ?? 'Summer 2026', shows }, null, 2), 'utf8');
+	fs.writeFileSync(JSON_PATH, JSON.stringify({ shows }, null, 2), 'utf8');
 };
 
 // ── Query helpers ─────────────────────────────────────────────────────────────
 
 const SHOW_JOIN = `
-	SELECT s.date, s.showtime_local, s.poster_url,
+	SELECT s.date, s.showtime_local, s.poster_url, s.leg,
 	       v.slug AS phishin_venue_slug, v.phishnet_venue_id,
 	       v.name AS venue, v.city, v.state, v.lat, v.lon,
 	       v.shakedown_location, v.shakedown_parking, v.shakedown_tip,
@@ -175,6 +195,7 @@ const shapeShow = (row, food = []) => {
 		lat: row.lat, lon: row.lon,
 		phishin_venue_slug: row.phishin_venue_slug,
 		phishnet_venue_id:  row.phishnet_venue_id,
+		leg:                row.leg ?? null,
 		showtime_local:     row.showtime_local,
 		poster_url:         row.poster_url ?? null,
 	};
@@ -240,14 +261,14 @@ const addShows = (incoming) => {
 		ON CONFLICT(slug) DO NOTHING
 	`);
 	const insertShow = db.prepare(`
-		INSERT INTO shows (date, venue_slug, showtime_local, poster_url) VALUES (?,?,'20:00',NULL)
+		INSERT INTO shows (date, venue_slug, showtime_local, poster_url, leg) VALUES (?,?,'20:00',NULL,?)
 		ON CONFLICT(date) DO NOTHING
 	`);
 	let added = 0;
 	db.transaction(() => {
 		for (const s of incoming) {
 			upsertVenue.run(s.slug, s.venue, s.city, s.state, s.lat ?? null, s.lon ?? null, s.phishnet_venue_id ?? null);
-			added += insertShow.run(s.date, s.slug).changes;
+			added += insertShow.run(s.date, s.slug, s.leg ?? legForDate(s.date)).changes;
 		}
 	})();
 	if (added) flushToJson();
@@ -255,7 +276,7 @@ const addShows = (incoming) => {
 };
 
 export {
-	initDb, getDb,
+	initDb, getDb, legForDate,
 	getShowByDate, getAllShows,
 	updateShow, updateVenuePolicy, addShows,
 	flushToJson,

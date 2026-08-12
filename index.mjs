@@ -431,7 +431,7 @@ const phishOnThisDay = async (req, res) => {
 let tourCache = null;
 let tourCacheHour = null;
 
-const phishSummerTour = async (req, res) => {
+const phishTour = async (req, res) => {
 	const now = new Date();
 	const mock = req.query.mock === '1';
 	const hourKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${now.getHours()}-${mock ? 'mock' : 'live'}`;
@@ -880,7 +880,7 @@ const renderTourSection = (password) => {
 ${rows}
 </table>
 </div>
-<p class="q-note">Auto-saves on change. Writes to DB and flushes to summer-tour.json. <strong style="color:#ff0">After setting a poster URL, commit to survive the next deploy:</strong> <code>git add server/data/summer-tour.json &amp;&amp; git commit -m "Add poster for [date]" &amp;&amp; git push</code></p>
+<p class="q-note">Auto-saves on change. Writes to DB and flushes to tour.json. <strong style="color:#ff0">After setting a poster URL, commit to survive the next deploy:</strong> <code>git add server/data/tour.json &amp;&amp; git commit -m "Add poster for [date]" &amp;&amp; git push</code></p>
 <script>
 function policySave(date,field,val){
   var body={};body[field]=val;
@@ -1140,7 +1140,8 @@ app.get('/shop/success', async (req, res) => {
 // phish API routes — registered unconditionally so they work in both dev and production
 app.use('/api/phish', phishRateLimit);
 app.get('/api/phish/on-this-day', phishOnThisDay);
-app.get('/api/phish/summer-tour', phishSummerTour);
+app.get('/api/phish/tour', phishTour);
+app.get('/api/phish/summer-tour', phishTour); // legacy alias — kept for cached/external clients
 app.get('/api/phish/live-setlist', phishLiveSetlist);
 app.get('/api/phish/show-status', (_req, res) => {
 	const { phase, show, showtimeUtc, minutesUntilShow } = getShowPhase();

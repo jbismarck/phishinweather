@@ -251,7 +251,7 @@
   <tr><th>Day type</th><th>What you do</th></tr>
   <tr><td>Off day</td><td>Nothing. Stream runs.</td></tr>
   <tr><td>Show day, no poster</td><td>Nothing. Pre-show kicks in at T−3hrs automatically. Poster card silently skips.</td></tr>
-  <tr><td>Show day, with poster</td><td>Find poster image URL → paste into admin tour table → commit <code>summer-tour.json</code> → push. Railway deploys in ~60s.</td></tr>
+  <tr><td>Show day, with poster</td><td>Find poster image URL → paste into admin tour table → commit <code>tour.json</code> → push. Railway deploys in ~60s.</td></tr>
   <tr><td>Non-standard showtime</td><td>Set <code>showtime_local</code> in admin tour table → commit → push.</td></tr>
   <tr><td>Something broke</td><td>Check <a href="/api/phish/show-status" target="_blank"><code>/api/phish/show-status</code></a> first. See "If Something Breaks" below.</td></tr>
 </table>
@@ -297,7 +297,7 @@
   <tr><td>Live Setlist card shows "FAILED"</td><td><code>PHISHNET_API_KEY</code> missing or phish.net slow</td><td>Check Railway env vars. Card shows <code>noData</code> if no show today — "FAILED" means API error.</td></tr>
   <tr><td>Stream audio died</td><td>PulseAudio sink dropped or xdotool click missed</td><td>SSH to Pi → <code>journalctl -u phishinweather-stream -f</code>. Watchdog retries every 60s. If stuck: <code>sudo systemctl restart phishinweather-stream</code>.</td></tr>
   <tr><td>Stream went offline</td><td>FFmpeg RTMP disconnect</td><td>FFmpeg reconnect loop retries every 5s automatically. If offline >3 min: restart service. YouTube live watchdog also kills/restarts FFmpeg every 5 min if stream is down.</td></tr>
-  <tr><td>Poster URL set but poster card not showing</td><td>summer-tour.json not committed after DB write</td><td>Commit <code>server/data/summer-tour.json</code> and push. DB writes are ephemeral on Railway — only git is permanent.</td></tr>
+  <tr><td>Poster URL set but poster card not showing</td><td>tour.json not committed after DB write</td><td>Commit <code>server/data/tour.json</code> and push. DB writes are ephemeral on Railway — only git is permanent.</td></tr>
   <tr><td>Production broken after Railway variable change</td><td><code>DIST=1</code> or <code>NODE_ENV=production</code> silently dropped</td><td>Open Railway dashboard → verify both vars still present. The startup assertion will throw immediately if missing — check deploy logs.</td></tr>
 </table>
 

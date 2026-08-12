@@ -26,7 +26,7 @@ check "Home page"            "$HOST/"
 check "CSS bundle"           "$HOST/resources/ws.min.css"
 check "JS bundle"            "$HOST/resources/ws.min.js"
 check "Phish on-this-day"   "$HOST/api/phish/on-this-day" 30
-check "Phish summer tour"    "$HOST/api/phish/summer-tour"
+check "Phish summer tour"    "$HOST/api/phish/tour"
 check "Poster page"          "$HOST/poster"
 
 echo ""
