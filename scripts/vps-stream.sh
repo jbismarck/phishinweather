@@ -104,14 +104,23 @@ CHROME_PID=$!
 echo "Waiting ${PAGE_LOAD_WAIT}s for page to load..."
 sleep "$PAGE_LOAD_WAIT"
 
-# ── 4. Click ToggleMedia (volume button) ──────────────────────────────────────
-# Nav bar renders below the 480px display in normal document flow.
-# #divTwcBottomRight is right-aligned; ToggleMedia is its first (leftmost) button.
-# Screenshot-verified position: volume icon at approximately x=490, y=487.
+# ── 4. Enter rotation + start audio ───────────────────────────────────────────
+# On a fresh load the app lands on the main MENU, which does NOT auto-advance:
+# index.mjs fires 'play' before the tour location/weather data finish loading, so
+# it "plays" an empty app and stalls on the menu. Clicking a loaded menu item
+# enters the display rotation (which then auto-advances normally). We click
+# "Current Conditions" (first menu item, stable main-content position 270,114 —
+# unaffected by nav-bar layout changes).
+echo "Nudging into rotation (click Current Conditions menu item)..."
+DISPLAY="${DISPLAY}" xdotool mousemove 270 114 click 1
+sleep 2
+
+# Then start audio via the ToggleMedia (volume) button in the bottom nav.
+# Position updated 2026-08-11 for the logo-menu nav shift: the corner logo box
+# pushed the nav icons right, moving the volume button from 490,487 → 506,503
+# (screenshot-verified on the Pi's :99 display).
 echo "Clicking ToggleMedia (audio on)..."
-DISPLAY="${DISPLAY}" xdotool mousemove 490 487
-sleep 0.3
-DISPLAY="${DISPLAY}" xdotool click 1
+DISPLAY="${DISPLAY}" xdotool mousemove 506 503 click 1
 sleep 2
 
 echo "Sink inputs after click:"
@@ -150,50 +159,26 @@ FFMPEG_PID=$!
 
 echo "Stream live. FFmpeg loop PID: $FFMPEG_PID"
 
-# ── 6. Audio + YouTube live watchdog ─────────────────────────────────────────
-# Audio: every 60s — if phish.in stops playing, clicks ToggleMedia to restart.
-# YouTube: every 5min after a 10min grace period — if the channel isn't live,
-#          kills FFmpeg so the reconnect loop forces a fresh RTMP handshake.
-#          A fresh handshake usually triggers YouTube to resume broadcasting.
+# ── 6. Audio watchdog ────────────────────────────────────────────────────────
+# Every 60s — if phish.in stops playing, clicks ToggleMedia to restart audio.
+#
+# NOTE: A YouTube "is the channel live?" check used to live here and would kill
+# FFmpeg to force a reconnect when it thought the stream was down. It was removed
+# 2026-07-13: the check (a redirect test on /@phishinweather/live) gives false
+# negatives — YouTube can report isLive:true while the URL still doesn't redirect
+# to /watch — so it killed a perfectly healthy FFmpeg every ~30 min, and the
+# resulting RTMP gap froze the YouTube player on the last frame. Genuine RTMP
+# disconnects (broken pipe) are already handled by the reconnect loop above.
+# A truly ended YouTube broadcast needs a manual "Go Live" in Studio anyway;
+# killing FFmpeg does not fix that.
 (
   sleep 30  # give phish.in time to fully load before first check
-  yt_check_counter=0
-  startup_ts=$(date +%s)
   while kill -0 "$FFMPEG_PID" 2>/dev/null; do
-    # Audio check
     if ! PULSE_SERVER="${PULSE_SERVER}" pactl list sink-inputs short 2>/dev/null | grep -q .; then
       echo "Watchdog: no audio sink input — clicking ToggleMedia to restart..."
-      DISPLAY="${DISPLAY}" xdotool mousemove 490 487
-      sleep 0.3
-      DISPLAY="${DISPLAY}" xdotool click 1
+      DISPLAY="${DISPLAY}" xdotool mousemove 506 503 click 1
       sleep 5  # wait for playback to resume before next check
     fi
-
-    # YouTube live check — every 30 min (30 × 60s ticks), skip first 15 min
-    # Checks @phishinweather/live redirect; only restarts FFmpeg if confident
-    # the stream is genuinely down (not a CDN/cache false positive).
-    yt_check_counter=$((yt_check_counter + 1))
-    now_ts=$(date +%s)
-    if [ $((yt_check_counter % 30)) -eq 0 ] && [ $((now_ts - startup_ts)) -gt 900 ]; then
-      final_url=$(curl -sL --max-time 15 -o /dev/null -w "%{url_effective}" \
-        "https://www.youtube.com/@phishinweather/live" 2>/dev/null)
-      # Confirm twice before acting — one CDN miss shouldn't kill the stream
-      if ! echo "$final_url" | grep -q "watch"; then
-        sleep 30
-        final_url2=$(curl -sL --max-time 15 -o /dev/null -w "%{url_effective}" \
-          "https://www.youtube.com/@phishinweather/live" 2>/dev/null)
-        if ! echo "$final_url2" | grep -q "watch"; then
-          echo "Watchdog: YouTube not live (confirmed twice: ${final_url2}) — restarting FFmpeg..."
-          pkill -u "$(id -un)" -x ffmpeg 2>/dev/null || true
-          sleep 10
-        else
-          echo "Watchdog: YouTube live OK on second check (first was false positive)"
-        fi
-      else
-        echo "Watchdog: YouTube live OK"
-      fi
-    fi
-
     sleep 60
   done
 ) &

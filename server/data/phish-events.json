@@ -13,11 +13,10 @@
       "name": "Fall Tour 2026",
       "short": "FALL TOUR",
       "type": "fall",
-      "date": null,
-      "dateDisplay": "SEPT – NOV 2026",
-      "expected": "Announcement expected late summer 2026",
-      "note": "Watch phish.net for dates",
-      "announced": false
+      "date": "2026-10-02",
+      "dateDisplay": "OCT 2 – 11",
+      "note": "Atlantic City, Richmond, Jacksonville & Huntsville",
+      "announced": true
     },
     {
       "name": "New Year's Run 2026",

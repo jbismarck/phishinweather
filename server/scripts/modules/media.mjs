@@ -80,21 +80,28 @@ const getMedia = async () => {
         // Falls back to A Live One if no shows exist for today's date.
         const hasCustomTracks = playlist.availableFiles.some((f) => !f.startsWith('default/'));
         if (!hasCustomTracks) {
-                try {
-                        const r = await fetch('/api/phish/on-this-day');
-                        if (r.ok) {
-                                const data = await r.json();
-                                // All shows for today, oldest → newest, tracks in set order
-                                const todayTracks = (data?.shows ?? [])
+                // Today-in-history shows, in set order. Retry the fetch before giving up
+                // to A Live One: a cold cache (right after a Railway deploy wipes the disk
+                // cache) makes the first request slow and failure-prone, and without a retry
+                // the unattended stream is stranded on the compilation for the whole session.
+                let todayTracks = [];
+                for (let attempt = 0; attempt < 4 && todayTracks.length === 0; attempt += 1) {
+                        // eslint-disable-next-line no-await-in-loop
+                        if (attempt > 0) await new Promise((resolve) => { setTimeout(resolve, 5000); });
+                        try {
+                                // eslint-disable-next-line no-await-in-loop
+                                const res = await fetch('/api/phish/on-this-day');
+                                if (!res.ok) continue;
+                                // eslint-disable-next-line no-await-in-loop
+                                const data = await res.json();
+                                todayTracks = (data?.shows ?? [])
                                         .filter((s) => s.tracks.length > 0)
                                         .sort((a, b) => a.date.localeCompare(b.date))
                                         .flatMap((s) => s.tracks.map((t) => ({ mp3: t.mp3, title: t.title })));
-                                const tracks = todayTracks.length > 0 ? todayTracks : A_LIVE_ONE;
-                                playlist = { availableFiles: tracks.map((t) => t.mp3), sequential: true };
-                        } else {
-                                playlist = { availableFiles: A_LIVE_ONE.map((t) => t.mp3), sequential: true };
-                        }
-                } catch { playlist = { availableFiles: A_LIVE_ONE.map((t) => t.mp3), sequential: true }; }
+                        } catch { /* keep todayTracks empty → retry or fall back */ }
+                }
+                const tracks = todayTracks.length > 0 ? todayTracks : A_LIVE_ONE;
+                playlist = { availableFiles: tracks.map((t) => t.mp3), sequential: true };
         }
 
         enableMediaPlayer();
@@ -225,8 +232,10 @@ const initializePlayer = async () => {
 	// create the player
 	player = new Audio();
 
-	// reset the playlist index
-	currentTrack = 0;
+	// Start at a random point in the playlist so frequent restarts (e.g. the
+	// unattended stream) don't always replay from track 1. Playback continues
+	// sequentially and wraps around, so a show still plays in set order.
+	currentTrack = Math.floor(Math.random() * playlist.availableFiles.length);
 
 	// add event handlers
 	player.addEventListener('ended', playerEnded);
