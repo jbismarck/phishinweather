@@ -54,8 +54,13 @@ const initDb = () => {
 		);
 	`);
 
-	const count = db.prepare('SELECT COUNT(*) as n FROM shows').get().n;
-	if (count === 0) seedFromJson();
+	// Idempotent seed on every boot: every insert is ON CONFLICT DO NOTHING and
+	// food is skipped when the venue already has rows, so this only ADDS shows
+	// newly committed to summer-tour.json — curated DB data (admin edits) is
+	// never overwritten. Previously gated on count===0, which meant new shows
+	// (e.g. a fall-tour announcement) never reached the persistent prod DB after
+	// the initial seed, so they were invisible despite being in the JSON.
+	seedFromJson();
 };
 
 const seedFromJson = () => {
