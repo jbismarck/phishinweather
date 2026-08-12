@@ -173,6 +173,14 @@ Runs a continuous loop: gathers all active screen texts, joins them with `   •
 
 Rate limiting: serial fetches with 150ms delay between requests. Cache stored in `server/data/phish-cache.json` (gitignored).
 
+### Tour data (`tour.json` + `leg`)
+
+- **Schedule source of truth is `server/data/tour.json`** (renamed from `summer-tour.json` 2026-08-11; `/api/phish/summer-tour` still works as a legacy alias). It holds ALL shows across legs, each tagged with a `leg` (e.g. `summer-2026`, `fall-2026`) derived from the date via `legForDate()` in `db.mjs`. Aligns with the `type` values in `phish-events.json` (summer/fall/yemsg/mexico/spring). `sphere`/`festival` aren't date-derivable — set by hand.
+- **The prod DB is persistent** (Railway volume — that's how admin edits survive deploys). `seedFromJson()` runs on **every boot** and is idempotent (`ON CONFLICT DO NOTHING`/`DO UPDATE ... WHERE leg IS NULL`), so **committing a show to `tour.json` reaches prod on the next deploy** — but it never overwrites curated DB data (policy/food/shakedown/poster). Schema changes to the `shows` table need an explicit `ALTER TABLE` migration guarded by a `PRAGMA table_info` check (CREATE IF NOT EXISTS won't alter an existing table).
+- **Adding announced shows:** `PHISHNET_API_KEY=… node server/tour-sync.mjs --dry-run` then without `--dry-run`. **Caveat:** the tool's flush rewrites the whole file from the (possibly stale) local DB and CAN clobber curated fields edited directly in the JSON. Safer: run it, then apply ONLY the new shows onto the committed file (diff-check that existing shows are byte-for-byte unchanged before committing).
+- **`/data/*.json` is served `no-cache`** (revalidate via ETag) — these are fetched by plain path with no SHA buster, so a long cache would hide tour/event updates for days.
+- **Venue policy** (poster tubes / water / re-entry): source from official venue pages + crowdsource via the admin panel — the philm/phish.in dependency was dropped 2026-08-11 (venues don't publish tube policy anyway). Banked research: `design/venue-policies.md`.
+
 ### Easter eggs
 
 | Trigger | Effect |
