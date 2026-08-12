@@ -1259,6 +1259,14 @@ if (process.env?.DIST === '1') {
 			if (filePath.endsWith('.html')) {
 				res.setHeader('Cache-Control', 'no-cache');
 			}
+			// Dynamic data JSON (tour events, show data, venue stats) is fetched
+			// by plain path with NO SHA cache-buster, so the 7d cache hid tour
+			// updates for up to a week (e.g. a fall-tour announcement rolled back
+			// to "DATES NOT YET ANNOUNCED" on already-cached clients). Revalidate
+			// every load — the ETag makes an unchanged fetch a cheap 304.
+			if (/[/\\]data[/\\][^/\\]+\.json$/.test(filePath)) {
+				res.setHeader('Cache-Control', 'no-cache');
+			}
 		},
 	}));
 } else {
