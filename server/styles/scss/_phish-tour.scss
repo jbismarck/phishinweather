@@ -262,6 +262,8 @@
 		justify-content: center;
 		height: 100%;
 		padding: 0 20px 10px;
+		// Nudge the whole assembly ~4 letter-widths right for nicer placement.
+		transform: translateX(4ch);
 
 		// header bar already reads "VENUE HISTORY" — in-card headline is redundant
 		.vh-headline { display: none; }
