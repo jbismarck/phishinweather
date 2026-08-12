@@ -136,6 +136,23 @@ const init = () => {
 	// swipe functionality
 	document.querySelector('#container').addEventListener('swiped-left', () => swipeCallBack('left'));
 	document.querySelector('#container').addEventListener('swiped-right', () => swipeCallBack('right'));
+
+	// Logo menu: click the header logo to open the settings/checkboxes dropdown.
+	// The logo appears in every card header, so delegate. Close on the ✕, on a
+	// backdrop click, or Escape.
+	const logoMenu = document.querySelector('#logo-menu');
+	if (logoMenu) {
+		const setOpen = (open) => logoMenu.toggleAttribute('hidden', !open);
+		document.addEventListener('click', (e) => {
+			if (e.target.closest('.logo')) {
+				e.stopPropagation();
+				setOpen(logoMenu.hasAttribute('hidden'));
+			} else if (e.target === logoMenu || e.target.closest('.logo-menu-close')) {
+				setOpen(false);
+			}
+		});
+		document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+	}
 };
 
 const autocompleteOnSelect = async (suggestion) => {

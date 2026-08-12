@@ -892,3 +892,67 @@ body {
 		opacity: 0.4;
 	}
 }
+// ── Logo dropdown menu ────────────────────────────────────────────────────────
+// Settings/checkboxes live behind the header logo (click it to open).
+.header .logo {
+	cursor: pointer;
+}
+body.stream-mode .header .logo {
+	cursor: default;
+	pointer-events: none; // no interaction on the unattended stream
+}
+
+.logo-menu {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	padding: 44px 12px;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	background: rgba(0, 0, 0, 0.55);
+
+	&[hidden] { display: none; }
+
+	.logo-menu-panel {
+		width: 100%;
+		max-width: 460px;
+		color: #fff;
+		background: linear-gradient(#102080, #001040);
+		border: 2px solid rgba(255, 255, 255, 0.28);
+		border-radius: 10px;
+		box-shadow: 0 14px 44px rgba(0, 0, 0, 0.55);
+		padding: 8px 16px 18px;
+	}
+
+	.logo-menu-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+		padding-bottom: 8px;
+		margin-bottom: 4px;
+	}
+	.logo-menu-brand {
+		height: 30px;
+		width: auto;
+		image-rendering: pixelated;
+	}
+	.logo-menu-close {
+		width: 32px;
+		height: 32px;
+		line-height: 1;
+		font-size: 15px;
+		color: #fff;
+		background: none;
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		border-radius: 6px;
+		cursor: pointer;
+
+		&:hover { background: rgba(255, 255, 255, 0.1); }
+	}
+
+	.ui-section { max-width: none; }
+}

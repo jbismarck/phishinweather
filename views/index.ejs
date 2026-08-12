@@ -225,38 +225,48 @@
 
 	<div class="media"></div>
 
-	<details class="ui-section" open>
-		<summary>Selected Displays</summary>
-		<div id='enabledDisplays'></div>
-	</details>
-
-	<details class="ui-section">
-		<summary>Settings</summary>
-		<div id='settings'></div>
-	</details>
-
-	<details class="ui-section">
-		<summary>Sharing</summary>
-		<div class='info'>
-			<a href='' id='share-link'>Copy Permalink</a> <span id="share-link-copied">Link copied to clipboard!</span>
-			<div id="share-link-instructions">
-				Copy this long URL:
-				<input type='text' id="share-link-url">
+	<!-- Settings/checkboxes live behind the header logo — click it to open this menu -->
+	<div id="logo-menu" class="logo-menu" hidden>
+		<div class="logo-menu-panel">
+			<div class="logo-menu-head">
+				<img src="images/logos/logo-corner.png" class="logo-menu-brand" alt="Phishin Weather" />
+				<button type="button" class="logo-menu-close" aria-label="Close menu">&#10005;</button>
 			</div>
-		</div>
-	</details>
 
-	<details class="ui-section">
-		<summary>Forecast Information</summary>
-		<div id="divInfo">
-			Location: <span id="spanCity"></span> <span id="spanState"></span><br />
-			Station Id: <span id="spanStationId"></span><br />
-			Radar Id: <span id="spanRadarId"></span><br />
-			Zone Id: <span id="spanZoneId"></span><br />
-			Music: <span id="musicTrack">Not playing</span><br />
-			Phishin Weather Version: <span><%- version %></span>
+			<details class="ui-section" open>
+				<summary>Selected Displays</summary>
+				<div id='enabledDisplays'></div>
+			</details>
+
+			<details class="ui-section">
+				<summary>Settings</summary>
+				<div id='settings'></div>
+			</details>
+
+			<details class="ui-section">
+				<summary>Sharing</summary>
+				<div class='info'>
+					<a href='' id='share-link'>Copy Permalink</a> <span id="share-link-copied">Link copied to clipboard!</span>
+					<div id="share-link-instructions">
+						Copy this long URL:
+						<input type='text' id="share-link-url">
+					</div>
+				</div>
+			</details>
+
+			<details class="ui-section">
+				<summary>Forecast Information</summary>
+				<div id="divInfo">
+					Location: <span id="spanCity"></span> <span id="spanState"></span><br />
+					Station Id: <span id="spanStationId"></span><br />
+					Radar Id: <span id="spanRadarId"></span><br />
+					Zone Id: <span id="spanZoneId"></span><br />
+					Music: <span id="musicTrack">Not playing</span><br />
+					Phishin Weather Version: <span><%- version %></span>
+				</div>
+			</details>
 		</div>
-	</details>
+	</div>
 
 	<p class="site-footer">
 		<a href="https://github.com/netbymatt/ws4kp" target="_blank" rel="noopener">
