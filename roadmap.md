@@ -13,6 +13,9 @@
 
 ### Stream ops — tech debt
 - **YouTube streams default to Private** — fix in YouTube Studio → Settings → Channel → Advanced → Default broadcast privacy → Public
+- **Stream startup nudge + nav click-coords are a band-aid** (2026-08-11) — real fix is `index.mjs` play-on-load timing: fire `play` *after* `loadStreamTourLocation`/`loadData` complete so it doesn't land on the menu. That makes the 270,114 "Current Conditions" nudge AND the hardcoded ToggleMedia coord (506,503) unnecessary. The coords are fragile — they drift whenever the nav layout changes (they moved once already when the logo menu shipped).
+- **Merge `feature/stream-refresh-stagger`** — stagger card auto-refresh + keep cards loaded during silence (stream stability; relevant after today's outage).
+- **A truly-ended YouTube broadcast still needs a manual Studio "Go Live"** — the Pi can feed the ingest but can't start the broadcast session. Known limitation, not fixable from the Pi.
 
 ### Content / UX
 - **Poster product photo** — ChatGPT prompt ready (session 2026-06-11). Generate image, drop as `server/images/poster-thumb.png`, swap `.shop-product-placeholder` in `views/shop.ejs` for `<img>`
@@ -20,7 +23,9 @@
 - **Reddit** — no dedicated subreddit; post to r/phish and related subs directly
 - **Social card backgrounds** — currently `1.png`; need venue-specific PNGs in GIMP
 - **Venue-specific backgrounds** — MSG and Dick's first; user working in GIMP/Aseprite
-- **Venue page layout redesign** — waiting on screenshot mockup from user; Claude will rework venue card SCSS + EJS to match
+- **Venue page layout redesign** — initial restyle shipped 2026-08-11 (halved gap, `1.png` social-card background, vertical centering, 4ch shift); any further mockup-based rework still open
+- **Merge `feature/phishnet-tour-sync`** — auto-populates announced *shows* into `summer-tour.json`/DB (the tour card), complementing today's fall countdown. Needs `PHISHNET_API_KEY` + one `sync-tour` run; would light up the fall shows in the tour rotation.
+- **Wire the countdown to synced tour data** — the Countdown card reads the manual `phish-events.json`, so each tour announcement needs a hand-edit. Consider deriving countdown dates from the synced show data so it self-updates.
 - **New weather icon animations** — user exploring Aseprite; reference icons in `server/images/icons/current-conditions/`
 - **Policy panel centering** — improved (flexbox `space-around`) but not pixel-perfect; needs final devtools tuning
 - **Policy sprites — tubes** — `policy-tubes-clear.png` in sprites folder, not yet wired in JS; waiting on philm (phish.in) for authoritative venue tube policy data before updating `summer-tour.json`
@@ -44,6 +49,14 @@
 ---
 
 ## Completed
+
+### 2026-08-11 — stream recovery + music robustness + fall countdown + venue restyle + logo menu
+- **Stream outage fixed** (`vps-stream.sh`, commit 9693079) — removed the YouTube-live watchdog that was SIGTERM-ing a *healthy* FFmpeg on false positives (the `/@phishinweather/live` redirect check gives false negatives); the reconnect gap had been ending the YouTube broadcast. Genuine RTMP disconnects are still handled by the reconnect loop.
+- **Stream audio + menu-stall fixed** — the logo-menu nav redesign shifted the bottom nav, so the ToggleMedia click coord moved **490,487 → 506,503**; added a startup nudge (click "Current Conditions" at 270,114) because a fresh load fires `play` before tour data loads and stalls on the menu. **Follow-up tech debt below.**
+- **Music robustness** (`media.mjs`, commit 8fc1f8b) — retry `/api/phish/on-this-day` 4×/5s before falling back to *A Live One* (Railway wipes the daily cache on every deploy → cold-cache loads were stranding the stream on the compilation); start playback at a **random offset** so restarts don't replay from track 1.
+- **Fall Tour 2026 countdown** (commit 4f76f44) — set real announced dates in `phish-events.json` (**Oct 2–11**: Boardwalk Hall AC, Allianz Richmond, VyStar Jacksonville, Orion Huntsville). Was stuck on "DATES NOT YET ANNOUNCED". Note: the countdown reads `phish-events.json` (manual), separate from `tour-sync.mjs` (show data).
+- **Venue song stats restyle** (`_phish-tour.scss`, commits 698cacc→fba03f3) — halved the name→number gap (`.mp-row` max-width 60%), switched to the social-card background `1.png`, roomier vertically-centered layout, shifted the assembly `4ch` right.
+- **Logo dropdown menu** (commit 65af17e, merged e29e30a) — the corner logo is now a button that opens a centered dropdown holding Selected Displays / Settings / Sharing / Forecast Info; disabled in stream mode (`body.stream-mode .logo { pointer-events: none }`).
 
 ### 2026-07-20 — venue song stats + slug bug fix
 - Venue History card (tour card 4) enriched with song-level stats: **most-played here (top 5)** with dot-leader counts, **rarest bustout** (biggest previous-performance gap ever played here), **never-played-here** (core-repertoire songs missing at this venue). Show/song counts + last-show folded into one subtitle line.

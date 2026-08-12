@@ -7,6 +7,12 @@ Remove when built or explicitly killed.
 
 2026-06-11 — Add /api/ideas POST endpoint to phishinweather (or station) so the stop hook can write captured ideas directly to ideas.md without manual copy-paste
 
+2026-08-11 — Persist music playback position (localStorage) as an alternative to the new random-start, so a plain `systemctl restart` resumes where it left off instead of jumping. Caveat: profile-wipe restarts (`rm -rf /tmp/chromium-stream`, used by the stuck-menu fix) would erase it, so it only helps for clean restarts.
+
+2026-08-11 — Alert when the YouTube broadcast needs a manual "Go Live". The Pi can feed the ingest but can't start a truly-ended broadcast session — today that meant the stream was silently down until we noticed. Add a check (FFmpeg pushing but channel not live for >N min) that fires a notification so it doesn't sit dark unattended.
+
+2026-08-11 — Housekeeping: add a `.gitignore` for `.DS_Store`, `server/data/*.db-shm`/`*.db-wal`, and stray root `*.mp3` downloads — they clutter `git status` every session.
+
 ---
 
 # Show Night Runbook
@@ -47,7 +53,7 @@ Showtime defaults to 8:00 PM local. Override per show with `"showtime_local": "1
 
 **Audio died** → SSH to Pi and check: `journalctl -u phishinweather-stream -f`. The watchdog checks every 60s and clicks ToggleMedia to restart. If it doesn't recover in 2 min: `sudo systemctl restart phishinweather-stream`.
 
-**Stream went offline** → The FFmpeg reconnect loop retries every 5s automatically. If offline for >3 min: restart the service. The YouTube live check watchdog (every 5 min) also kills and restarts FFmpeg if it detects the stream dropped.
+**Stream went offline** → The FFmpeg reconnect loop retries every 5s automatically for RTMP disconnects. If YouTube shows offline while FFmpeg is still pushing, the *broadcast session* ended: `sudo systemctl restart phishinweather-stream`, and if it's still not live, click **Go Live** in YouTube Studio (the Pi can feed the ingest but can't start the broadcast). Note: the old YouTube-live watchdog that auto-killed FFmpeg was **removed 2026-08-11** — it gave false positives and ended healthy broadcasts.
 
 **Phase stuck on `off` when it should be `pre-show`** → Show date or state may be wrong in summer-tour.json, or the timezone lookup failed. Check `curl phishinweather.com/api/phish/show-status`.
 
