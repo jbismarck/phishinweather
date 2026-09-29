@@ -50,6 +50,11 @@
 
 ## Completed
 
+### 2026-09-28 — bug reporting system + menu Light Mode fix + dep audit
+- **Bug reporting system** (commit e97a6a3) — the footer ⚑ flag now opens an in-app modal (was an Instagram DM link) that POSTs to `/api/bugs`. Reports store in a new SQLite `bugs` table (auto-creates on boot, persists on the Railway volume) and are reviewed in a **Bug Reports** section at the top of `/admin` (resolve/reopen/delete). Injection-safe: parameterized statements only, all output HTML-escaped (verified a `<script>` payload renders escaped), rate-limited 5/min, length-capped, control-chars stripped, real UA captured server-side. Auto-captures the current display + page URL. Files: `server/db.mjs`, `index.mjs`, `views/index.ejs`, `server/scripts/index.mjs`, `_page.scss`.
+- **Menu unreadable in Light Mode** (commit e97a6a3) — the logo-menu display-name text went black on the always-dark-blue panel for visitors whose OS was in Light Mode, due to a leftover `@media (prefers-color-scheme: light)` override inherited from upstream (from when the panel followed the OS theme). Removed it so the text stays light in every theme (`_page.scss`).
+- **Dependency vulnerabilities cleared** (commit 6fa3730) — `npm audit fix` resolved 7 advisories (js-yaml, qs, ip-address) flagged by the pre-push gate; non-breaking, build + prod-mode boot verified.
+
 ### 2026-08-11 — stream recovery + music robustness + fall countdown + venue restyle + logo menu
 - **Stream outage fixed** (`vps-stream.sh`, commit 9693079) — removed the YouTube-live watchdog that was SIGTERM-ing a *healthy* FFmpeg on false positives (the `/@phishinweather/live` redirect check gives false negatives); the reconnect gap had been ending the YouTube broadcast. Genuine RTMP disconnects are still handled by the reconnect loop.
 - **Stream audio + menu-stall fixed** — the logo-menu nav redesign shifted the bottom nav, so the ToggleMedia click coord moved **490,487 → 506,503**; added a startup nudge (click "Current Conditions" at 270,114) because a fresh load fires `play` before tour data loads and stalls on the menu. **Follow-up tech debt below.**
