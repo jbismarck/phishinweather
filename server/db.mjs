@@ -48,6 +48,7 @@ const initDb = () => {
 			policy_water_bottles   TEXT,
 			policy_poster_tubes    TEXT,
 			policy_water_station   TEXT,
+			policy_re_entry        TEXT,
 			policy_last_updated    TEXT
 		);
 
@@ -84,6 +85,10 @@ const initDb = () => {
 	const hasLeg = db.prepare('PRAGMA table_info(shows)').all().some((c) => c.name === 'leg');
 	if (!hasLeg) db.exec('ALTER TABLE shows ADD COLUMN leg TEXT');
 
+	// Same for the re-entry policy column, added after venues already existed.
+	const hasReEntry = db.prepare('PRAGMA table_info(venues)').all().some((c) => c.name === 'policy_re_entry');
+	if (!hasReEntry) db.exec('ALTER TABLE venues ADD COLUMN policy_re_entry TEXT');
+
 	// Idempotent seed on every boot: every insert is ON CONFLICT DO NOTHING and
 	// food is skipped when the venue already has rows, so this only ADDS shows
 	// newly committed to tour.json — curated DB data (admin edits) is
@@ -98,12 +103,26 @@ const seedFromJson = () => {
 	try { tourData = JSON.parse(fs.readFileSync(JSON_PATH, 'utf8')); }
 	catch { console.warn('show db: could not read tour.json for seeding'); return; }
 
+	// On conflict, fill only the curated fields that are still NULL — so a policy
+	// or shakedown committed to tour.json reaches an existing prod venue row on
+	// the next deploy, while any non-null value already curated via the admin
+	// panel is preserved (COALESCE keeps the existing value when it's set).
 	const upsertVenue = db.prepare(`
 		INSERT INTO venues (slug, name, city, state, lat, lon, phishnet_venue_id,
 			shakedown_location, shakedown_parking, shakedown_tip,
-			policy_water_bottles, policy_poster_tubes, policy_water_station, policy_last_updated)
-		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-		ON CONFLICT(slug) DO NOTHING
+			policy_water_bottles, policy_poster_tubes, policy_water_station,
+			policy_re_entry, policy_last_updated)
+		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+		ON CONFLICT(slug) DO UPDATE SET
+			phishnet_venue_id    = COALESCE(venues.phishnet_venue_id,    excluded.phishnet_venue_id),
+			shakedown_location   = COALESCE(venues.shakedown_location,   excluded.shakedown_location),
+			shakedown_parking    = COALESCE(venues.shakedown_parking,    excluded.shakedown_parking),
+			shakedown_tip        = COALESCE(venues.shakedown_tip,        excluded.shakedown_tip),
+			policy_water_bottles = COALESCE(venues.policy_water_bottles, excluded.policy_water_bottles),
+			policy_poster_tubes  = COALESCE(venues.policy_poster_tubes,  excluded.policy_poster_tubes),
+			policy_water_station = COALESCE(venues.policy_water_station, excluded.policy_water_station),
+			policy_re_entry      = COALESCE(venues.policy_re_entry,      excluded.policy_re_entry),
+			policy_last_updated  = COALESCE(venues.policy_last_updated,  excluded.policy_last_updated)
 	`);
 	const insertFood = db.prepare(`
 		INSERT INTO food (venue_slug, name, type, note, sort_order) VALUES (?,?,?,?,?)
@@ -127,6 +146,7 @@ const seedFromJson = () => {
 				show.policy?.water_bottles ?? null,
 				show.policy?.poster_tubes ?? null,
 				show.policy?.water_station ?? null,
+				show.policy?.re_entry ?? null,
 				show.policy?.last_updated ?? null,
 			);
 			const existing = db.prepare('SELECT COUNT(*) as n FROM food WHERE venue_slug = ?').get(slug).n;
@@ -147,7 +167,8 @@ const flushToJson = () => {
 		       v.slug AS phishin_venue_slug, v.phishnet_venue_id,
 		       v.name AS venue, v.city, v.state, v.lat, v.lon,
 		       v.shakedown_location, v.shakedown_parking, v.shakedown_tip,
-		       v.policy_water_bottles, v.policy_poster_tubes, v.policy_water_station, v.policy_last_updated
+		       v.policy_water_bottles, v.policy_poster_tubes, v.policy_water_station,
+		       v.policy_re_entry, v.policy_last_updated
 		FROM shows s JOIN venues v ON s.venue_slug = v.slug
 		ORDER BY s.date
 	`).all();
@@ -173,11 +194,12 @@ const flushToJson = () => {
 			if (s.shakedown_parking)  out.shakedown.parking  = s.shakedown_parking;
 			if (s.shakedown_tip)      out.shakedown.tip       = s.shakedown_tip;
 		}
-		if (s.policy_water_bottles || s.policy_poster_tubes || s.policy_water_station) {
+		if (s.policy_water_bottles || s.policy_poster_tubes || s.policy_water_station || s.policy_re_entry) {
 			out.policy = {};
 			if (s.policy_water_bottles) out.policy.water_bottles  = s.policy_water_bottles;
 			if (s.policy_poster_tubes)  out.policy.poster_tubes   = s.policy_poster_tubes;
 			if (s.policy_water_station) out.policy.water_station  = s.policy_water_station;
+			if (s.policy_re_entry)      out.policy.re_entry       = s.policy_re_entry;
 			if (s.policy_last_updated)  out.policy.last_updated   = s.policy_last_updated;
 		}
 		if (foodMap[s.phishin_venue_slug]) out.food = foodMap[s.phishin_venue_slug];
@@ -194,7 +216,8 @@ const SHOW_JOIN = `
 	       v.slug AS phishin_venue_slug, v.phishnet_venue_id,
 	       v.name AS venue, v.city, v.state, v.lat, v.lon,
 	       v.shakedown_location, v.shakedown_parking, v.shakedown_tip,
-	       v.policy_water_bottles, v.policy_poster_tubes, v.policy_water_station, v.policy_last_updated
+	       v.policy_water_bottles, v.policy_poster_tubes, v.policy_water_station,
+	       v.policy_re_entry, v.policy_last_updated
 	FROM shows s JOIN venues v ON s.venue_slug = v.slug
 `;
 
@@ -216,11 +239,12 @@ const shapeShow = (row, food = []) => {
 			tip:      row.shakedown_tip      ?? '',
 		};
 	}
-	if (row.policy_water_bottles || row.policy_poster_tubes || row.policy_water_station) {
+	if (row.policy_water_bottles || row.policy_poster_tubes || row.policy_water_station || row.policy_re_entry) {
 		out.policy = {
 			water_bottles:  row.policy_water_bottles  ?? '',
 			poster_tubes:   row.policy_poster_tubes   ?? '',
 			water_station:  row.policy_water_station  ?? '',
+			re_entry:       row.policy_re_entry       ?? '',
 			last_updated:   row.policy_last_updated   ?? null,
 		};
 	}
@@ -250,12 +274,24 @@ const updateShow = (date, { poster_url, showtime_local } = {}) => {
 	flushToJson();
 };
 
-const updateVenuePolicy = (slug, { water_bottles, poster_tubes, water_station } = {}) => {
+const updateVenuePolicy = (slug, { water_bottles, poster_tubes, water_station, re_entry } = {}) => {
 	const today = new Date().toISOString().slice(0, 10);
 	if (water_bottles !== undefined) db.prepare('UPDATE venues SET policy_water_bottles = ? WHERE slug = ?').run(water_bottles, slug);
 	if (poster_tubes  !== undefined) db.prepare('UPDATE venues SET policy_poster_tubes  = ? WHERE slug = ?').run(poster_tubes,  slug);
 	if (water_station !== undefined) db.prepare('UPDATE venues SET policy_water_station = ? WHERE slug = ?').run(water_station, slug);
+	if (re_entry      !== undefined) db.prepare('UPDATE venues SET policy_re_entry      = ? WHERE slug = ?').run(re_entry,      slug);
 	db.prepare('UPDATE venues SET policy_last_updated = ? WHERE slug = ?').run(today, slug);
+	flushToJson();
+};
+
+// Shakedown fields are venue-level (apply to all shows at the venue), same as
+// policy. Only updates the fields passed; blanks are stored as NULL.
+const updateShakedown = (slug, { location, parking, tip } = {}) => {
+	const norm = (v) => (v === undefined ? undefined : (v?.trim() ? v.trim() : null));
+	const l = norm(location); const p = norm(parking); const t = norm(tip);
+	if (l !== undefined) db.prepare('UPDATE venues SET shakedown_location = ? WHERE slug = ?').run(l, slug);
+	if (p !== undefined) db.prepare('UPDATE venues SET shakedown_parking  = ? WHERE slug = ?').run(p, slug);
+	if (t !== undefined) db.prepare('UPDATE venues SET shakedown_tip      = ? WHERE slug = ?').run(t, slug);
 	flushToJson();
 };
 
@@ -312,7 +348,7 @@ const deleteBug = (id) => db.prepare('DELETE FROM bugs WHERE id = ?').run(id).ch
 export {
 	initDb, getDb, legForDate,
 	getShowByDate, getAllShows,
-	updateShow, updateVenuePolicy, addShows,
+	updateShow, updateVenuePolicy, updateShakedown, addShows,
 	flushToJson,
 	addBug, getBugs, setBugStatus, deleteBug,
 };

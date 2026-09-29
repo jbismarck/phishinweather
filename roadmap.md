@@ -31,8 +31,8 @@
 - **Display the `leg` tag on the tour card** — e.g. a "FALL TOUR" / "SUMMER TOUR" header, or grouping in a full-schedule view. The data's there (added 2026-08-11); nothing surfaces it yet.
 - **New weather icon animations** — user exploring Aseprite; reference icons in `server/images/icons/current-conditions/`
 - **Policy panel centering** — improved (flexbox `space-around`) but not pixel-perfect; needs final devtools tuning
-- **Policy sprites — tubes + venue policy data** — `policy-tubes-clear.png` in sprites folder, not yet wired in JS. **philm (phish.in) dependency dropped 2026-08-11** (unresponsive) — source policy ourselves from venue sites/phish.net/Reddit + crowdsource via the admin panel. Researched 2026-08-11 for Dick's + all 4 fall venues: water-bottle rules, water stations, and re-entry (all **no re-entry**) were found; **poster-tube policy is unstated at every venue** (none address tubes explicitly; Allianz/Dick's lean no), so treat "tubes" as *call-ahead / uncertain* rather than a hard sprite. See per-venue data in session notes / [[project-phishinweather]].
-- **Policy sprites — remaining** — no-water-station, tubes-none, tubes-soft, tubes-all sprites still needed
+- **Policy sprites — tubes still unwired** — `policy-tubes-clear.png` in sprites folder, not yet wired in JS (tubes are "Check venue website" everywhere — undocumented at all 5 venues; treat as *call-ahead / uncertain*). Water/re-entry **data** now wired into `tour.json` + admin (done 2026-09-29); this item is now sprite-authoring only. See `design/venue-policies.md`.
+- **Policy sprites — remaining** — no-water-station, tubes-none, tubes-soft, tubes-all, and a `policy-reentry-*.png` (re-entry currently renders as text) sprites still needed in Aseprite
 - **Contact method for shop** — `hello@phishinweather.com` doesn't exist; currently "DM on Instagram or Reddit"
 - **Discord server** — create server, get permanent invite link, set `DISCORD_INVITE_URL` Railway var; update feature-vote card to mention Discord
 - **Poster artist commission** — top candidates: AJ Masthay (most prolific active Phish poster artist), Todd Slater (retro/graphic style suits phishinweather), Jim Pollock (most iconic, less likely for fan projects)
@@ -52,6 +52,12 @@
 ---
 
 ## Completed
+
+### 2026-09-29 — fall venue data + re-entry policy field + admin curation
+- **Full fall-tour venue data** — Dick's + all 4 fall venues (Boardwalk Hall AC, Allianz Richmond, VyStar Jacksonville, Orion Huntsville) now have water/tubes/station/re-entry in `tour.json`, sourced from `design/venue-policies.md`. Previously only skeleton data (name/coords) — surfaced by "missing venue data for AC".
+- **New re-entry policy field** — `policy_re_entry` column (PRAGMA-guarded ALTER migration), threaded through `shapeShow`/`flushToJson`/`SHOW_JOIN`/`updateVenuePolicy` and the show-status/tour APIs. Renders as a text row in the venue guide and a strip under the tour-card policy panels (sprite hook left for a future Aseprite `policy-reentry-*.png`). All 5 venues are "No re-entry".
+- **Seed now fills NULL curated fields from `tour.json`** — `seedFromJson` upsert changed from `DO NOTHING` to `DO UPDATE ... COALESCE(existing, incoming)`, so policy/shakedown committed to JSON reaches existing prod venue rows on deploy, while admin-curated (non-null) values are never overwritten.
+- **Admin panel: re-entry + "No outside bottles" / "Empty reusable only" options, and shakedown editing** — the Tour section gained a Re-Entry dropdown and location/parking/tip inputs (new `/api/shows/:date/shakedown` route + `updateShakedown`), so shakedown is no longer JSON-only. Wired the existing unused `policy-bottles-none.png` sprite for "No outside bottles".
 
 ### 2026-09-28 — bug reporting system + menu Light Mode fix + dep audit
 - **Bug reporting system** (commit e97a6a3) — the footer ⚑ flag now opens an in-app modal (was an Instagram DM link) that POSTs to `/api/bugs`. Reports store in a new SQLite `bugs` table (auto-creates on boot, persists on the Railway volume) and are reviewed in a **Bug Reports** section at the top of `/admin` (resolve/reopen/delete). Injection-safe: parameterized statements only, all output HTML-escaped (verified a `<script>` payload renders escaped), rate-limited 5/min, length-capped, control-chars stripped, real UA captured server-side. Auto-captures the current display + page URL. Files: `server/db.mjs`, `index.mjs`, `views/index.ejs`, `server/scripts/index.mjs`, `_page.scss`.

@@ -17,7 +17,7 @@ import {
 import { getShowPhase } from './server/show-phase.mjs';
 import {
 	initDb, getShowByDate, getAllShows,
-	updateShow, updateVenuePolicy,
+	updateShow, updateVenuePolicy, updateShakedown,
 	addBug, getBugs, setBugStatus, deleteBug,
 } from './server/db.mjs';
 import { phishinSlug } from './server/phishin-slugs.mjs';
@@ -794,6 +794,8 @@ ${tableRows}
 }
 
 const BOTTLE_OPTIONS = [
+	'No outside bottles',
+	'Empty reusable only',
 	'Factory-sealed only',
 	'Empty reusable or factory-sealed',
 	'Factory-sealed or empty reusable (1 liter max)',
@@ -801,6 +803,7 @@ const BOTTLE_OPTIONS = [
 ];
 const TUBES_OPTIONS = ['Not permitted', 'Permitted', 'Check venue website'];
 const WATER_OPTIONS = ['Available', 'Water fountains', 'Water bottle filler', 'Check venue website'];
+const RE_ENTRY_OPTIONS = ['No re-entry', 'Re-entry allowed', 'Check venue website'];
 
 const requireAdmin = (req, res, next) => {
 	const password = process.env.ADMIN_PASSWORD;
@@ -869,14 +872,20 @@ const renderTourSection = (password) => {
 			+ '</select>';
 	};
 
+	const txtInput = (id, val, onchange, width, placeholder = '') =>
+		'<input id="' + id + '" type="text" value="' + (val ?? '').replace(/"/g, '&quot;') + '" '
+		+ (placeholder ? 'placeholder="' + placeholder + '" ' : '')
+		+ 'onchange="' + onchange + '" '
+		+ 'style="background:#111;border:1px solid #333;color:#ccc;font-family:monospace;font-size:.75em;width:' + width + 'px"/>';
+
 	const rows = shows.map((show) => {
 		const d = new Date(show.date + 'T12:00:00');
 		const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 		const p = show.policy ?? {};
+		const sd = show.shakedown ?? {};
 		const updated = p.last_updated
 			? '<span style="color:#4f4">' + p.last_updated + '</span>'
 			: '<span style="color:#555">—</span>';
-		const posterVal = (show.poster_url ?? '').replace(/"/g, '&quot;');
 		return '<tr>'
 			+ '<td style="white-space:nowrap;color:#888;font-size:.85em">' + dateStr + '</td>'
 			+ '<td style="font-size:.85em">' + show.venue + '</td>'
@@ -884,9 +893,11 @@ const renderTourSection = (password) => {
 			+ '<td>' + selEl('water_bottles', p.water_bottles ?? 'Check venue website', BOTTLE_OPTIONS, show.date) + '</td>'
 			+ '<td>' + selEl('poster_tubes',  p.poster_tubes  ?? 'Check venue website', TUBES_OPTIONS,  show.date) + '</td>'
 			+ '<td>' + selEl('water_station', p.water_station ?? 'Check venue website', WATER_OPTIONS,  show.date) + '</td>'
-			+ '<td><input id="tp-' + show.date + '" type="text" value="' + posterVal + '" placeholder="https://..." '
-			+ 'onchange="posterSave(\'' + show.date + '\',this.value)" '
-			+ 'style="background:#111;border:1px solid #333;color:#ccc;font-family:monospace;font-size:.75em;width:180px"/></td>'
+			+ '<td>' + selEl('re_entry',      p.re_entry      ?? 'Check venue website', RE_ENTRY_OPTIONS, show.date) + '</td>'
+			+ '<td>' + txtInput('sd-' + show.date + '-location', sd.location, 'shakedownSave(\'' + show.date + '\',\'location\',this.value)', 150, 'lot / area') + '</td>'
+			+ '<td>' + txtInput('sd-' + show.date + '-parking', sd.parking, 'shakedownSave(\'' + show.date + '\',\'parking\',this.value)', 150, 'parking note') + '</td>'
+			+ '<td>' + txtInput('sd-' + show.date + '-tip', sd.tip, 'shakedownSave(\'' + show.date + '\',\'tip\',this.value)', 180, 'tip') + '</td>'
+			+ '<td>' + txtInput('tp-' + show.date, show.poster_url, 'posterSave(\'' + show.date + '\',this.value)', 180, 'https://...') + '</td>'
 			+ '<td style="font-size:.75em;white-space:nowrap">' + updated + '</td>'
 			+ '</tr>';
 	}).join('');
@@ -894,32 +905,35 @@ const renderTourSection = (password) => {
 	return `<h2>Tour</h2>
 <div style="overflow-x:auto">
 <table>
-<tr><th>Date</th><th>Venue</th><th>City</th><th>Water Bottles</th><th>Tubes</th><th>Water Station</th><th>Poster URL</th><th>Updated</th></tr>
+<tr><th>Date</th><th>Venue</th><th>City</th><th>Water Bottles</th><th>Tubes</th><th>Water Station</th><th>Re-Entry</th><th>Shakedown</th><th>Parking</th><th>Tip</th><th>Poster URL</th><th>Updated</th></tr>
 ${rows}
 </table>
 </div>
-<p class="q-note">Auto-saves on change. Writes to DB and flushes to tour.json. <strong style="color:#ff0">After setting a poster URL, commit to survive the next deploy:</strong> <code>git add server/data/tour.json &amp;&amp; git commit -m "Add poster for [date]" &amp;&amp; git push</code></p>
+<p class="q-note">Auto-saves on change. Writes to DB and flushes to tour.json. Policy + shakedown are <strong>venue-level</strong> (apply to every show at that venue). <strong style="color:#ff0">After editing, commit to survive the next deploy:</strong> <code>git add server/data/tour.json &amp;&amp; git commit -m "Update venue data" &amp;&amp; git push</code></p>
 <script>
+function _flash(el,ok){if(!el)return;el.style.borderColor=ok?'#4f4':'#f44';if(ok)setTimeout(function(){el.style.borderColor='';},1200);}
 function policySave(date,field,val){
   var body={};body[field]=val;
   var sel=document.getElementById('ts-'+date+'-'+field);
   fetch('/api/shows/'+date+'/policy',{method:'PATCH',
     headers:{'Content-Type':'application/json',Authorization:'Basic ${token}'},
     body:JSON.stringify(body)
-  }).then(function(r){
-    if(r.ok){sel.style.borderColor='#4f4';setTimeout(function(){sel.style.borderColor='';},1200);}
-    else{sel.style.borderColor='#f44';}
-  });
+  }).then(function(r){_flash(sel,r.ok);});
+}
+function shakedownSave(date,field,val){
+  var body={};body[field]=val;
+  var inp=document.getElementById('sd-'+date+'-'+field);
+  fetch('/api/shows/'+date+'/shakedown',{method:'PATCH',
+    headers:{'Content-Type':'application/json',Authorization:'Basic ${token}'},
+    body:JSON.stringify(body)
+  }).then(function(r){_flash(inp,r.ok);});
 }
 function posterSave(date,val){
   var inp=document.getElementById('tp-'+date);
   fetch('/api/shows/'+date,{method:'PATCH',
     headers:{'Content-Type':'application/json',Authorization:'Basic ${token}'},
     body:JSON.stringify({poster_url:val||null})
-  }).then(function(r){
-    if(r.ok){inp.style.borderColor='#4f4';setTimeout(function(){inp.style.borderColor='';},1200);}
-    else{inp.style.borderColor='#f44';}
-  });
+  }).then(function(r){_flash(inp,r.ok);});
 }
 </script>`;
 };
@@ -1230,12 +1244,21 @@ app.patch('/api/shows/:date', requireAdmin, (req, res) => {
 	res.json({ ok: true });
 });
 
-// Update venue policy (water, tubes, station) — applies to all shows at this venue
+// Update venue policy (water, tubes, station, re-entry) — applies to all shows at this venue
 app.patch('/api/shows/:date/policy', requireAdmin, (req, res) => {
 	const show = getShowByDate(req.params.date);
 	if (!show) return res.status(404).json({ error: 'show not found' });
-	const { water_bottles, poster_tubes, water_station } = req.body;
-	updateVenuePolicy(show.phishin_venue_slug, { water_bottles, poster_tubes, water_station });
+	const { water_bottles, poster_tubes, water_station, re_entry } = req.body;
+	updateVenuePolicy(show.phishin_venue_slug, { water_bottles, poster_tubes, water_station, re_entry });
+	res.json({ ok: true });
+});
+
+// Update venue shakedown (location, parking, tip) — applies to all shows at this venue
+app.patch('/api/shows/:date/shakedown', requireAdmin, (req, res) => {
+	const show = getShowByDate(req.params.date);
+	if (!show) return res.status(404).json({ error: 'show not found' });
+	const { location, parking, tip } = req.body;
+	updateShakedown(show.phishin_venue_slug, { location, parking, tip });
 	res.json({ ok: true });
 });
 

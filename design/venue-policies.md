@@ -1,9 +1,11 @@
 # Venue Policy Research
 
 Source data for the Phish Tour card's policy sprites (water bottles, water station,
-poster tubes) and the `venues` table (`policy_water_bottles`, `policy_poster_tubes`,
-`policy_water_station`). **Not yet wired into `tour.json`** — banked here until we
-build the policy→sprite wiring.
+poster tubes, re-entry) and the `venues` table (`policy_water_bottles`,
+`policy_poster_tubes`, `policy_water_station`, `policy_re_entry`). **Wired into
+`tour.json` 2026-09-29** for Dick's + all 4 fall venues (water/tubes/station/re-entry);
+reaches prod via the NULL-fill upsert in `db.mjs`. A `policy-reentry-*.png` sprite is
+still TODO in Aseprite — re-entry renders as text until one exists.
 
 > **Note (2026-08-11):** philm (phish.in) was the intended "authoritative tube data"
 > source but went unresponsive. Turns out venues **don't publish poster-tube policy at

@@ -75,6 +75,7 @@ class VenueGuide extends WeatherDisplay {
 			addRow('WATER', policy.water_bottles);
 			addRow('POSTER TUBES', policy.poster_tubes);
 			if (policy.water_station) addRow('WATER STATION', policy.water_station);
+			if (policy.re_entry) addRow('RE-ENTRY', policy.re_entry);
 		}
 
 		if (food?.length) {

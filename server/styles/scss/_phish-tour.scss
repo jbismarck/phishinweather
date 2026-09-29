@@ -115,6 +115,32 @@
 				overflow-wrap: break-word;
 			}
 		}
+
+		// Re-entry strip — a single line under the three sprite panels, so it
+		// doesn't disturb their fixed-width layout.
+		.policy-reentry {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+			margin-top: 6px;
+
+			.pr-sprite {
+				max-height: 40px;
+				image-rendering: pixelated;
+			}
+
+			.pr-label {
+				font-size: 18pt;
+				color: c.$column-header-text;
+				font-family: 'Star4000 Small';
+			}
+
+			.pr-value {
+				font-size: 18pt;
+				color: white;
+			}
+		}
 	}
 
 	// ── Forecast Card ────────────────────────────────────────────────────────

@@ -187,6 +187,8 @@ class PhishTour extends WeatherDisplay {
 		card.querySelector('.policy-water-station').textContent = policy.water_station ?? 'Check venue website';
 
 		const BOTTLE_SPRITE = {
+			'No outside bottles': 'policy-bottles-none.png',
+			'Empty reusable only': 'policy-bottles-personal.png',
 			'Factory-sealed only': 'policy-bottles-sealed.png',
 			'Empty reusable or factory-sealed': 'policy-bottles-personal.png',
 			'Factory-sealed or empty reusable (1 liter max)': 'policy-bottles-personal.png',
@@ -209,6 +211,31 @@ class PhishTour extends WeatherDisplay {
 		};
 		setSpriteImg(panels[0], BOTTLE_SPRITE[policy.water_bottles]);
 		setSpriteImg(panels[2], WATER_SPRITE[policy.water_station]);
+
+		// Re-entry: a compact strip under the 3 sprite panels (not a 4th panel —
+		// the panels are fixed-width and a fourth would overflow the 640px card).
+		// The sprite stays hidden until a policy-reentry-*.png is authored; drop
+		// one in and add its key here and it renders with no other change.
+		const REENTRY_SPRITE = {
+			// 'No re-entry': 'policy-reentry-none.png',
+		};
+		const reentryStrip = card.querySelector('.policy-reentry');
+		if (reentryStrip) {
+			if (policy.re_entry) {
+				card.querySelector('.policy-reentry-value').textContent = policy.re_entry;
+				const prImg = reentryStrip.querySelector('.pr-sprite');
+				const spriteFile = REENTRY_SPRITE[policy.re_entry];
+				if (prImg && spriteFile) {
+					prImg.src = `images/icons/sprites/${spriteFile}`;
+					prImg.style.display = '';
+				} else if (prImg) {
+					prImg.style.display = 'none';
+				}
+				reentryStrip.style.display = '';
+			} else {
+				reentryStrip.style.display = 'none';
+			}
+		}
 
 		const days = daysUntil(show.date);
 		const countdownElem = card.querySelector('.show-countdown');
