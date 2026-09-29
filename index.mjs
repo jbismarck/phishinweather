@@ -1016,7 +1016,7 @@ const renderBugsSection = (password) => {
 			+ '</div></div>';
 	}).join('');
 
-	return '<h2>Bug Reports <span class="q-count">(' + newCount + ' new / ' + bugs.length + ' total)</span></h2>'
+	return '<h2 id="bugs">Bug Reports <span class="q-count">(' + newCount + ' new / ' + bugs.length + ' total)</span></h2>'
 		+ '<style>'
 		+ '.bug-row{border:1px solid #333;border-radius:4px;padding:10px 12px;margin-bottom:8px}'
 		+ '.bug-done{opacity:.5}'
@@ -1044,6 +1044,14 @@ const renderBugsSection = (password) => {
 const adminDashboard = async (req, res) => {
 	const password = process.env.ADMIN_PASSWORD;
 
+	// Unread-bug count drives the tab title + a banner so new reports are obvious
+	// the moment /admin loads, without scrolling to the Bug Reports section.
+	const newBugs = getBugs('new').length;
+	const titlePrefix = newBugs ? `(${newBugs}) ` : '';
+	const bugBadge = newBugs
+		? ` <a href="#bugs" class="new-badge">${newBugs} NEW BUG${newBugs > 1 ? 'S' : ''}</a>`
+		: '';
+
 	const [cfRows, totalMonthly] = await Promise.all([
 		fetchCfAnalytics(),
 		Promise.resolve(MONTHLY_BURN.reduce((sum, e) => sum + e.monthly, 0)),
@@ -1062,11 +1070,14 @@ const adminDashboard = async (req, res) => {
 
 	const burnRows = MONTHLY_BURN.map((e) => `<tr><td>${e.name}</td><td>$${e.monthly.toFixed(2)}/mo</td></tr>`).join('');
 
-	res.send(`<!DOCTYPE html><html><head><title>phishinweather admin</title>
+	res.send(`<!DOCTYPE html><html><head><title>${titlePrefix}phishinweather admin</title>
 <style>
   body { font-family: monospace; max-width: 800px; margin: 40px auto; padding: 0 20px; background: #0a0a0a; color: #ccc; }
   h1 { color: #ff0; } h2 { color: #ff0; margin-top: 2em; border-bottom: 1px solid #333; padding-bottom: 4px; }
   a { color: #6af; }
+  .new-badge { display: inline-block; background: #ff0; color: #001040; font-size: 0.5em; font-weight: bold; letter-spacing: 0.08em; padding: 3px 9px; border-radius: 10px; vertical-align: middle; text-decoration: none; animation: badge-pulse 1.4s ease-in-out infinite; }
+  .new-badge:hover { color: #001040; filter: brightness(1.1); }
+  @keyframes badge-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
   .svc { border: 1px solid #333; padding: 12px 16px; margin-bottom: 10px; border-radius: 4px; }
   .svc.critical { border-color: #a33; }
   .svc-name { font-weight: bold; font-size: 1.05em; margin-bottom: 8px; }
@@ -1081,7 +1092,7 @@ const adminDashboard = async (req, res) => {
   th { padding: 6px 12px; border: 1px solid #333; color: #ff0; text-align: left; background: #111; }
   .total { color: #ff0; }
 </style></head><body>
-<h1>phishinweather /admin</h1>
+<h1>phishinweather /admin${bugBadge}</h1>
 
 <h2>Monthly Burn</h2>
 <table>${burnRows}
