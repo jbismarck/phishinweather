@@ -1136,6 +1136,49 @@ const cleanBugText = (v, max) => {
 	return stripped ? stripped.slice(0, max) : null;
 };
 
+// Best-effort email alert on a new bug report (Resend HTTP API — no npm dep).
+// No-ops unless BOTH RESEND_API_KEY and BUG_ALERT_EMAIL are set, mirroring the
+// CF-analytics / Ko-fi-token pattern (built, inert until configured). The
+// destination address is intentionally NOT hardcoded — this repo is public.
+// Fire-and-forget: never blocks or fails the submission response.
+const sendBugAlert = async (bug) => {
+	const key = process.env.RESEND_API_KEY;
+	const to = process.env.BUG_ALERT_EMAIL;
+	if (!key || !to) return;
+	// Sender must be on a Resend-verified domain; onboarding@resend.dev works
+	// out of the box for delivery to your own Resend account email.
+	const from = process.env.RESEND_FROM ?? 'onboarding@resend.dev';
+	const body = [
+		bug.message,
+		'',
+		bug.display ? `Screen: ${bug.display}` : null,
+		bug.page_url ? `Page: ${bug.page_url}` : null,
+		bug.user_agent ? `Browser: ${bug.user_agent}` : null,
+		'',
+		'Review + resolve: https://phishinweather.com/admin',
+	].filter((l) => l !== null).join('\n');
+	const controller = new AbortController();
+	const id = setTimeout(() => controller.abort(), 8000);
+	try {
+		const r = await fetch('https://api.resend.com/emails', {
+			method: 'POST',
+			headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				from: `phishinweather bugs <${from}>`,
+				to: [to],
+				subject: `🐛 New bug report #${bug.id}`,
+				text: body,
+			}),
+			signal: controller.signal,
+		});
+		if (!r.ok) console.error('Bug alert email rejected:', r.status, await r.text().catch(() => ''));
+	} catch (e) {
+		console.error('Bug alert email failed:', e.message);
+	} finally {
+		clearTimeout(id);
+	}
+};
+
 app.post('/api/bugs', bugRateLimit, (req, res) => {
 	const message = cleanBugText(req.body?.message, BUG_MSG_MAX);
 	if (!message) return res.status(400).json({ error: 'message required' });
@@ -1144,6 +1187,8 @@ app.post('/api/bugs', bugRateLimit, (req, res) => {
 	// Prefer the real request UA over anything the client sent us.
 	const user_agent = cleanBugText(req.get('user-agent'), BUG_FIELD_MAX);
 	const id = addBug({ message, display, page_url, user_agent });
+	// Fire-and-forget — don't make the user wait on the email round-trip.
+	sendBugAlert({ id, message, display, page_url, user_agent });
 	res.json({ ok: true, id });
 });
 

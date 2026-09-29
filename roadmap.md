@@ -10,6 +10,9 @@
 | `CF_WEB_ANALYTICS_TOKEN` | Cloudflare → Web Analytics → Manage site | Browser analytics beacon |
 | `DISCORD_INVITE_URL` | Permanent Discord invite (server not yet created) | `/discord` redirect |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare → My Profile → API Tokens (Analytics:Read) | CF analytics table on `/admin` |
+| `RESEND_API_KEY` | resend.com → API Keys | Email alert on each bug report (with `BUG_ALERT_EMAIL`) |
+| `BUG_ALERT_EMAIL` | your inbox address | Destination for bug-report alerts (kept out of the public repo) |
+| `RESEND_FROM` *(optional)* | verified Resend domain sender; defaults to `onboarding@resend.dev` | From-address for bug alerts |
 
 ### Stream ops — tech debt
 - **YouTube streams default to Private** — fix in YouTube Studio → Settings → Channel → Advanced → Default broadcast privacy → Public
