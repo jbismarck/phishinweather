@@ -67,6 +67,16 @@ const initDb = () => {
 			poster_url     TEXT,
 			leg            TEXT
 		);
+
+		CREATE TABLE IF NOT EXISTS bugs (
+			id          INTEGER PRIMARY KEY AUTOINCREMENT,
+			created_at  TEXT NOT NULL,
+			message     TEXT NOT NULL,
+			display     TEXT,
+			page_url    TEXT,
+			user_agent  TEXT,
+			status      TEXT NOT NULL DEFAULT 'new'
+		);
 	`);
 
 	// Persistent DBs created before the leg column need it added — CREATE TABLE
@@ -275,9 +285,34 @@ const addShows = (incoming) => {
 	return added;
 };
 
+// ── Bug reports ───────────────────────────────────────────────────────────────
+// User-submitted bug reports. This table is standalone — it is never flushed to
+// tour.json. All writes go through prepared statements (parameterized), so
+// user-supplied text can never be interpreted as SQL. Callers are responsible
+// for length-capping/sanitizing input and for HTML-escaping on output.
+
+const addBug = ({ message, display, page_url, user_agent }) => {
+	const created_at = new Date().toISOString();
+	const info = db.prepare(`
+		INSERT INTO bugs (created_at, message, display, page_url, user_agent, status)
+		VALUES (?,?,?,?,?, 'new')
+	`).run(created_at, message, display ?? null, page_url ?? null, user_agent ?? null);
+	return info.lastInsertRowid;
+};
+
+// status: 'all' returns everything, otherwise filters (e.g. 'new').
+const getBugs = (status = 'all') => (status === 'all'
+	? db.prepare('SELECT * FROM bugs ORDER BY id DESC').all()
+	: db.prepare('SELECT * FROM bugs WHERE status = ? ORDER BY id DESC').all(status));
+
+const setBugStatus = (id, status) => db.prepare('UPDATE bugs SET status = ? WHERE id = ?').run(status, id).changes;
+
+const deleteBug = (id) => db.prepare('DELETE FROM bugs WHERE id = ?').run(id).changes;
+
 export {
 	initDb, getDb, legForDate,
 	getShowByDate, getAllShows,
 	updateShow, updateVenuePolicy, addShows,
 	flushToJson,
+	addBug, getBugs, setBugStatus, deleteBug,
 };

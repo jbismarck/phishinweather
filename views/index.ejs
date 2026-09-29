@@ -276,8 +276,26 @@
 		<span class="site-footer-sep">&nbsp;·&nbsp;</span>
 		<a href="https://ko-fi.com/phishinweather" target="_blank" rel="noopener">support on ko-fi</a>
 		<span class="site-footer-sep">&nbsp;·&nbsp;</span>
-		<a href="https://ig.me/m/phishinweather" target="_blank" rel="noopener" class="report-problem" title="Report a problem">⚑</a>
+		<button type="button" id="report-bug-open" class="report-problem" title="Report a problem" aria-haspopup="dialog">⚑</button>
 	</p>
+
+	<!-- Bug report modal — opened by the ⚑ flag in the footer. Submits to
+	     POST /api/bugs (rate-limited, stored in SQLite, reviewed in /admin). -->
+	<div id="bug-modal" class="bug-modal" hidden>
+		<div class="bug-modal-panel" role="dialog" aria-modal="true" aria-labelledby="bug-modal-title">
+			<div class="bug-modal-head">
+				<span id="bug-modal-title">Report a Problem</span>
+				<button type="button" class="bug-modal-close" aria-label="Close">&#10005;</button>
+			</div>
+			<p class="bug-modal-sub">Spotted a bug? Tell us what happened. We auto-note which screen you're on.</p>
+			<form id="bug-form">
+				<textarea id="bug-message" maxlength="2000" rows="5" required
+					placeholder="What went wrong? What were you doing when it happened?"></textarea>
+				<button type="submit" class="bug-submit">Send Report</button>
+				<span id="bug-status" class="bug-status" hidden></span>
+			</form>
+		</div>
+	</div>
 
 </body>
 

@@ -18,6 +18,7 @@ import { getShowPhase } from './server/show-phase.mjs';
 import {
 	initDb, getShowByDate, getAllShows,
 	updateShow, updateVenuePolicy,
+	addBug, getBugs, setBugStatus, deleteBug,
 } from './server/db.mjs';
 import { phishinSlug } from './server/phishin-slugs.mjs';
 import { widgetView } from './server/widget.mjs';
@@ -77,6 +78,23 @@ const phishRateLimit = rateLimit({
 	standardHeaders: 'draft-7',
 	legacyHeaders: false,
 });
+
+// Bug report submissions: tighter cap since it's an unauthenticated write.
+const bugRateLimit = rateLimit({
+	windowMs: 60 * 1000,
+	limit: 5,
+	standardHeaders: 'draft-7',
+	legacyHeaders: false,
+});
+
+// Escape user-supplied text before interpolating into an HTML string. Used by
+// the admin dashboard, which builds HTML by concatenation rather than EJS.
+const escapeHtml = (s) => String(s ?? '')
+	.replace(/&/g, '&amp;')
+	.replace(/</g, '&lt;')
+	.replace(/>/g, '&gt;')
+	.replace(/"/g, '&quot;')
+	.replace(/'/g, '&#39;');
 
 const port = process.env.PORT ?? process.env.WS4KP_PORT ?? 8080;
 
@@ -974,6 +992,55 @@ async function streamPageClear() {
 </script>`;
 };
 
+const renderBugsSection = (password) => {
+	const token = Buffer.from(':' + password).toString('base64');
+	const bugs = getBugs('all');
+	const newCount = bugs.filter((b) => b.status === 'new').length;
+
+	// Every field below is user-submitted — escape all of it before it lands in
+	// the HTML string. The DB writes are parameterized (db.mjs), so this is the
+	// only remaining injection surface, and it's closed here.
+	const rows = bugs.map((b) => {
+		const when = new Date(b.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+		const resolved = b.status === 'resolved';
+		const ctx = [b.display, b.page_url].filter(Boolean).map(escapeHtml).join(' · ');
+		return '<div class="bug-row' + (resolved ? ' bug-done' : '') + '">'
+			+ '<div class="bug-meta">#' + b.id + ' · ' + escapeHtml(when)
+			+ (b.user_agent ? ' · <span class="bug-ua" title="' + escapeHtml(b.user_agent) + '">UA</span>' : '')
+			+ '</div>'
+			+ '<div class="bug-msg">' + escapeHtml(b.message) + '</div>'
+			+ (ctx ? '<div class="bug-ctx">' + ctx + '</div>' : '')
+			+ '<div class="bug-actions">'
+			+ '<button class="bug-btn" onclick="bugToggle(' + b.id + ',\'' + (resolved ? 'new' : 'resolved') + '\')">' + (resolved ? '↺ Reopen' : '✓ Resolve') + '</button>'
+			+ '<button class="bug-btn bug-del" onclick="bugDel(' + b.id + ')">× Delete</button>'
+			+ '</div></div>';
+	}).join('');
+
+	return '<h2>Bug Reports <span class="q-count">(' + newCount + ' new / ' + bugs.length + ' total)</span></h2>'
+		+ '<style>'
+		+ '.bug-row{border:1px solid #333;border-radius:4px;padding:10px 12px;margin-bottom:8px}'
+		+ '.bug-done{opacity:.5}'
+		+ '.bug-meta{color:#888;font-size:.75em;margin-bottom:4px}'
+		+ '.bug-ua{color:#6af;cursor:help;text-decoration:underline dotted}'
+		+ '.bug-msg{font-size:.9em;white-space:pre-wrap;word-break:break-word}'
+		+ '.bug-ctx{color:#6a6;font-size:.75em;margin-top:4px;word-break:break-all}'
+		+ '.bug-actions{margin-top:8px;display:flex;gap:8px}'
+		+ '.bug-btn{background:#1a1a1a;border:1px solid #444;color:#ccc;cursor:pointer;padding:3px 10px;font-family:monospace;font-size:.8em}'
+		+ '.bug-btn:hover{background:#222}'
+		+ '.bug-del{color:#f88}.bug-del:hover{background:#2a1a1a}'
+		+ '</style>'
+		+ '<div id="bug-list">' + (rows || '<p style="color:#666">No bug reports yet.</p>') + '</div>'
+		+ '<script>'
+		+ 'var _bT="' + token + '";'
+		+ 'function bugToggle(id,status){'
+		+ 'fetch("/api/bugs/"+id,{method:"PATCH",headers:{"Content-Type":"application/json",Authorization:"Basic "+_bT},body:JSON.stringify({status:status})})'
+		+ '.then(function(){location.reload();});}'
+		+ 'function bugDel(id){if(!confirm("Delete this bug report?"))return;'
+		+ 'fetch("/api/bugs/"+id,{method:"DELETE",headers:{Authorization:"Basic "+_bT}})'
+		+ '.then(function(){location.reload();});}'
+		+ '</script>';
+};
+
 const adminDashboard = async (req, res) => {
 	const password = process.env.ADMIN_PASSWORD;
 
@@ -1022,6 +1089,8 @@ const adminDashboard = async (req, res) => {
 </table>
 <p style="color:#888">Break-even: $${totalMonthly.toFixed(2)}/month. Check <a href="https://ko-fi.com/phishinweather" target="_blank">Ko-fi</a> and <a href="https://dashboard.stripe.com" target="_blank">Stripe</a> for revenue.</p>
 
+${renderBugsSection(password)}
+
 ${renderSchedulerSection(password)}
 
 ${renderCfSection(cfRows)}
@@ -1050,6 +1119,50 @@ app.delete('/api/hfb-quotes/:index', requireAdmin, (req, res) => {
 	hfbQuotes.splice(i, 1);
 	fs.writeFileSync(HFB_QUOTES_FILE, JSON.stringify(hfbQuotes, null, '\t'), 'utf8');
 	res.json({ ok: true, count: hfbQuotes.length });
+});
+
+// ── Bug reports ───────────────────────────────────────────────────────────────
+// Public submission (rate-limited, unauthenticated). All fields are treated as
+// hostile: length-capped, control-chars stripped, stored via parameterized
+// prepared statements (db.mjs), and HTML-escaped on output (renderBugsSection).
+const BUG_MSG_MAX = 2000;
+const BUG_FIELD_MAX = 300;
+const cleanBugText = (v, max) => {
+	if (typeof v !== 'string') return null;
+	// Strip control chars but keep tab/newline/CR so multi-line reports survive;
+	// then trim and cap length.
+	// eslint-disable-next-line no-control-regex
+	const stripped = v.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
+	return stripped ? stripped.slice(0, max) : null;
+};
+
+app.post('/api/bugs', bugRateLimit, (req, res) => {
+	const message = cleanBugText(req.body?.message, BUG_MSG_MAX);
+	if (!message) return res.status(400).json({ error: 'message required' });
+	const display = cleanBugText(req.body?.display, BUG_FIELD_MAX);
+	const page_url = cleanBugText(req.body?.page_url, BUG_FIELD_MAX);
+	// Prefer the real request UA over anything the client sent us.
+	const user_agent = cleanBugText(req.get('user-agent'), BUG_FIELD_MAX);
+	const id = addBug({ message, display, page_url, user_agent });
+	res.json({ ok: true, id });
+});
+
+app.patch('/api/bugs/:id', requireAdmin, (req, res) => {
+	const id = Number(req.params.id);
+	if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid id' });
+	const { status } = req.body ?? {};
+	if (!['new', 'resolved'].includes(status)) return res.status(400).json({ error: 'status must be new or resolved' });
+	const changed = setBugStatus(id, status);
+	if (!changed) return res.status(404).json({ error: 'not found' });
+	res.json({ ok: true });
+});
+
+app.delete('/api/bugs/:id', requireAdmin, (req, res) => {
+	const id = Number(req.params.id);
+	if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid id' });
+	const changed = deleteBug(id);
+	if (!changed) return res.status(404).json({ error: 'not found' });
+	res.json({ ok: true });
 });
 
 // Update show-specific fields (poster_url, showtime_local)

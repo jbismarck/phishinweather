@@ -153,6 +153,55 @@ const init = () => {
 		});
 		document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 	}
+
+	// Bug report modal: the ⚑ flag in the footer opens it; submit posts to
+	// /api/bugs. We auto-capture the currently-visible display and page URL so
+	// reports are actionable without asking the user for details.
+	const bugModal = document.querySelector('#bug-modal');
+	const bugOpen = document.querySelector('#report-bug-open');
+	if (bugModal && bugOpen) {
+		const setBugOpen = (open) => {
+			bugModal.toggleAttribute('hidden', !open);
+			if (open) bugModal.querySelector('#bug-message')?.focus();
+		};
+		bugOpen.addEventListener('click', () => setBugOpen(true));
+		bugModal.addEventListener('click', (e) => {
+			if (e.target === bugModal || e.target.closest('.bug-modal-close')) setBugOpen(false);
+		});
+		document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setBugOpen(false); });
+
+		const bugForm = bugModal.querySelector('#bug-form');
+		const bugStatus = bugModal.querySelector('#bug-status');
+		bugForm?.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const message = bugModal.querySelector('#bug-message').value.trim();
+			if (!message) return;
+			// currently-visible card carries the .show class (weatherdisplay.mjs)
+			const display = document.querySelector('.weather-display.show')?.id?.replace(/-html$/, '') || null;
+			const submitBtn = bugForm.querySelector('.bug-submit');
+			submitBtn.disabled = true;
+			bugStatus.hidden = false;
+			bugStatus.textContent = 'Sending…';
+			bugStatus.className = 'bug-status';
+			try {
+				const r = await fetch('/api/bugs', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ message, display, page_url: location.href }),
+				});
+				if (!r.ok) throw new Error('bad status');
+				bugStatus.textContent = 'Thanks! Report sent.';
+				bugStatus.classList.add('ok');
+				bugModal.querySelector('#bug-message').value = '';
+				setTimeout(() => setBugOpen(false), 1400);
+			} catch (_) {
+				bugStatus.textContent = 'Could not send — try again later.';
+				bugStatus.classList.add('err');
+			} finally {
+				submitBtn.disabled = false;
+			}
+		});
+	}
 };
 
 const autocompleteOnSelect = async (suggestion) => {
