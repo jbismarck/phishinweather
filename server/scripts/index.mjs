@@ -94,6 +94,16 @@ const init = () => {
 	const parsedParameters = parseQueryString();
 	const loadFromParsed = parsedParameters.latLonQuery && parsedParameters.latLon;
 
+	// Always auto-play on startup so visitors (and the iTour deep-link) land
+	// straight in the display rotation instead of the navigation menu. We fire
+	// play both now AND via the data-ready callback below: firing only at init
+	// used to land on the empty menu because no display had loaded yet, and the
+	// old code gated on the stored 'play' state — so a single past pause disabled
+	// autoplay permanently. ?play=false in the URL is an escape hatch for debugging.
+	settings.kiosk.value = parsedParameters['settings-kiosk-checkbox'] === 'true';
+	const autoplay = parsedParameters.play !== 'false';
+	const startPlayback = () => { if (autoplay) postMessage('navButton', 'play'); };
+
 	// Auto load the parsed parameters and fall back to the previous query
 	const query = parsedParameters.latLonQuery ?? localStorage.getItem('latLonQuery');
 	const latLon = parsedParameters.latLon ?? localStorage.getItem('latLon');
@@ -106,15 +116,12 @@ const init = () => {
 	} else if (query && latLon && !fromGPS) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 		txtAddress.value = query;
-		loadData(JSON.parse(latLon));
+		loadData(JSON.parse(latLon), startPlayback);
 	} else if (fromGPS) {
 		btnGetGpsClick();
 	}
 
-	// if kiosk mode was set via the query string, also play immediately
-	settings.kiosk.value = parsedParameters['settings-kiosk-checkbox'] === 'true';
-	const play = parsedParameters['settings-kiosk-checkbox'] ?? localStorage.getItem('play');
-	if (play === null || play === 'true') postMessage('navButton', 'play');
+	startPlayback();
 
 	document.querySelector('#btnClearQuery').addEventListener('click', () => {
 		document.querySelector('#divLocationSet').style.display = 'none';
