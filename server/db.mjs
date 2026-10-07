@@ -78,6 +78,11 @@ const initDb = () => {
 			user_agent  TEXT,
 			status      TEXT NOT NULL DEFAULT 'new'
 		);
+
+		CREATE TABLE IF NOT EXISTS hfb_quotes (
+			id    INTEGER PRIMARY KEY AUTOINCREMENT,
+			text  TEXT NOT NULL
+		);
 	`);
 
 	// Persistent DBs created before the leg column need it added — CREATE TABLE
@@ -96,6 +101,23 @@ const initDb = () => {
 	// (e.g. a fall-tour announcement) never reached the persistent prod DB after
 	// the initial seed, so they were invisible despite being in the JSON.
 	seedFromJson();
+	seedHfbQuotes();
+};
+
+// Seed HFB quotes from the committed JSON ONLY when the table is empty — after
+// that the DB (on the Railway volume) is authoritative, so admin add/delete
+// edits persist across deploys. The JSON stays as the git-committed default
+// used for a fresh DB. (If an admin deletes every quote, the next boot reseeds
+// the defaults, which is the desired "restore" behavior.)
+const seedHfbQuotes = () => {
+	const count = db.prepare('SELECT COUNT(*) AS n FROM hfb_quotes').get().n;
+	if (count > 0) return;
+	let quotes;
+	try { quotes = JSON.parse(fs.readFileSync(join(__dirname, 'data/hfb-quotes.json'), 'utf8')); }
+	catch { console.warn('show db: could not read hfb-quotes.json for seeding'); return; }
+	const insert = db.prepare('INSERT INTO hfb_quotes (text) VALUES (?)');
+	db.transaction(() => { for (const q of quotes) if (typeof q === 'string' && q.trim()) insert.run(q.trim()); })();
+	console.log(`show db: seeded ${quotes.length} HFB quotes`);
 };
 
 const seedFromJson = () => {
@@ -345,10 +367,21 @@ const setBugStatus = (id, status) => db.prepare('UPDATE bugs SET status = ? WHER
 
 const deleteBug = (id) => db.prepare('DELETE FROM bugs WHERE id = ?').run(id).changes;
 
+// ── HFB quotes ────────────────────────────────────────────────────────────────
+// Stored in the DB (persistent volume) so admin edits survive deploys. Ordered
+// by insertion (id). Seeded from hfb-quotes.json when the table is empty.
+
+const getHfbQuotes = () => db.prepare('SELECT id, text FROM hfb_quotes ORDER BY id').all();
+
+const addHfbQuote = (text) => db.prepare('INSERT INTO hfb_quotes (text) VALUES (?)').run(text).lastInsertRowid;
+
+const deleteHfbQuote = (id) => db.prepare('DELETE FROM hfb_quotes WHERE id = ?').run(id).changes;
+
 export {
 	initDb, getDb, legForDate,
 	getShowByDate, getAllShows,
 	updateShow, updateVenuePolicy, updateShakedown, addShows,
 	flushToJson,
 	addBug, getBugs, setBugStatus, deleteBug,
+	getHfbQuotes, addHfbQuote, deleteHfbQuote,
 };

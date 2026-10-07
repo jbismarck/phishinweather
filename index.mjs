@@ -19,6 +19,7 @@ import {
 	initDb, getShowByDate, getAllShows,
 	updateShow, updateVenuePolicy, updateShakedown,
 	addBug, getBugs, setBugStatus, deleteBug,
+	getHfbQuotes, addHfbQuote, deleteHfbQuote,
 } from './server/db.mjs';
 import { phishinSlug } from './server/phishin-slugs.mjs';
 import { widgetView } from './server/widget.mjs';
@@ -194,9 +195,9 @@ const geoip = (req, res) => {
 
 const PHISH_CACHE_FILE = './server/data/phish-cache.json';
 
-const HFB_QUOTES_FILE = './server/data/hfb-quotes.json';
-let hfbQuotes = [];
-try { hfbQuotes = JSON.parse(fs.readFileSync(HFB_QUOTES_FILE, 'utf8')); } catch { hfbQuotes = []; }
+// HFB quotes now live in the DB (persistent volume) so admin edits survive
+// deploys — see getHfbQuotes/addHfbQuote/deleteHfbQuote in db.mjs. The JSON file
+// (server/data/hfb-quotes.json) is only the committed seed for a fresh DB.
 const SHOUTOUTS_FILE = './server/data/shoutouts.json';
 let shoutouts = [];
 try { shoutouts = JSON.parse(fs.readFileSync(SHOUTOUTS_FILE, 'utf8')); } catch { shoutouts = []; }
@@ -824,11 +825,12 @@ const requireAdmin = (req, res, next) => {
 
 const renderQuotesSection = (password) => {
 	const token = Buffer.from(':' + password).toString('base64');
-	const rows = hfbQuotes.map((q, i) =>
-		'<div class="q-row"><span>' + q.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>'
-		+ '<button class="q-del" onclick="hfbDel(' + i + ')">×</button></div>'
+	const quotes = getHfbQuotes();
+	const rows = quotes.map((q) =>
+		'<div class="q-row"><span>' + escapeHtml(q.text) + '</span>'
+		+ '<button class="q-del" onclick="hfbDel(' + q.id + ')">×</button></div>'
 	).join('');
-	return '<h2>HFB Quotes <span class="q-count">(' + hfbQuotes.length + ')</span></h2>'
+	return '<h2>HFB Quotes <span class="q-count">(' + quotes.length + ')</span></h2>'
 		+ '<style>'
 		+ '.q-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #1e1e1e}'
 		+ '.q-row span{flex:1;font-size:.85em}'
@@ -838,7 +840,7 @@ const renderQuotesSection = (password) => {
 		+ '.q-note{color:#666;font-size:.8em;margin:.5em 0 1em}'
 		+ '</style>'
 		+ '<div id="hfb-list">' + rows + '</div>'
-		+ '<p class="q-note">Changes persist until next deploy. To make permanent: commit <code>server/data/hfb-quotes.json</code>.</p>'
+		+ '<p class="q-note">Saved to the database — changes persist across deploys. (<code>server/data/hfb-quotes.json</code> is only the seed for a fresh database.)</p>'
 		+ '<form id="hfb-form" style="display:flex;gap:8px;margin-top:8px">'
 		+ '<input id="hfb-input" type="text" placeholder="NEW QUOTE — UPPERCASE RECOMMENDED" '
 		+ 'style="flex:1;padding:6px;background:#111;border:1px solid #444;color:#ccc;font-family:monospace;font-size:.9em">'
@@ -1128,22 +1130,22 @@ ${serviceHTML}
 </body></html>`);
 };
 
-app.get('/api/hfb-quotes', (_req, res) => res.json(hfbQuotes));
+// Public: the scroller (phish-easter-eggs.mjs) fetches the plain string array.
+app.get('/api/hfb-quotes', (_req, res) => res.json(getHfbQuotes().map((q) => q.text)));
 
 app.post('/api/hfb-quotes', requireAdmin, (req, res) => {
 	const { quote } = req.body;
-	if (!quote || typeof quote !== 'string') return res.status(400).json({ error: 'quote required' });
-	hfbQuotes.push(quote.trim());
-	fs.writeFileSync(HFB_QUOTES_FILE, JSON.stringify(hfbQuotes, null, '\t'), 'utf8');
-	res.json({ ok: true, count: hfbQuotes.length });
+	if (!quote || typeof quote !== 'string' || !quote.trim()) return res.status(400).json({ error: 'quote required' });
+	const id = addHfbQuote(quote.trim());
+	res.json({ ok: true, id });
 });
 
-app.delete('/api/hfb-quotes/:index', requireAdmin, (req, res) => {
-	const i = Number(req.params.index);
-	if (!Number.isInteger(i) || i < 0 || i >= hfbQuotes.length) return res.status(400).json({ error: 'invalid index' });
-	hfbQuotes.splice(i, 1);
-	fs.writeFileSync(HFB_QUOTES_FILE, JSON.stringify(hfbQuotes, null, '\t'), 'utf8');
-	res.json({ ok: true, count: hfbQuotes.length });
+app.delete('/api/hfb-quotes/:id', requireAdmin, (req, res) => {
+	const id = Number(req.params.id);
+	if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid id' });
+	const changed = deleteHfbQuote(id);
+	if (!changed) return res.status(404).json({ error: 'not found' });
+	res.json({ ok: true });
 });
 
 // ── Bug reports ───────────────────────────────────────────────────────────────
