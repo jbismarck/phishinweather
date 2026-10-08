@@ -278,6 +278,17 @@ body {
 	text-align: right;
 }
 
+// Playback/nav chrome removed by request: hide the three button groups in every
+// mode (this mirrors what kiosk mode already does). We hide the CHILDREN, not
+// #divTwcBottom itself — resize() in navigation.mjs reads #divTwcBottom's width
+// to compute the display zoom, so a display:none on the bar would zero that
+// width and collapse the whole display. With its children gone the flex bar
+// collapses to zero height, so no empty strip remains. The app auto-plays and
+// the corner logo still opens the settings menu, so no controls are stranded.
+#divTwcBottom > div {
+	display: none;
+}
+
 #divTwcNavContainer {
 	display: none;
 }
