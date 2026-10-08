@@ -158,7 +158,15 @@ const init = () => {
 				setOpen(false);
 			}
 		});
-		document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+		// Escape is the guaranteed escape hatch: close the menu AND drop out of
+		// fullscreen / kiosk. Kiosk hides the normal chrome, so without this a user
+		// who can't land a click on the logo could get stuck with no way out.
+		document.addEventListener('keydown', (e) => {
+			if (e.key !== 'Escape') return;
+			setOpen(false);
+			if (document.fullscreenElement) document.exitFullscreen?.();
+			if (settings.kiosk?.value) settings.kiosk.value = false;
+		});
 	}
 
 	// Bug report modal: the ⚑ flag in the footer opens it; submit posts to
