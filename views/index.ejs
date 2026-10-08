@@ -191,27 +191,13 @@
         <%- include('partials/hazards.ejs') %>
       </div>
     </div>
+    <!-- Empty bar kept only as the width reference for resize() in navigation.mjs
+         (its width drives the display zoom scale). The playback/menu controls now
+         live in the logo "mini player" (#logo-menu-transport). #NavigateMenu stays
+         here (hidden) because its click binding runs at init. -->
     <div id="divTwcBottom">
       <div id="divTwcBottomLeft">
         <img id="NavigateMenu" class="navButton" src="images/nav/ic_menu_white_24dp_2x.png" title="Menu" />
-        <img id="NavigatePrevious" class="navButton" src="images/nav/ic_skip_previous_white_24dp_2x.png" title="Previous" />
-        <img id="NavigateNext" class="navButton" src="images/nav/ic_skip_next_white_24dp_2x.png" title="Next" />
-        <img id="NavigatePlay" class="navButton" src="images/nav/ic_play_arrow_white_24dp_2x.png" title="Play" />
-        <button id="btnBackToLive" style="display:none" onclick="import('./scripts/modules/navigation.mjs').then(m=>m.backToLive())">◉ LIVE</button>
-      </div>
-      <div id="divTwcBottomMiddle">
-        <img id="NavigateRefresh" class="navButton" src="images/nav/ic_refresh_white_24dp_2x.png" title="Refresh" />
-      </div>
-      <div id="divTwcBottomRight">
-				<div id="ToggleMedia">
-					<img class="navButton off" src="images/nav/ic_volume_off_white_24dp_2x.png" title="Unmute" />
-					<img class="navButton on" src="images/nav/ic_volume_on_white_24dp_2x.png" title="Mute" />
-				</div>
-				<div id="ToggleScanlines">
-					<img class="navButton off" src="images/nav/ic_scanlines_off_white_24dp_2x.png" title="Scan lines on" />
-					<img class="navButton on" src="images/nav/ic_scanlines_on_white_24dp_2x.png" title="Scan lines off" />
-				</div>
-        <img id="ToggleFullScreen" class="navButton" src="images/nav/ic_fullscreen_white_24dp_2x.png" title="Enter Fullscreen" />
       </div>
     </div>
   </div>
@@ -231,6 +217,26 @@
 			<div class="logo-menu-head">
 				<img src="images/logos/logo-corner.png" class="logo-menu-brand" alt="Phishin Weather" />
 				<button type="button" class="logo-menu-close" aria-label="Close menu">&#10005;</button>
+			</div>
+
+			<!-- Mini player: playback + display controls relocated from the old
+			     bottom bar. These keep their original ids, so their JS click
+			     bindings and self-updating play/pause + mute icons work unchanged. -->
+			<div id="logo-menu-transport">
+				<img id="NavigatePrevious" class="navButton" src="images/nav/ic_skip_previous_white_24dp_2x.png" title="Previous" />
+				<img id="NavigatePlay" class="navButton" src="images/nav/ic_play_arrow_white_24dp_2x.png" title="Play / Pause" />
+				<img id="NavigateNext" class="navButton" src="images/nav/ic_skip_next_white_24dp_2x.png" title="Next" />
+				<img id="NavigateRefresh" class="navButton" src="images/nav/ic_refresh_white_24dp_2x.png" title="Refresh" />
+				<div id="ToggleMedia">
+					<img class="navButton off" src="images/nav/ic_volume_off_white_24dp_2x.png" title="Unmute" />
+					<img class="navButton on" src="images/nav/ic_volume_on_white_24dp_2x.png" title="Mute" />
+				</div>
+				<div id="ToggleScanlines">
+					<img class="navButton off" src="images/nav/ic_scanlines_off_white_24dp_2x.png" title="Scan lines on" />
+					<img class="navButton on" src="images/nav/ic_scanlines_on_white_24dp_2x.png" title="Scan lines off" />
+				</div>
+				<img id="ToggleFullScreen" class="navButton" src="images/nav/ic_fullscreen_white_24dp_2x.png" title="Enter Fullscreen" />
+				<button id="btnBackToLive" style="display:none" onclick="import('./scripts/modules/navigation.mjs').then(m=>m.backToLive())">◉ LIVE</button>
 			</div>
 
 			<details class="ui-section" open>

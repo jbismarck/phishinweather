@@ -1076,5 +1076,52 @@ body.stream-mode .header .logo {
 		&:hover { background: rgba(255, 255, 255, 0.1); }
 	}
 
+	// Mini-player transport strip (play/prev/next/refresh/mute/scanlines/fullscreen),
+	// relocated here from the removed bottom bar.
+	#logo-menu-transport {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 4px;
+		padding: 8px 2px 10px;
+		margin-bottom: 6px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+
+		.navButton {
+			width: 34px;
+			height: 34px;
+			cursor: pointer;
+			opacity: 0.78;
+			transition: opacity 0.12s, transform 0.12s;
+
+			&:hover {
+				opacity: 1;
+				transform: scale(1.08);
+			}
+		}
+
+		// #ToggleMedia is display:none until audio is available (see _media.scss);
+		// #ToggleScanlines is inline-block. Keep both as inline wrappers so their
+		// on/off <img> swap renders inside the row.
+		#ToggleMedia,
+		#ToggleScanlines {
+			line-height: 0;
+		}
+
+		#btnBackToLive {
+			font-family: 'Star4000 Small';
+			font-size: 10pt;
+			color: #ff5555;
+			background: none;
+			border: 1px solid rgba(255, 80, 80, 0.6);
+			border-radius: 6px;
+			padding: 4px 10px;
+			cursor: pointer;
+
+			&:hover { background: rgba(255, 80, 80, 0.12); }
+		}
+	}
+
 	.ui-section { max-width: none; }
 }
