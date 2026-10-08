@@ -889,6 +889,22 @@ body {
 			color: rgba(255, 255, 255, 0.6);
 		}
 	}
+
+	// In light mode the page background is white (body has no dark override), so
+	// the faint-white footer text/links vanish into it. Flip them to faint-dark
+	// so they stay legible. Dark mode keeps the light-on-dark colors above.
+	@media (prefers-color-scheme: light) {
+		color: rgba(0, 0, 0, 0.5);
+
+		a,
+		.report-problem {
+			color: rgba(0, 0, 0, 0.5);
+
+			&:hover {
+				color: rgba(0, 0, 0, 0.8);
+			}
+		}
+	}
 }
 
 // ── Bug report modal ──────────────────────────────────────────────────────────
