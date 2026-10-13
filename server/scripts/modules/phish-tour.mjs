@@ -69,7 +69,7 @@ const daysUntil = (dateStr) => {
 
 class PhishTour extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Phish Summer Tour', true);
+		super(navId, elemId, 'Phish Tour', true);
 		this.timing.baseDelay = 8000;
 		this.lastShowIndex = -1;
 		this.mockWeather = false;
@@ -88,7 +88,9 @@ class PhishTour extends WeatherDisplay {
 		}
 
 		if (!data?.shows?.length) {
-			this.setStatus(STATUS.failed);
+			// No upcoming shows (e.g. between tours) isn't an error — show the gray
+			// "No Data" state like Venue Guide / Tonight's Poster, not red "Failed".
+			this.setStatus(STATUS.noData);
 			return;
 		}
 
