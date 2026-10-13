@@ -222,6 +222,16 @@ class WeatherDisplay {
 
 		this.startNavCount();
 
+		// Enforce a single visible card. hideAllCanvases() only iterates the
+		// displays[] array, so the progress/menu screen (a .weather-display that's
+		// NOT in displays[]) could be left with .show and stack on top of the
+		// playing card — the "dual framing" bug. Clearing .show from every OTHER
+		// .weather-display here makes single-visibility an invariant of every show
+		// path (navTo, loadDisplay, jumpToDisplay).
+		document.querySelectorAll('.weather-display.show').forEach((el) => {
+			if (el !== this.elem) el.classList.remove('show');
+		});
+
 		this.elem.classList.add('show');
 		document.querySelector('#divTwc').classList.add(this.elemId);
 	}
