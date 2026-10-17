@@ -361,6 +361,11 @@ body {
 
 #container {
 	position: relative;
+	// Trap the .scanlines pseudo-elements (z-index 2147483648) inside this
+	// element's own stacking context. Without it, those near-max-int scanlines
+	// paint into the root stacking context and cover UI chrome that lives
+	// outside #container — the logo menu (.logo-menu, z 1000) and bug modal.
+	isolation: isolate;
 	width: 640px;
 	height: 480px;
 	// overflow: hidden;
